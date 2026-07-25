@@ -28,6 +28,18 @@
         </div>
         }
       </div>
+      @if (eloPreview(); as elo) {
+      <div class="elo-preview" aria-label="Anteprima punti ELO squadra rossa">
+        <span>
+          <small>Se vince</small>
+          <strong class="positive">+{{ elo.red.win | number: '1.0-2' }}</strong>
+        </span>
+        <span>
+          <small>Se perde</small>
+          <strong class="negative">{{ elo.red.loss | number: '1.0-2' }}</strong>
+        </span>
+      </div>
+      }
       <button
         class="score-tap"
         type="button"
@@ -69,6 +81,22 @@
         </div>
         }
       </div>
+      @if (eloPreview(); as elo) {
+      <div class="elo-preview" aria-label="Anteprima punti ELO squadra blu">
+        <span>
+          <small>Se vince</small>
+          <strong class="positive"
+            >+{{ elo.blue.win | number: '1.0-2' }}</strong
+          >
+        </span>
+        <span>
+          <small>Se perde</small>
+          <strong class="negative"
+            >{{ elo.blue.loss | number: '1.0-2' }}</strong
+          >
+        </span>
+      </div>
+      }
       <button
         class="score-tap"
         type="button"

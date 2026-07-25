@@ -382,6 +382,42 @@
   }
 }
 
+.elo-preview {
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+
+  span {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.4rem 0.25rem;
+    text-align: center;
+    background: rgb(255 255 255 / 42%);
+    border: 1px solid rgb(255 255 255 / 55%);
+    border-radius: 0.65rem;
+  }
+
+  small {
+    font-size: 0.52rem;
+    font-weight: 800;
+    opacity: 0.68;
+  }
+
+  strong {
+    font-size: 0.72rem;
+  }
+
+  .positive {
+    color: #14733b;
+  }
+
+  .negative {
+    color: #a02d2d;
+  }
+}
+
 .score-tap {
   z-index: 1;
   display: flex;

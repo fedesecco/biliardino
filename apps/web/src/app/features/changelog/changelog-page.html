@@ -1,0 +1,14 @@
+<section class="changelog-page" aria-label="Changelog">
+  @if (changelog.isLoading()) {
+    <div class="changelog-state surface" role="status" aria-live="polite">
+      Caricamento changelog…
+    </div>
+  } @else if (changelog.error()) {
+    <div class="changelog-state error-banner" role="alert">
+      <h1>Changelog</h1>
+      <p>Impossibile caricare il changelog.</p>
+    </div>
+  } @else if (changelog.value(); as content) {
+    <article class="changelog-content surface" [innerHTML]="content"></article>
+  }
+</section>

@@ -54,6 +54,27 @@ export class PlayPage {
       this.redPreferenceCount() <= 2 &&
       this.bluePreferenceCount() <= 2,
   );
+  protected readonly eloPreview = computed(() => {
+    const teams = this.draft();
+    if (!teams?.red.length || !teams.blue.length) {
+      return null;
+    }
+
+    const redRating =
+      teams.red.reduce((total, player) => total + player.current_elo, 0) /
+      teams.red.length;
+    const blueRating =
+      teams.blue.reduce((total, player) => total + player.current_elo, 0) /
+      teams.blue.length;
+    const expectedRed = 1 / (1 + 10 ** ((blueRating - redRating) / 400));
+    const redWin = roundElo(32 * (1 - expectedRed));
+    const redLoss = roundElo(-32 * expectedRed);
+
+    return {
+      red: { win: redWin, loss: redLoss },
+      blue: { win: -redLoss, loss: -redWin },
+    };
+  });
 
   protected toggleAny(playerId: string): void {
     if (!this.auth.companyUser()) {
@@ -214,4 +235,8 @@ export class PlayPage {
   private errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : 'Operazione non riuscita.';
   }
+}
+
+function roundElo(value: number): number {
+  return (Math.sign(value) * Math.round(Math.abs(value) * 100)) / 100;
 }

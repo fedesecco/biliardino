@@ -9,6 +9,14 @@ export const appRoutes: Route[] = [
       import('./features/play/play-page').then((module) => module.PlayPage),
   },
   {
+    path: 'changelog',
+    title: 'Changelog · Biliardino',
+    loadComponent: () =>
+      import('./features/changelog/changelog-page').then(
+        (module) => module.ChangelogPage,
+      ),
+  },
+  {
     path: 'classifica',
     title: 'Classifica · Biliardino',
     loadComponent: () =>

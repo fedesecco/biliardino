@@ -1,0 +1,83 @@
+.changelog-page {
+  padding: 0.25rem 0 1.5rem;
+}
+
+.changelog-state,
+.changelog-content {
+  width: min(100%, 52rem);
+  margin: 0 auto;
+}
+
+.changelog-state {
+  padding: 1.25rem;
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  p {
+    margin-top: 0.5rem;
+  }
+}
+
+.changelog-content {
+  padding: clamp(1.25rem, 5vw, 2.5rem);
+  font-size: 0.95rem;
+  line-height: 1.7;
+
+  h1,
+  h2,
+  h3 {
+    color: var(--ink);
+    font-family: var(--font-display);
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+  }
+
+  h1 {
+    margin: 0 0 1.75rem;
+    font-size: clamp(1.8rem, 7vw, 2.75rem);
+  }
+
+  h2 {
+    padding-top: 1.75rem;
+    margin: 1.75rem 0 0.75rem;
+    font-size: 1.35rem;
+    border-top: 1px solid var(--line);
+  }
+
+  h3 {
+    margin: 1.25rem 0 0.5rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  p {
+    margin: 0 0 1rem;
+    color: var(--ink-soft);
+  }
+
+  ul {
+    display: grid;
+    gap: 0.65rem;
+    padding-left: 1.3rem;
+    margin: 0;
+  }
+
+  li {
+    padding-left: 0.2rem;
+
+    &::marker {
+      color: var(--blue);
+    }
+  }
+
+  a {
+    color: var(--blue-dark);
+    text-underline-offset: 0.18em;
+  }
+}

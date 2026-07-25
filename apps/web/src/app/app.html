@@ -38,6 +38,15 @@
     <router-outlet></router-outlet>
   </main>
 
+  <footer class="app-footer">
+    <a
+      routerLink="/changelog"
+      [attr.aria-label]="'Apri il changelog della versione ' + appVersion"
+    >
+      v{{ appVersion }}
+    </a>
+  </footer>
+
   <nav class="bottom-nav" aria-label="Navigazione principale">
     <a
       routerLink="/"

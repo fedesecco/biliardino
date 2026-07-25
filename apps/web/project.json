@@ -20,6 +20,10 @@
           {
             "glob": "**/*",
             "input": "apps/web/public"
+          },
+          {
+            "glob": "CHANGELOG.md",
+            "input": "."
           }
         ],
         "styles": ["apps/web/src/styles.scss"]

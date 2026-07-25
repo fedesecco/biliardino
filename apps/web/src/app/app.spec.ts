@@ -22,5 +22,11 @@ describe('App', () => {
     expect(compiled.querySelector('.config-alert')?.textContent).toContain(
       'Configurazione server mancante.',
     );
+    const versionLink = compiled.querySelector<HTMLAnchorElement>(
+      '.app-footer a',
+    );
+    expect(versionLink?.textContent?.trim()).toBe('v1.0.1');
+    expect(versionLink?.getAttribute('href')).toBe('/changelog');
+    expect(versionLink?.getAttribute('target')).toBeNull();
   });
 });
