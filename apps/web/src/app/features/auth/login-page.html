@@ -1,0 +1,55 @@
+<section class="login-page" aria-labelledby="login-title">
+  <div class="login-card surface">
+    <div class="login-content">
+      <h1 id="login-title">Accesso</h1>
+
+      @if (auth.configured()) { @if (auth.session()) { @if (auth.companyUser())
+      {
+      <div class="access-state company">
+        <span aria-hidden="true">✓</span>
+        <div>
+          <strong>Accesso condiviso attivo</strong>
+          <p>
+            Puoi creare partite, correggere risultati e gestire i giocatori.
+          </p>
+        </div>
+      </div>
+      } @else {
+      <div class="access-state denied">
+        <span aria-hidden="true">!</span>
+        <div>
+          <strong>Account non autorizzato</strong>
+          <p>Esci e accedi con l'account condiviso.</p>
+        </div>
+      </div>
+      } } @else {
+      <p class="intro">Inserisci password.</p>
+      @if (localError(); as error) {
+      <p class="error-banner" role="alert">{{ error }}</p>
+      }
+      <form [formGroup]="loginForm" (ngSubmit)="signIn()">
+        <div class="field">
+          <input
+            id="login-password"
+            aria-label="Password"
+            type="password"
+            autocomplete="current-password"
+            formControlName="password"
+          />
+          @if ( loginForm.controls.password.touched &&
+          loginForm.controls.password.invalid ) {
+          <small>Inserisci almeno 12 caratteri.</small>
+          }
+        </div>
+        <button
+          class="primary-button"
+          type="submit"
+          [disabled]="loginForm.invalid || busy()"
+        >
+          {{ busy() ? 'Accesso…' : 'Accedi' }}
+        </button>
+      </form>
+      } }
+    </div>
+  </div>
+</section>

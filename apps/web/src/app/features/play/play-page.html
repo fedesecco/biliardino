@@ -1,0 +1,246 @@
+@if (draft(); as teams) {
+<section class="match-view" aria-labelledby="match-title">
+  <div class="match-toolbar">
+    <h1 id="match-title">Partita</h1>
+    <button class="secondary-button" type="button" (click)="changePlayers()">
+      Cambia
+    </button>
+  </div>
+
+  @if (localError(); as error) {
+  <p class="error-banner" role="alert">{{ error }}</p>
+  }
+
+  <div class="scoreboard">
+    <article class="team-panel red-team">
+      <div class="team-label"><span></span> Rossi</div>
+      <div class="lineup">
+        @for (player of teams.red; track player.id) {
+        <div class="lineup-player">
+          <span
+            class="avatar"
+            [style.background-color]="player.avatar_color"
+            aria-hidden="true"
+          >
+            {{ player.name | playerInitials }}
+          </span>
+          <strong>{{ player.name }}</strong>
+        </div>
+        }
+      </div>
+      <button
+        class="score-tap"
+        type="button"
+        (click)="addGoal('red')"
+        [disabled]="confirming() || busy()"
+        aria-label="Aggiungi goal alla squadra rossa"
+      >
+        <span>{{ score().red }}</span>
+        <small>Tocca per segnare</small>
+      </button>
+      <button
+        class="minus-button"
+        type="button"
+        (click)="removeGoal('red')"
+        [disabled]="score().red === 0 || busy()"
+        aria-label="Rimuovi un goal alla squadra rossa"
+      >
+        − annulla
+      </button>
+    </article>
+
+    <div class="score-divider" aria-hidden="true">
+      <span>VS</span>
+    </div>
+
+    <article class="team-panel blue-team">
+      <div class="team-label"><span></span> Blu</div>
+      <div class="lineup">
+        @for (player of teams.blue; track player.id) {
+        <div class="lineup-player">
+          <span
+            class="avatar"
+            [style.background-color]="player.avatar_color"
+            aria-hidden="true"
+          >
+            {{ player.name | playerInitials }}
+          </span>
+          <strong>{{ player.name }}</strong>
+        </div>
+        }
+      </div>
+      <button
+        class="score-tap"
+        type="button"
+        (click)="addGoal('blue')"
+        [disabled]="confirming() || busy()"
+        aria-label="Aggiungi goal alla squadra blu"
+      >
+        <span>{{ score().blue }}</span>
+        <small>Tocca per segnare</small>
+      </button>
+      <button
+        class="minus-button"
+        type="button"
+        (click)="removeGoal('blue')"
+        [disabled]="score().blue === 0 || busy()"
+        aria-label="Rimuovi un goal alla squadra blu"
+      >
+        − annulla
+      </button>
+    </article>
+  </div>
+
+  @if (teams.benched.length) {
+  <div class="bench">
+    <span>Prossimo giro</span>
+    @for (player of teams.benched; track player.id) {
+    <strong>{{ player.name }}</strong>
+    }
+  </div>
+  } @if (confirming()) {
+  <div
+    class="confirm-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-title"
+  >
+    <div class="confirm-card">
+      <p class="eyebrow">Game over</p>
+      <h2 id="confirm-title">
+        {{ score().red }} <span>—</span> {{ score().blue }}
+      </h2>
+      <button
+        class="primary-button"
+        type="button"
+        (click)="confirmMatch()"
+        [disabled]="busy()"
+      >
+        {{ busy() ? 'Salvataggio…' : 'Conferma partita' }}
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="correctScore()"
+        [disabled]="busy()"
+      >
+        Correggi punteggio
+      </button>
+    </div>
+  </div>
+  }
+</section>
+} @else {
+<section class="selection-view" aria-labelledby="selection-title">
+  <header class="selection-header">
+    <div>
+      <h1 id="selection-title">Giocatori</h1>
+    </div>
+    <div class="counter">
+      <strong>{{ selectedCount() }}</strong>
+      <span>selezionati</span>
+    </div>
+  </header>
+
+  @if (!auth.companyUser()) {
+  <div class="lock-banner">
+    <strong>Modalità sola lettura.</strong>
+    <span> Accedi con l'account condiviso per creare una partita.</span>
+    <a routerLink="/accedi">Accedi</a>
+  </div>
+  } @if (store.error(); as error) {
+  <p class="error-banner" role="alert">{{ error }}</p>
+  } @if (localError(); as error) {
+  <p class="error-banner" role="alert">{{ error }}</p>
+  } @if (store.loading()) {
+  <div class="players-grid" aria-label="Caricamento giocatori">
+    @for (item of [1, 2, 3, 4, 5, 6]; track item) {
+    <div class="player-card skeleton"></div>
+    }
+  </div>
+  } @else if (store.activePlayers().length === 0) {
+  <div class="empty-state">
+    Accedi con l'account condiviso per aggiungerli dalla pagina Giocatori.
+  </div>
+  } @else {
+  <div class="players-grid">
+    @for (player of store.activePlayers(); track player.id) {
+    <article
+      class="player-card"
+      [class.selected-any]="selection().get(player.id) === 'any'"
+      [class.selected-red]="selection().get(player.id) === 'red'"
+      [class.selected-blue]="selection().get(player.id) === 'blue'"
+    >
+      <button
+        class="card-select"
+        type="button"
+        (click)="toggleAny(player.id)"
+        [disabled]="!auth.companyUser()"
+        [attr.aria-pressed]="selection().has(player.id)"
+        [attr.aria-label]="'Seleziona ' + player.name"
+      >
+        <span
+          class="avatar"
+          [style.background-color]="player.avatar_color"
+          aria-hidden="true"
+        >
+          {{ player.name | playerInitials }}
+        </span>
+        <span class="player-copy">
+          <strong>{{ player.name }}</strong>
+          <small>{{ player.current_elo | number: '1.0-0' }} ELO</small>
+        </span>
+      </button>
+      <div class="team-pickers" aria-label="Assegna squadra">
+        <button
+          type="button"
+          class="team-dot red"
+          [class.active]="selection().get(player.id) === 'red'"
+          (click)="chooseMode($event, player.id, 'red')"
+          [disabled]="!auth.companyUser()"
+          [attr.aria-label]="'Assegna ' + player.name + ' ai rossi'"
+        ></button>
+        <button
+          type="button"
+          class="team-dot any"
+          [class.active]="selection().get(player.id) === 'any'"
+          (click)="chooseMode($event, player.id, 'any')"
+          [disabled]="!auth.companyUser()"
+          [attr.aria-label]="'Lascia scegliere la squadra di ' + player.name"
+        >
+          ?
+        </button>
+        <button
+          type="button"
+          class="team-dot blue"
+          [class.active]="selection().get(player.id) === 'blue'"
+          (click)="chooseMode($event, player.id, 'blue')"
+          [disabled]="!auth.companyUser()"
+          [attr.aria-label]="'Assegna ' + player.name + ' ai blu'"
+        ></button>
+      </div>
+    </article>
+    }
+  </div>
+  }
+
+  <div class="selection-action">
+    <div>
+      <strong>
+        @if (selectedCount() < 4) { Ancora {{ 4 - selectedCount() }} } @else {
+        Squadre pronte }
+      </strong>
+      <span>Priorità a chi ha giocato meno oggi</span>
+    </div>
+    <button
+      class="primary-button"
+      type="button"
+      (click)="createTeams()"
+      [disabled]="!canCreateTeams()"
+    >
+      {{ busy() ? 'Scelta…' : 'Crea squadre' }}
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
+</section>
+}

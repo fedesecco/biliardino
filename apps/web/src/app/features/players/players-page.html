@@ -1,0 +1,125 @@
+<section class="players-page" aria-labelledby="players-title">
+  <div class="heading-row">
+    <div class="page-heading">
+      <h1 id="players-title">Giocatori</h1>
+    </div>
+    <button
+      class="primary-button add-button"
+      type="button"
+      (click)="createNew()"
+    >
+      <span aria-hidden="true">＋</span>
+      Nuovo
+    </button>
+  </div>
+
+  @if (localError(); as error) {
+  <p class="error-banner" role="alert">{{ error }}</p>
+  } @if (formVisible()) {
+  <form
+    class="player-form surface"
+    [formGroup]="playerForm"
+    (ngSubmit)="savePlayer()"
+  >
+    <div class="form-title">
+      <div>
+        <p class="eyebrow">
+          {{ editingId() ? 'Modifica' : 'Nuovo giocatore' }}
+        </p>
+        <h2>
+          {{ editingId() ? 'Aggiorna il profilo' : 'Aggiungi alla rosa' }}
+        </h2>
+      </div>
+      <button
+        class="close-button"
+        type="button"
+        (click)="closeForm()"
+        aria-label="Chiudi modulo"
+      >
+        ×
+      </button>
+    </div>
+
+    <div class="form-grid">
+      <div class="field name-field">
+        <label for="player-name">Nome</label>
+        <input
+          id="player-name"
+          type="text"
+          maxlength="40"
+          autocomplete="off"
+          formControlName="name"
+          placeholder="es. Federico"
+        />
+        @if (playerForm.controls.name.touched &&
+        playerForm.controls.name.invalid) {
+        <small>Inserisci da 2 a 40 caratteri.</small>
+        }
+      </div>
+
+      <fieldset class="color-field">
+        <legend>Colore card</legend>
+        <div class="color-list">
+          @for (color of colors; track color) {
+          <button
+            type="button"
+            class="color-choice"
+            [class.active]="playerForm.controls.avatarColor.value === color"
+            [style.background-color]="color"
+            (click)="chooseColor(color)"
+            [attr.aria-label]="'Scegli colore ' + color"
+            [attr.aria-pressed]="playerForm.controls.avatarColor.value === color"
+          ></button>
+          }
+        </div>
+      </fieldset>
+
+      @if (editingId()) {
+      <label class="active-toggle">
+        <input type="checkbox" formControlName="active" />
+        <span class="toggle-track" aria-hidden="true"><i></i></span>
+        <span>
+          <strong>Giocatore attivo</strong>
+          <small>Se disattivato non compare nella selezione.</small>
+        </span>
+      </label>
+      }
+    </div>
+
+    <button
+      class="primary-button save-button"
+      type="submit"
+      [disabled]="busy() || playerForm.invalid"
+    >
+      {{ busy() ? 'Salvataggio…' : editingId() ? 'Salva modifiche' : 'Crea
+      giocatore' }}
+    </button>
+  </form>
+  } @if (store.players().length === 0) {
+  <div class="empty-state">La rosa è vuota. Crea il primo giocatore.</div>
+  } @else {
+  <div class="roster-grid">
+    @for (player of store.players(); track player.id) {
+    <article class="roster-card surface" [class.inactive]="!player.active">
+      <span
+        class="avatar"
+        [style.background-color]="player.avatar_color"
+        aria-hidden="true"
+      >
+        {{ player.name | playerInitials }}
+      </span>
+      <div>
+        <strong>{{ player.name }}</strong>
+        <span>
+          {{ player.current_elo }} ELO · {{ player.active ? 'Attivo' : 'Fuori
+          rosa' }}
+        </span>
+      </div>
+      <button class="edit-button" type="button" (click)="editPlayer(player)">
+        Modifica
+      </button>
+    </article>
+    }
+  </div>
+  }
+</section>

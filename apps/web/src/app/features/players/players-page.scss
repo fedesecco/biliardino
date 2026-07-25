@@ -1,0 +1,268 @@
+:host {
+  display: block;
+  padding: 0.5rem 0 2rem;
+}
+
+.players-page {
+  animation: page-in 360ms ease-out;
+}
+
+.heading-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.add-button {
+  flex: 0 0 auto;
+  margin-bottom: 0.75rem;
+}
+
+.player-form {
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.form-title {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--line);
+
+  .eyebrow {
+    margin-bottom: 0.3rem;
+  }
+
+  h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    letter-spacing: -0.04em;
+  }
+}
+
+.close-button {
+  display: grid;
+  width: 2.2rem;
+  height: 2.2rem;
+  padding: 0;
+  color: var(--muted);
+  font-size: 1.25rem;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.form-grid {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem 0;
+}
+
+.field small {
+  color: var(--red-dark);
+  font-size: 0.65rem;
+  font-weight: 750;
+}
+
+.color-field {
+  padding: 0;
+  margin: 0;
+  border: 0;
+
+  legend {
+    margin-bottom: 0.55rem;
+    color: var(--ink-soft);
+    font-size: 0.72rem;
+    font-weight: 850;
+  }
+}
+
+.color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.color-choice {
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: 3px solid var(--paper);
+  border-radius: 0.7rem;
+  box-shadow: 0 0 0 1px var(--line);
+
+  &.active {
+    box-shadow:
+      0 0 0 2px var(--ink),
+      0 0.3rem 0.8rem rgb(32 35 47 / 18%);
+    transform: rotate(-5deg) scale(1.06);
+  }
+}
+
+.active-toggle {
+  display: flex;
+  gap: 0.7rem;
+  align-items: center;
+  cursor: pointer;
+
+  > input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  > span:last-child {
+    display: grid;
+    gap: 0.12rem;
+  }
+
+  strong {
+    font-size: 0.75rem;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 0.63rem;
+  }
+}
+
+.toggle-track {
+  position: relative;
+  width: 2.7rem;
+  height: 1.55rem;
+  background: #c8c6c0;
+  border-radius: 999px;
+  transition: background 160ms ease;
+
+  i {
+    position: absolute;
+    top: 0.2rem;
+    left: 0.2rem;
+    width: 1.15rem;
+    height: 1.15rem;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0.15rem 0.35rem rgb(32 35 47 / 20%);
+    transition: transform 160ms ease;
+  }
+}
+
+.active-toggle input:checked + .toggle-track {
+  background: var(--green);
+
+  i {
+    transform: translateX(1.15rem);
+  }
+}
+
+.active-toggle input:focus-visible + .toggle-track {
+  outline: 3px solid rgb(50 121 246 / 42%);
+  outline-offset: 3px;
+}
+
+.save-button {
+  width: 100%;
+}
+
+.roster-grid {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.roster-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.8rem;
+
+  &.inactive {
+    filter: grayscale(0.85);
+    opacity: 0.62;
+  }
+
+  > div {
+    display: grid;
+    min-width: 0;
+  }
+
+  strong {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 0.88rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  span {
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 750;
+  }
+}
+
+.avatar {
+  display: grid;
+  width: 2.7rem;
+  height: 2.7rem;
+  color: white;
+  font-size: 0.72rem;
+  font-weight: 950;
+  border: 2px solid white;
+  border-radius: 0.85rem;
+  box-shadow: 0 0.25rem 0.7rem rgb(32 35 47 / 13%);
+  place-items: center;
+}
+
+.edit-button {
+  min-height: 2.35rem;
+  padding: 0.45rem 0.7rem;
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 850;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@media (min-width: 40rem) {
+  .player-form {
+    padding: 1.25rem;
+  }
+
+  .form-grid {
+    grid-template-columns: minmax(12rem, 1fr) 1fr;
+    align-items: end;
+  }
+
+  .active-toggle {
+    grid-column: 1 / -1;
+  }
+
+  .save-button {
+    width: auto;
+  }
+
+  .roster-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .roster-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,153 @@
+<section class="history-page" aria-labelledby="history-title">
+  <div class="page-heading">
+    <h1 id="history-title">Storico partite</h1>
+  </div>
+
+  @if (store.error(); as error) {
+    <p class="error-banner" role="alert">{{ error }}</p>
+  }
+  @if (localError(); as error) {
+    <p class="error-banner" role="alert">{{ error }}</p>
+  }
+
+  @if (store.loading()) {
+    <div class="match-list" aria-label="Caricamento partite">
+      @for (item of [1, 2, 3]; track item) {
+        <div class="history-card surface skeleton"></div>
+      }
+    </div>
+  } @else if (store.matches().length === 0) {
+    <div class="empty-state">Nessuna partita registrata.</div>
+  } @else {
+    <div class="match-list">
+      @for (match of store.matches(); track match.id) {
+        <article class="history-card surface">
+          <header class="match-meta">
+            <time [attr.datetime]="match.played_at">
+              {{
+                match.played_at
+                  | date: 'EEE d MMM, HH:mm' : undefined : 'it'
+              }}
+            </time>
+            <div class="meta-actions">
+              @if (match.edited_at) {
+                <span
+                  class="edited"
+                  [attr.title]="
+                    'Modificata il ' +
+                    (match.edited_at
+                      | date: 'd MMM y, HH:mm' : undefined : 'it')
+                  "
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="m4 16-.7 4.7L8 20l11-11-4-4L4 16Zm9-9 4 4" />
+                  </svg>
+                  {{
+                    match.edited_at
+                      | date: 'd MMM, HH:mm' : undefined : 'it'
+                  }}
+                </span>
+              }
+              @if (canDelete(match)) {
+                <button
+                  class="delete-button"
+                  type="button"
+                  (click)="requestDelete(match.id)"
+                  [attr.aria-label]="
+                    'Elimina partita, ' +
+                    deletionMinutesLeft(match) +
+                    ' minuti disponibili'
+                  "
+                  [attr.title]="
+                    'Eliminabile ancora per ' +
+                    deletionMinutesLeft(match) +
+                    ' min'
+                  "
+                >
+                  <svg aria-hidden="true" viewBox="0 0 24 24">
+                    <path d="M4 7h16M9 7V4h6v3m3 0-1 13H7L6 7m4 4v5m4-5v5" />
+                  </svg>
+                </button>
+              }
+            </div>
+          </header>
+
+          @if (confirmingDeleteId() === match.id && canDelete(match)) {
+            <div class="delete-confirmation" role="alert">
+              <p>
+                Eliminare questa partita? ELO e statistiche verranno
+                ricalcolati.
+              </p>
+              <div>
+                <button
+                  class="danger-button"
+                  type="button"
+                  (click)="deleteMatch(match.id)"
+                  [disabled]="busy()"
+                >
+                  {{ busy() ? 'Eliminazione…' : 'Conferma' }}
+                </button>
+                <button
+                  class="secondary-button"
+                  type="button"
+                  (click)="cancelDelete()"
+                  [disabled]="busy()"
+                >
+                  Annulla
+                </button>
+              </div>
+            </div>
+          }
+
+          <div class="match-result">
+            <div class="team team-red">
+              <span class="team-name"><i></i> Rossi</span>
+              <div class="names">
+                @for (
+                  participant of participants(match, 'red');
+                  track participant.player_id
+                ) {
+                  <strong>{{ participant.player.name }}</strong>
+                }
+              </div>
+              <span
+                class="elo-delta"
+                [class.positive]="teamDelta(match, 'red') > 0"
+                [class.negative]="teamDelta(match, 'red') < 0"
+              >
+                {{ teamDelta(match, 'red') > 0 ? '+' : ''
+                }}{{ teamDelta(match, 'red') | number: '1.0-2' }} ELO
+              </span>
+            </div>
+
+            <div class="final-score" aria-label="Punteggio finale">
+              <strong class="red-score">{{ match.red_score }}</strong>
+              <span>:</span>
+              <strong class="blue-score">{{ match.blue_score }}</strong>
+            </div>
+
+            <div class="team team-blue">
+              <span class="team-name">Blu <i></i></span>
+              <div class="names">
+                @for (
+                  participant of participants(match, 'blue');
+                  track participant.player_id
+                ) {
+                  <strong>{{ participant.player.name }}</strong>
+                }
+              </div>
+              <span
+                class="elo-delta"
+                [class.positive]="teamDelta(match, 'blue') > 0"
+                [class.negative]="teamDelta(match, 'blue') < 0"
+              >
+                {{ teamDelta(match, 'blue') > 0 ? '+' : ''
+                }}{{ teamDelta(match, 'blue') | number: '1.0-2' }} ELO
+              </span>
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

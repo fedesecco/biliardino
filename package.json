@@ -1,0 +1,52 @@
+{
+  "name": "@org/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "node tools/generate-env.mjs && nx serve web",
+    "build:web": "node tools/generate-env.mjs && nx build web",
+    "lint:web": "nx lint web",
+    "test:web": "nx test web",
+    "e2e:web": "nx e2e web-e2e"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/common": "22.0.6",
+    "@angular/compiler": "22.0.6",
+    "@angular/core": "22.0.6",
+    "@angular/forms": "22.0.6",
+    "@angular/platform-browser": "22.0.6",
+    "@angular/router": "22.0.6",
+    "@supabase/supabase-js": "^2.110.8",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "0.16.2"
+  },
+  "devDependencies": {
+    "@angular/build": "22.0.6",
+    "@angular/cli": "22.0.6",
+    "@angular/compiler-cli": "22.0.6",
+    "@angular/language-service": "22.0.6",
+    "@eslint/js": "^9.8.0",
+    "@nx/angular": "23.1.0",
+    "@nx/eslint": "23.1.0",
+    "@nx/eslint-plugin": "23.1.0",
+    "@nx/playwright": "23.1.0",
+    "@nx/web": "23.1.0",
+    "@nx/workspace": "23.1.0",
+    "@playwright/test": "^1.36.0",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "~4.1.0",
+    "angular-eslint": "22.1.0",
+    "eslint": "^9.8.0",
+    "eslint-config-prettier": "^10.0.0",
+    "eslint-plugin-playwright": "^1.6.2",
+    "jsdom": "~22.1.0",
+    "jsonc-eslint-parser": "^2.1.0",
+    "nx": "23.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.40.0",
+    "vitest": "~4.1.0"
+  }
+}

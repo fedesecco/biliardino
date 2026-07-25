@@ -1,0 +1,185 @@
+<section class="analytics-page" aria-labelledby="analytics-title">
+  <div class="page-heading">
+    <h1 id="analytics-title">Statistiche</h1>
+  </div>
+
+  @if (store.error(); as error) {
+    <p class="error-banner" role="alert">{{ error }}</p>
+  }
+
+  @if (store.loading()) {
+    <div
+      class="chart-card surface loading-block"
+      aria-label="Caricamento statistiche"
+    ></div>
+  } @else if (eloChart(); as chart) {
+    <article class="team-card surface">
+      <header class="card-heading">
+        <div>
+          <span>Squadre</span>
+          <h2>Vittorie per colore</h2>
+        </div>
+        <strong>{{ teamPerformance().total }} partite</strong>
+      </header>
+
+      <div class="team-split">
+        <div class="blue-value">
+          <small>Blu</small>
+          <strong>{{ teamPerformance().blueRate | number: '1.0-1' }}%</strong>
+        </div>
+        <div class="red-value">
+          <small>Rossi</small>
+          <strong>{{ teamPerformance().redRate | number: '1.0-1' }}%</strong>
+        </div>
+      </div>
+
+      <div
+        class="team-balance-bar"
+        role="img"
+        [attr.aria-label]="
+          'Vittorie blu ' +
+          (teamPerformance().blueRate | number: '1.0-1') +
+          ' per cento, vittorie rosse ' +
+          (teamPerformance().redRate | number: '1.0-1') +
+          ' per cento'
+        "
+      >
+        <span
+          class="blue-share"
+          [style.width.%]="teamPerformance().blueRate"
+        ></span>
+        <span
+          class="red-share"
+          [style.width.%]="teamPerformance().redRate"
+        ></span>
+      </div>
+
+      <div class="team-totals">
+        <span>{{ teamPerformance().blueWins }} vittorie blu</span>
+        <span>{{ teamPerformance().redWins }} vittorie rosse</span>
+      </div>
+    </article>
+
+    <article class="chart-card surface">
+      <header class="card-heading">
+        <div>
+          <span>Andamento</span>
+          <h2>ELO nel tempo</h2>
+        </div>
+        <small>
+          {{ chart.startDate | date: 'd MMM y' : undefined : 'it' }} –
+          {{ chart.endDate | date: 'd MMM y' : undefined : 'it' }}
+        </small>
+      </header>
+
+      <p class="chart-hint">
+        Tocca un giocatore per evidenziarne l’andamento. Scorri il grafico
+        orizzontalmente.
+      </p>
+
+      <div class="chart-scroll" tabindex="0">
+        <svg
+          class="history-chart"
+          [attr.viewBox]="'0 0 ' + chart.width + ' ' + chart.height"
+          role="img"
+          aria-label="Andamento ELO dei giocatori nel tempo"
+        >
+          <text class="axis-title y-title" x="14" y="18">ELO</text>
+          @for (tick of chart.yTicks; track tick.value) {
+            <line
+              class="grid-line"
+              [attr.x1]="chart.plotLeft"
+              [attr.x2]="chart.plotRight"
+              [attr.y1]="tick.position"
+              [attr.y2]="tick.position"
+            />
+            <text
+              class="axis-label y-label"
+              [attr.x]="chart.plotLeft - 10"
+              [attr.y]="tick.position + 4"
+            >
+              {{ tick.value }}
+            </text>
+          }
+
+          @for (tick of chart.xTicks; track tick.position) {
+            <line
+              class="grid-line vertical"
+              [attr.x1]="tick.position"
+              [attr.x2]="tick.position"
+              [attr.y1]="chart.plotTop"
+              [attr.y2]="chart.plotBottom"
+            />
+            <text
+              class="axis-label x-label"
+              [attr.x]="tick.position"
+              [attr.y]="chart.plotBottom + 24"
+            >
+              {{ tick.date | date: 'd MMM' : undefined : 'it' }}
+            </text>
+          }
+          <text
+            class="axis-title x-title"
+            [attr.x]="chart.plotRight"
+            [attr.y]="chart.height - 6"
+          >
+            Tempo
+          </text>
+
+          @for (playerSeries of chart.series; track playerSeries.id) {
+            <path
+              class="player-line"
+              [class.dimmed]="
+                selectedPlayerId() !== null &&
+                selectedPlayerId() !== playerSeries.id
+              "
+              [class.selected]="selectedPlayerId() === playerSeries.id"
+              [attr.d]="playerSeries.path"
+              [attr.stroke]="playerSeries.color"
+            />
+            <circle
+              class="player-endpoint"
+              [class.dimmed]="
+                selectedPlayerId() !== null &&
+                selectedPlayerId() !== playerSeries.id
+              "
+              [attr.cx]="playerSeries.lastPoint.x"
+              [attr.cy]="playerSeries.lastPoint.y"
+              [attr.fill]="playerSeries.color"
+              r="4"
+            />
+          }
+        </svg>
+      </div>
+
+      <div class="chart-legend" aria-label="Giocatori nel grafico">
+        @for (playerSeries of chart.series; track playerSeries.id) {
+          <button
+            type="button"
+            [class.active]="selectedPlayerId() === playerSeries.id"
+            [class.dimmed]="
+              selectedPlayerId() !== null &&
+              selectedPlayerId() !== playerSeries.id
+            "
+            (click)="togglePlayer(playerSeries.id)"
+            [attr.aria-pressed]="selectedPlayerId() === playerSeries.id"
+          >
+            <span
+              class="legend-avatar"
+              [style.background-color]="playerSeries.color"
+              aria-hidden="true"
+            >
+              {{ playerSeries.name | playerInitials }}
+            </span>
+            <span>{{ playerSeries.name }}</span>
+            <strong>{{ playerSeries.currentElo | number: '1.0-0' }}</strong>
+          </button>
+        }
+      </div>
+    </article>
+  } @else {
+    <div class="empty-state">
+      Le statistiche compariranno dopo la prima partita.
+    </div>
+  }
+</section>

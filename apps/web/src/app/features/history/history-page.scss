@@ -1,0 +1,257 @@
+:host {
+  display: block;
+  padding: 0.5rem 0 2rem;
+}
+
+.history-page {
+  animation: page-in 360ms ease-out;
+}
+
+.match-list {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.history-card {
+  padding: 0.9rem;
+  overflow: hidden;
+}
+
+.match-meta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.75rem;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 800;
+  border-bottom: 1px solid var(--line);
+  text-transform: capitalize;
+}
+
+.meta-actions,
+.edited {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.edited {
+  padding: 0.3rem 0.45rem;
+  color: #765918;
+  background: #fff2c6;
+  border-radius: 999px;
+
+  svg {
+    width: 0.75rem;
+    height: 0.75rem;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+}
+
+.delete-button {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--red-dark);
+  background: var(--red-soft);
+  border: 1px solid rgb(232 74 95 / 24%);
+  border-radius: 50%;
+  place-items: center;
+
+  svg {
+    width: 0.9rem;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+}
+
+.delete-confirmation {
+  display: grid;
+  gap: 0.65rem;
+  padding: 0.75rem;
+  margin-top: 0.75rem;
+  color: var(--red-dark);
+  background: var(--red-soft);
+  border: 1px solid rgb(232 74 95 / 22%);
+  border-radius: 0.75rem;
+
+  p {
+    margin: 0;
+    font-size: 0.7rem;
+    font-weight: 800;
+    line-height: 1.4;
+  }
+
+  > div {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  button {
+    flex: 1;
+  }
+}
+
+.match-result {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding-top: 0.9rem;
+}
+
+.team {
+  display: grid;
+  gap: 0.42rem;
+  min-width: 0;
+}
+
+.team-blue {
+  text-align: right;
+}
+
+.team-name {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+
+  i {
+    width: 0.48rem;
+    height: 0.48rem;
+    background: var(--red);
+    border-radius: 50%;
+  }
+}
+
+.team-blue .team-name {
+  justify-content: flex-end;
+
+  i {
+    background: var(--blue);
+  }
+}
+
+.names {
+  display: grid;
+  min-width: 0;
+
+  strong {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: clamp(0.75rem, 3.5vw, 1rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.elo-delta {
+  width: max-content;
+  padding: 0.22rem 0.4rem;
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 850;
+  background: #efede7;
+  border-radius: 999px;
+
+  &.positive {
+    color: #147451;
+    background: var(--green-soft);
+  }
+
+  &.negative {
+    color: var(--red-dark);
+    background: var(--red-soft);
+  }
+}
+
+.team-blue .elo-delta {
+  justify-self: end;
+}
+
+.final-score {
+  display: flex;
+  gap: 0.2rem;
+  align-items: center;
+  justify-content: center;
+  min-width: 4.9rem;
+  font-family: var(--font-display);
+
+  strong {
+    display: grid;
+    width: 1.8rem;
+    height: 2.2rem;
+    color: white;
+    font-size: 1.35rem;
+    border-radius: 0.5rem;
+    place-items: center;
+  }
+
+  span {
+    color: var(--muted);
+    font-weight: 900;
+  }
+
+  .red-score {
+    background: var(--red);
+  }
+
+  .blue-score {
+    background: var(--blue);
+  }
+}
+
+
+.skeleton {
+  min-height: 9rem;
+  background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
+  background-size: 220% 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position-x: -220%;
+  }
+}
+
+@media (min-width: 44rem) {
+  .history-card {
+    padding: 1.1rem 1.25rem;
+  }
+
+  .match-result {
+    gap: 1.25rem;
+  }
+
+  .final-score {
+    min-width: 7rem;
+
+    strong {
+      width: 2.5rem;
+      height: 2.8rem;
+      font-size: 1.7rem;
+    }
+  }
+}
