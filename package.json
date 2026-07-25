@@ -1,6 +1,6 @@
 {
-  "name": "@org/source",
-  "version": "0.0.0",
+  "name": "biliardino",
+  "version": "1.0.0",
   "license": "MIT",
   "scripts": {
     "start": "node tools/generate-env.mjs && nx serve web",
@@ -48,5 +48,8 @@
     "typescript": "6.0.3",
     "typescript-eslint": "^8.40.0",
     "vitest": "~4.1.0"
+  },
+  "volta": {
+    "node": "24.18.0"
   }
 }
