@@ -1,11 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import type {
@@ -13,24 +7,25 @@ import type {
   SelectionMode,
   TeamColor,
   TeamDraft,
+  TeamPickingMode,
 } from '../../core/models';
-import { PlayerInitialsPipe } from '../../core/player-initials.pipe';
+import { PlayerAvatar } from '../../core/player-avatar';
 import { SupabaseService } from '../../core/supabase.service';
 
 @Component({
   selector: 'app-play-page',
-  imports: [DecimalPipe, PlayerInitialsPipe, RouterLink],
+  imports: [DecimalPipe, PlayerAvatar, RouterLink],
   templateUrl: './play-page.html',
   styleUrl: './play-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayPage {
   protected readonly store = inject(AppStore);
   protected readonly auth = inject(SupabaseService);
-  protected readonly selection = signal(new Map<string, SelectionMode>());
-  protected readonly draft = signal<TeamDraft | null>(null);
-  protected readonly score = signal({ red: 0, blue: 0 });
-  protected readonly confirming = signal(false);
+  protected readonly selection = this.store.playSelection;
+  protected readonly teamPickingMode = this.store.teamPickingMode;
+  protected readonly draft = this.store.playDraft;
+  protected readonly score = this.store.playScore;
+  protected readonly confirming = this.store.playConfirming;
   protected readonly busy = signal(false);
   protected readonly localError = signal<string | null>(null);
 
@@ -112,10 +107,13 @@ export class PlayPage {
     this.updateSelection(playerId, current === mode ? 'off' : mode);
   }
 
-  protected async createTeams(): Promise<void> {
+  protected async createTeams(
+    mode: TeamPickingMode = this.teamPickingMode(),
+  ): Promise<void> {
     if (!this.canCreateTeams()) {
       return;
     }
+    this.teamPickingMode.set(mode);
 
     this.busy.set(true);
     this.localError.set(null);
@@ -132,6 +130,7 @@ export class PlayPage {
         selectedEntries
           .filter(([, mode]) => mode === 'blue')
           .map(([playerId]) => playerId),
+        this.teamPickingMode(),
       );
       const playersById = new Map(
         this.store

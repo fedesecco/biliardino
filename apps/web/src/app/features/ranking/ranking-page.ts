@@ -1,14 +1,13 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { AppStore } from '../../core/app-store.service';
-import { PlayerInitialsPipe } from '../../core/player-initials.pipe';
+import { PlayerAvatar } from '../../core/player-avatar';
 
 @Component({
   selector: 'app-ranking-page',
-  imports: [DecimalPipe, PlayerInitialsPipe],
+  imports: [DecimalPipe, PlayerAvatar],
   templateUrl: './ranking-page.html',
   styleUrl: './ranking-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RankingPage {
   protected readonly store = inject(AppStore);

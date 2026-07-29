@@ -21,3 +21,32 @@
 - The `nx-generate` skill handles generator discovery internally - don't call nx_docs just to look up generator syntax
 
 <!-- nx configuration end-->
+
+# Biliardino workspace
+
+## Repository map
+
+- Package manager: npm. Prefix Nx commands with `npx nx`.
+- `web`: Angular 22 standalone application in `apps/web`.
+- `web-e2e`: Playwright end-to-end project in `apps/web-e2e`.
+- Application state and Supabase RPC calls live in `apps/web/src/app/core/app-store.service.ts`.
+- Supabase client setup and authentication live in `apps/web/src/app/core/supabase.service.ts`.
+- Generated database types live in `apps/web/src/app/core/database.types.ts`.
+- Database history is append-only under `supabase/migrations`; never rewrite an applied migration.
+- The user-facing changelog is `CHANGELOG.md` and is rendered by the application.
+
+## Database workflow
+
+- For database incidents, inspect both Supabase API and PostgreSQL logs before editing.
+- Inspect the live schema and function definitions before creating a migration.
+- Apply DDL and PostgreSQL function changes through a new Supabase migration, then verify the deployed behavior.
+- This project enables safe-update protection. Every `UPDATE` statement, including an intentional whole-table update, must have an explicit `WHERE` clause.
+
+## Delivery and versioning
+
+- Use the `bugfix` skill for reported defects and regressions.
+- Every completed implementation task must have a user-facing `CHANGELOG.md` entry.
+- Every commit represents one application version. Keep all uncommitted implementation work under a single pending changelog version.
+- Use a patch version while the pending work contains only fixes. If a feature is added before commit, promote the pending release to the next minor version and fold every earlier uncommitted fix into it; remove any intermediate patch heading.
+- Update both `package.json` and `package-lock.json` to the single pending version.
+- Run project tasks through Nx. Prefer the narrow target that proves the changed behavior.

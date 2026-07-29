@@ -1,5 +1,6 @@
 export type TeamColor = 'red' | 'blue';
 export type SelectionMode = 'off' | 'any' | TeamColor;
+export type TeamPickingMode = 'random' | 'elo-balanced';
 
 export interface Player {
   id: string;

@@ -1,17 +1,8 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import {
-  ChangeDetectionStrategy,
-  Component,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { AppStore } from '../../core/app-store.service';
-import type {
-  MatchRecord,
-  PlayerStatistic,
-} from '../../core/models';
-import { PlayerInitialsPipe } from '../../core/player-initials.pipe';
+import type { MatchRecord, PlayerStatistic } from '../../core/models';
+import { PlayerAvatar } from '../../core/player-avatar';
 
 interface EloChartPoint {
   x: number;
@@ -39,10 +30,9 @@ interface TimeAxisTick {
 
 @Component({
   selector: 'app-analytics-page',
-  imports: [DatePipe, DecimalPipe, PlayerInitialsPipe],
+  imports: [DatePipe, DecimalPipe, PlayerAvatar],
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AnalyticsPage {
   private readonly chartWidth = 920;
@@ -87,10 +77,7 @@ export class AnalyticsPage {
     );
   }
 
-  private buildEloChart(
-    matches: MatchRecord[],
-    statistics: PlayerStatistic[],
-  ) {
+  private buildEloChart(matches: MatchRecord[], statistics: PlayerStatistic[]) {
     if (matches.length === 0 || statistics.length === 0) {
       return null;
     }
@@ -142,8 +129,7 @@ export class AnalyticsPage {
     const maximumElo = Math.ceil((rawMaximum + step * 0.25) / step) * step;
     const eloRange = Math.max(1, maximumElo - minimumElo);
     const xPosition = (timestamp: number) =>
-      this.plotLeft +
-      ((timestamp - startTimestamp) / timeRange) * plotWidth;
+      this.plotLeft + ((timestamp - startTimestamp) / timeRange) * plotWidth;
     const yPosition = (elo: number) =>
       this.plotTop + ((maximumElo - elo) / eloRange) * plotHeight;
     const statisticsById = new Map(

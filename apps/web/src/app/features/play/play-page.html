@@ -17,13 +17,10 @@
       <div class="lineup">
         @for (player of teams.red; track player.id) {
         <div class="lineup-player">
-          <span
-            class="avatar"
-            [style.background-color]="player.avatar_color"
-            aria-hidden="true"
-          >
-            {{ player.name | playerInitials }}
-          </span>
+          <app-player-avatar
+            [name]="player.name"
+            [color]="player.avatar_color"
+          />
           <strong>{{ player.name }}</strong>
         </div>
         }
@@ -70,13 +67,10 @@
       <div class="lineup">
         @for (player of teams.blue; track player.id) {
         <div class="lineup-player">
-          <span
-            class="avatar"
-            [style.background-color]="player.avatar_color"
-            aria-hidden="true"
-          >
-            {{ player.name | playerInitials }}
-          </span>
+          <app-player-avatar
+            [name]="player.name"
+            [color]="player.avatar_color"
+          />
           <strong>{{ player.name }}</strong>
         </div>
         }
@@ -207,13 +201,7 @@
         [attr.aria-pressed]="selection().has(player.id)"
         [attr.aria-label]="'Seleziona ' + player.name"
       >
-        <span
-          class="avatar"
-          [style.background-color]="player.avatar_color"
-          aria-hidden="true"
-        >
-          {{ player.name | playerInitials }}
-        </span>
+        <app-player-avatar [name]="player.name" [color]="player.avatar_color" />
         <span class="player-copy">
           <strong>{{ player.name }}</strong>
           <small>{{ player.current_elo | number: '1.0-0' }} ELO</small>
@@ -253,22 +241,33 @@
   }
 
   <div class="selection-action">
-    <div>
+    <div class="selection-summary">
       <strong>
         @if (selectedCount() < 4) { Ancora {{ 4 - selectedCount() }} } @else {
         Squadre pronte }
       </strong>
       <span>Priorità a chi ha giocato meno oggi</span>
     </div>
-    <button
-      class="primary-button"
-      type="button"
-      (click)="createTeams()"
-      [disabled]="!canCreateTeams()"
-    >
-      {{ busy() ? 'Scelta…' : 'Crea squadre' }}
-      <span aria-hidden="true">→</span>
-    </button>
+    <div class="team-create-actions">
+      <button
+        class="primary-button"
+        type="button"
+        (click)="createTeams('random')"
+        [disabled]="!canCreateTeams()"
+      >
+        {{ busy() ? 'Scelta…' : 'Random' }}
+        <span aria-hidden="true">→</span>
+      </button>
+      <button
+        class="primary-button"
+        type="button"
+        (click)="createTeams('elo-balanced')"
+        [disabled]="!canCreateTeams()"
+      >
+        {{ busy() ? 'Scelta…' : 'ELO balanced' }}
+        <span aria-hidden="true">→</span>
+      </button>
+    </div>
   </div>
 </section>
 }

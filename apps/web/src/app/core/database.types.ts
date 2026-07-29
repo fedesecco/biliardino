@@ -178,6 +178,7 @@ export type Database = {
       is_company_user: { Args: never; Returns: boolean }
       pick_teams: {
         Args: {
+          p_balance_by_elo?: boolean
           p_blue_preferences?: string[]
           p_candidates: string[]
           p_red_preferences?: string[]

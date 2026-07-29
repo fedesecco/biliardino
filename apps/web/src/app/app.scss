@@ -26,24 +26,10 @@
   color: var(--ink);
   text-decoration: none;
 
-  strong,
-  small {
-    display: block;
-  }
-
   strong {
     font-family: var(--font-display);
     font-size: 1rem;
     letter-spacing: -0.02em;
-  }
-
-  small {
-    margin-top: 0.05rem;
-    color: var(--muted);
-    font-size: 0.55rem;
-    font-weight: 800;
-    letter-spacing: 0.13em;
-    text-transform: uppercase;
   }
 }
 

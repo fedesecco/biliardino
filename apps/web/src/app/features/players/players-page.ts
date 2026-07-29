@@ -1,20 +1,14 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AppStore } from '../../core/app-store.service';
 import type { Player } from '../../core/models';
-import { PlayerInitialsPipe } from '../../core/player-initials.pipe';
+import { PlayerAvatar } from '../../core/player-avatar';
 
 @Component({
   selector: 'app-players-page',
-  imports: [PlayerInitialsPipe, ReactiveFormsModule],
+  imports: [PlayerAvatar, ReactiveFormsModule],
   templateUrl: './players-page.html',
   styleUrl: './players-page.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayersPage {
   private readonly formBuilder = inject(FormBuilder);
@@ -24,32 +18,49 @@ export class PlayersPage {
   protected readonly busy = signal(false);
   protected readonly localError = signal<string | null>(null);
   protected readonly colors = [
-    '#1f9d70',
-    '#d98d1d',
-    '#7b61ff',
-    '#d754b0',
-    '#227c83',
-    '#4f596b',
-  ];
+    '#a8e6cf',
+    '#ffd3a5',
+    '#c7ceea',
+    '#ffb7ce',
+    '#b5ead7',
+    '#e2f0cb',
+    '#ffdac1',
+    '#d5aaff',
+    '#bde0fe',
+    '#fde2e4',
+    '#fff1a8',
+    '#cde7be',
+    '#f1c0e8',
+    '#a9def9',
+    '#e4c1f9',
+    '#fbc4ab',
+    '#b9fbc0',
+    '#cfbaf0',
+    '#f6d6ad',
+    '#b8e0d2',
+  ] as const;
   protected readonly playerForm = this.formBuilder.nonNullable.group({
     name: [
       '',
       [Validators.required, Validators.minLength(2), Validators.maxLength(40)],
     ],
     avatarColor: [
-      '#1f9d70',
+      '#a8e6cf',
       [Validators.required, Validators.pattern(/^#[0-9a-fA-F]{6}$/)],
     ],
     active: true,
   });
 
   protected createNew(): void {
+    const avatarColor =
+      this.colors.find((color) => !this.colorUsedByAnother(color)) ??
+      this.colors[0];
     this.editingId.set(null);
     this.formVisible.set(true);
     this.localError.set(null);
     this.playerForm.reset({
       name: '',
-      avatarColor: '#1f9d70',
+      avatarColor,
       active: true,
     });
   }
@@ -67,7 +78,20 @@ export class PlayersPage {
   }
 
   protected chooseColor(color: string): void {
-    this.playerForm.controls.avatarColor.setValue(color);
+    if (!this.colorUsedByAnother(color)) {
+      this.playerForm.controls.avatarColor.setValue(color);
+    }
+  }
+
+  protected colorUsedByAnother(color: string): boolean {
+    const editingId = this.editingId();
+    return this.store
+      .players()
+      .some(
+        (player) =>
+          player.id !== editingId &&
+          player.avatar_color.toLowerCase() === color.toLowerCase(),
+      );
   }
 
   protected closeForm(): void {
@@ -78,6 +102,12 @@ export class PlayersPage {
   protected async savePlayer(): Promise<void> {
     if (this.playerForm.invalid || this.busy()) {
       this.playerForm.markAllAsTouched();
+      return;
+    }
+    if (this.colorUsedByAnother(this.playerForm.controls.avatarColor.value)) {
+      this.localError.set(
+        'Questo colore è già assegnato a un altro giocatore.',
+      );
       return;
     }
 

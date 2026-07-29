@@ -58,20 +58,6 @@
   text-align: center;
 }
 
-.avatar {
-  display: grid;
-  flex: 0 0 auto;
-  width: 2.35rem;
-  height: 2.35rem;
-  color: white;
-  font-size: 0.65rem;
-  font-weight: 950;
-  border: 2px solid white;
-  border-radius: 0.75rem;
-  box-shadow: 0 0.2rem 0.65rem rgb(32 35 47 / 14%);
-  place-items: center;
-}
-
 .player-name {
   display: grid;
   min-width: 0;

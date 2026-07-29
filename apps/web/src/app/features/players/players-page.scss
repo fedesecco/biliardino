@@ -102,6 +102,12 @@
       0 0.3rem 0.8rem rgb(32 35 47 / 18%);
     transform: rotate(-5deg) scale(1.06);
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    filter: grayscale(0.35);
+    opacity: 0.28;
+  }
 }
 
 .active-toggle {
@@ -205,19 +211,6 @@
     font-size: 0.62rem;
     font-weight: 750;
   }
-}
-
-.avatar {
-  display: grid;
-  width: 2.7rem;
-  height: 2.7rem;
-  color: white;
-  font-size: 0.72rem;
-  font-weight: 950;
-  border: 2px solid white;
-  border-radius: 0.85rem;
-  box-shadow: 0 0.25rem 0.7rem rgb(32 35 47 / 13%);
-  place-items: center;
 }
 
 .edit-button {

@@ -6,6 +6,9 @@ import type {
   PickedPlayer,
   Player,
   PlayerStatistic,
+  SelectionMode,
+  TeamDraft,
+  TeamPickingMode,
 } from './models';
 import { SupabaseService } from './supabase.service';
 
@@ -13,8 +16,8 @@ import { SupabaseService } from './supabase.service';
 export class AppStore {
   private readonly supabase = inject(SupabaseService);
   private readonly playerColorReplacements: Record<string, string> = {
-    '#e84a5f': '#d98d1d',
-    '#3279f6': '#1f9d70',
+    '#e84a5f': '#fbc4ab',
+    '#3279f6': '#bde0fe',
   };
   private realtimeChannel: RealtimeChannel | null = null;
 
@@ -27,6 +30,11 @@ export class AppStore {
   readonly activePlayers = computed(() =>
     this.players().filter((player) => player.active),
   );
+  readonly playSelection = signal(new Map<string, SelectionMode>());
+  readonly teamPickingMode = signal<TeamPickingMode>('elo-balanced');
+  readonly playDraft = signal<TeamDraft | null>(null);
+  readonly playScore = signal({ red: 0, blue: 0 });
+  readonly playConfirming = signal(false);
 
   constructor() {
     if (!this.supabase.configured()) {
@@ -56,12 +64,14 @@ export class AppStore {
     candidates: string[],
     redPreferences: string[],
     bluePreferences: string[],
+    mode: TeamPickingMode,
   ): Promise<PickedPlayer[]> {
     this.assertCompanyUser();
     const { data, error } = await this.supabase.client.rpc('pick_teams', {
       p_candidates: candidates,
       p_red_preferences: redPreferences,
       p_blue_preferences: bluePreferences,
+      p_balance_by_elo: mode === 'elo-balanced',
     });
 
     if (error) {
@@ -191,7 +201,7 @@ export class AppStore {
               row.avatar_color?.toLowerCase() ?? ''
             ] ??
             row.avatar_color ??
-            '#1f9d70',
+            '#a8e6cf',
           current_elo: Number(row.current_elo ?? 1000),
           games: Number(row.games ?? 0),
           wins: Number(row.wins ?? 0),

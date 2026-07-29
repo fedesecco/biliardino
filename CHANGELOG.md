@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.1.0]
+
+### Aggiunto
+
+- Due azioni dedicate permettono di creare squadre casuali oppure bilanciate in base al punteggio ELO.
+- Selezione dei giocatori, squadre e punteggio della partita in corso conservati durante la navigazione nell'app.
+- Palette ampliata a 20 tonalità pastello: i giocatori attuali hanno colori distinti e le iniziali negli avatar sono scure.
+
+### Migliorato
+
+- Il marchio dell'app è ora Coppa Telenia, mostrato come unico titolo senza sottotitolo.
+- Le card dei giocatori selezionati hanno un aspetto più evidente e curato, con accento caldo e bordi colorati per squadra.
+
+### Corretto
+
+- L'eliminazione di una partita recente completa nuovamente il ricalcolo ELO senza mostrare un errore.
+- Avatar dei giocatori unificati tra selezione squadre, gestione giocatori, classifica e statistiche, sempre con iniziali scure.
+
 ## [1.0.1]
 
 ### Aggiunto

@@ -66,6 +66,7 @@
             class="color-choice"
             [class.active]="playerForm.controls.avatarColor.value === color"
             [style.background-color]="color"
+            [disabled]="colorUsedByAnother(color)"
             (click)="chooseColor(color)"
             [attr.aria-label]="'Scegli colore ' + color"
             [attr.aria-pressed]="playerForm.controls.avatarColor.value === color"
@@ -101,13 +102,11 @@
   <div class="roster-grid">
     @for (player of store.players(); track player.id) {
     <article class="roster-card surface" [class.inactive]="!player.active">
-      <span
-        class="avatar"
-        [style.background-color]="player.avatar_color"
-        aria-hidden="true"
-      >
-        {{ player.name | playerInitials }}
-      </span>
+      <app-player-avatar
+        [name]="player.name"
+        [color]="player.avatar_color"
+        size="large"
+      />
       <div>
         <strong>{{ player.name }}</strong>
         <span>

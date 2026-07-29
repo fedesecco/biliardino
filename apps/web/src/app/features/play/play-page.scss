@@ -95,10 +95,9 @@
   }
 
   &.selected-any {
-    background: #e7e5e0;
-    border-color: #a7a49d;
-    box-shadow: 0 0 0 0.25rem rgb(77 78 83 / 10%);
-    transform: translateY(-0.1rem);
+    background: linear-gradient(145deg, #fffdf8, #fff0cf);
+    border-color: var(--amber);
+    box-shadow: 0 0 0 0.3rem rgb(217 141 29 / 16%);
   }
 
   &.selected-red {
@@ -138,21 +137,6 @@
   text-align: left;
   background: transparent;
   border: 0;
-}
-
-.avatar {
-  display: grid;
-  flex: 0 0 auto;
-  width: 2.15rem;
-  height: 2.15rem;
-  color: white;
-  font-size: 0.62rem;
-  font-weight: 950;
-  letter-spacing: 0.04em;
-  border: 2px solid rgb(255 255 255 / 78%);
-  border-radius: 0.7rem;
-  box-shadow: 0 0.2rem 0.55rem rgb(32 35 47 / 14%);
-  place-items: center;
 }
 
 .player-copy {
@@ -210,6 +194,11 @@
     background: var(--blue);
   }
 
+  &.any.active {
+    color: white;
+    background: var(--ink);
+  }
+
   &.active {
     box-shadow:
       0 0 0 2px var(--ink),
@@ -238,7 +227,7 @@
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(1rem);
 
-  > div {
+  > .selection-summary {
     display: none;
   }
 
@@ -253,7 +242,16 @@
     font-size: 0.65rem;
   }
 
+  .team-create-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.4rem;
+    width: 100%;
+  }
+
   .primary-button {
+    display: flex;
+    justify-content: space-between;
     width: 100%;
     color: var(--ink);
     background: white;
@@ -366,13 +364,6 @@
   gap: 0.45rem;
   align-items: center;
   min-width: 0;
-
-  .avatar {
-    width: 2rem;
-    height: 2rem;
-    font-size: 0.6rem;
-    border-radius: 0.65rem;
-  }
 
   strong {
     overflow: hidden;
@@ -580,11 +571,16 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .selection-action > div {
+  .selection-action > .selection-summary {
     display: block;
   }
 
+  .selection-action .team-create-actions {
+    width: auto;
+  }
+
   .selection-action .primary-button {
+    min-width: 8.5rem;
     width: auto;
   }
 

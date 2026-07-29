@@ -1,6 +1,6 @@
 {
   "name": "biliardino",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "license": "MIT",
   "scripts": {
     "start": "node tools/generate-env.mjs && nx serve web",

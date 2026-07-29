@@ -4,13 +4,13 @@ import { companyUserGuard } from './core/company-user.guard';
 export const appRoutes: Route[] = [
   {
     path: '',
-    title: 'Nuova partita · Biliardino',
+    title: 'Nuova partita · Coppa Telenia',
     loadComponent: () =>
       import('./features/play/play-page').then((module) => module.PlayPage),
   },
   {
     path: 'changelog',
-    title: 'Changelog · Biliardino',
+    title: 'Changelog · Coppa Telenia',
     loadComponent: () =>
       import('./features/changelog/changelog-page').then(
         (module) => module.ChangelogPage,
@@ -18,7 +18,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'classifica',
-    title: 'Classifica · Biliardino',
+    title: 'Classifica · Coppa Telenia',
     loadComponent: () =>
       import('./features/ranking/ranking-page').then(
         (module) => module.RankingPage,
@@ -26,7 +26,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'statistiche',
-    title: 'Statistiche · Biliardino',
+    title: 'Statistiche · Coppa Telenia',
     loadComponent: () =>
       import('./features/analytics/analytics-page').then(
         (module) => module.AnalyticsPage,
@@ -34,7 +34,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'storico',
-    title: 'Storico · Biliardino',
+    title: 'Storico · Coppa Telenia',
     loadComponent: () =>
       import('./features/history/history-page').then(
         (module) => module.HistoryPage,
@@ -42,7 +42,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'giocatori',
-    title: 'Giocatori · Biliardino',
+    title: 'Giocatori · Coppa Telenia',
     canActivate: [companyUserGuard],
     loadComponent: () =>
       import('./features/players/players-page').then(
@@ -51,7 +51,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'accedi',
-    title: 'Accedi · Biliardino',
+    title: 'Accedi · Coppa Telenia',
     loadComponent: () =>
       import('./features/auth/login-page').then((module) => module.LoginPage),
   },
