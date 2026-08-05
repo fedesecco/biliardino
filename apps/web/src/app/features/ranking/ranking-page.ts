@@ -1,11 +1,12 @@
 import { DecimalPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import { PlayerAvatar } from '../../core/player-avatar';
 
 @Component({
   selector: 'app-ranking-page',
-  imports: [DecimalPipe, PlayerAvatar],
+  imports: [DecimalPipe, PlayerAvatar, RouterLink],
   templateUrl: './ranking-page.html',
   styleUrl: './ranking-page.scss',
 })

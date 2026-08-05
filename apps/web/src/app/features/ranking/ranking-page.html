@@ -3,6 +3,7 @@
     <h1 id="ranking-title">Classifica</h1>
   </div>
 
+
   @if (store.error(); as error) {
   <p class="error-banner" role="alert">{{ error }}</p>
   } @if (store.loading()) {
@@ -23,10 +24,14 @@
     </div>
 
     @for (stat of store.statistics(); track stat.id; let rank = $index) {
-    <article class="ranking-row">
+    <a class="ranking-row" [routerLink]="['/giocatore', stat.id]">
       <div class="identity">
         <span class="rank">{{ rank + 1 }}</span>
-        <app-player-avatar [name]="stat.name" [color]="stat.avatar_color" />
+        <app-player-avatar
+          [name]="stat.name"
+          [color]="stat.avatar_color"
+          [badge]="store.weeklyBadgeFor(stat.id)"
+        />
         <span class="player-name">
           <strong>{{ stat.name }}</strong>
           <small>{{ stat.wins }}V · {{ stat.losses }}S</small>
@@ -49,7 +54,7 @@
         <small>GF−GS</small>
         {{ stat.goal_diff > 0 ? '+' : '' }}{{ stat.goal_diff }}
       </span>
-    </article>
+    </a>
     }
   </div>
   }

@@ -1,0 +1,95 @@
+<section class="player-detail-page" aria-labelledby="player-title">
+  <a class="back-link" routerLink="/classifica">← Torna alla classifica</a>
+
+  @if (store.loading()) {
+    <div class="player-hero surface skeleton" aria-label="Caricamento giocatore"></div>
+  } @else if (statistic(); as player) {
+    <article class="player-hero surface">
+      <app-player-avatar
+        [name]="player.name"
+        [color]="player.avatar_color"
+        [badge]="store.weeklyBadgeFor(player.id)"
+        size="large"
+      />
+      <div>
+        <span>Giocatore</span>
+        <h1 id="player-title">{{ player.name }}</h1>
+        @if (store.weeklyBadgeFor(player.id); as badge) {
+          <small>{{ badge.label }} · {{ badge.elo > 0 ? '+' : '' }}{{ badge.elo | number: '1.0-2' }} ELO</small>
+        }
+      </div>
+      <strong>{{ player.current_elo | number: '1.0-0' }} <small>ELO</small></strong>
+    </article>
+
+    <div class="stat-grid" aria-label="Statistiche del giocatore">
+      <article class="surface"><span>Partite</span><strong>{{ player.games }}</strong></article>
+      <article class="surface"><span>Vittorie</span><strong>{{ player.wins }}</strong></article>
+      <article class="surface"><span>Winrate</span><strong>{{ player.win_rate | number: '1.0-1' }}%</strong></article>
+      <article class="surface"><span>GF−GS</span><strong>{{ player.goal_diff > 0 ? '+' : '' }}{{ player.goal_diff }}</strong></article>
+    </div>
+
+    <section class="trophy-cabinet surface" aria-labelledby="trophy-title">
+      <header>
+        <div>
+          <span>Premi permanenti</span>
+          <h2 id="trophy-title">Bacheca</h2>
+        </div>
+        <strong>{{ trophies().length }}</strong>
+      </header>
+
+      @if (trophies().length === 0) {
+        <div class="empty-state">Nessun premio mensile ancora conquistato.</div>
+      } @else {
+        <div class="trophy-grid">
+          @for (trophy of trophies(); track trophy.month_start) {
+            <button
+              type="button"
+              (click)="openTrophy(trophy)"
+              [attr.aria-label]="'Apri ' + trophy.title"
+              [attr.title]="trophy.title"
+            >
+              <app-trophy-artwork [monthStart]="trophy.month_start" />
+              <span>{{ trophy.exclusive ? 'Premio permanente' : 'Premio retroattivo' }}</span>
+              <strong>{{ trophy.title }}</strong>
+            </button>
+          }
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="empty-state">
+      <h1 id="player-title">Giocatore non trovato</h1>
+      <p>Il giocatore richiesto non è disponibile.</p>
+    </div>
+  }
+</section>
+
+@if (selectedTrophy(); as trophy) {
+  <dialog
+    #trophyDialog
+    tabindex="-1"
+    (keydown.escape)="closeTrophy()"
+    class="trophy-dialog"
+    aria-labelledby="trophy-dialog-title"
+    (close)="selectedTrophy.set(null)"
+    (click)="closeFromBackdrop($event)"
+  >
+    <article>
+      <button
+        class="dialog-close"
+        type="button"
+        aria-label="Chiudi bacheca"
+        (click)="closeTrophy()"
+      >
+        ×
+      </button>
+      <app-trophy-artwork [monthStart]="trophy.month_start" size="hero" />
+      <span>{{ trophy.exclusive ? 'Premio permanente' : 'Riconoscimento retroattivo' }}</span>
+      <h2 id="trophy-dialog-title">{{ trophy.title }}</h2>
+      @if (statistic(); as player) {
+        <strong>{{ player.name }}</strong>
+      }
+      <p>+{{ trophy.elo_gained | number: '1.0-2' }} ELO conquistati nel mese</p>
+    </article>
+  </dialog>
+}

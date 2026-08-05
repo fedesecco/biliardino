@@ -12,6 +12,27 @@
   gap: 0.8rem;
 }
 
+.history-status {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  min-height: 4rem;
+  margin-top: 0.8rem;
+
+  &.error-banner {
+    justify-content: space-between;
+  }
+}
+
+.history-end {
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-align: center;
+}
+
 .history-card {
   padding: 0.9rem;
   overflow: hidden;

@@ -33,6 +33,7 @@ const store = {
   activePlayers: computed(() => players),
   loading: signal(false),
   error: signal<string | null>(null),
+  weeklyBadgeFor: vi.fn().mockReturnValue(null),
   playSelection,
   teamPickingMode,
   playDraft,

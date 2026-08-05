@@ -1,0 +1,252 @@
+:host {
+  display: block;
+  padding: 0.5rem 0 2rem;
+}
+
+.player-detail-page {
+  display: grid;
+  gap: 1rem;
+  animation: page-in 360ms ease-out;
+}
+
+.back-link {
+  width: max-content;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.player-hero {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem;
+
+  > div {
+    display: grid;
+    min-width: 0;
+  }
+
+  span,
+  small {
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 800;
+  }
+
+  h1 {
+    margin: 0.12rem 0;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 6vw, 2rem);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  > strong {
+    display: grid;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+    text-align: right;
+
+    small {
+      font-family: inherit;
+      text-transform: uppercase;
+    }
+  }
+}
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.65rem;
+
+  article {
+    display: grid;
+    gap: 0.2rem;
+    padding: 0.8rem;
+  }
+
+  span {
+    color: var(--muted);
+    font-size: 0.58rem;
+    font-weight: 850;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  strong {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+  }
+}
+
+.trophy-cabinet {
+  padding: 1rem;
+
+  > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.85rem;
+
+    div {
+      display: grid;
+    }
+
+    span {
+      color: #8a6114;
+      font-size: 0.58rem;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 0.08rem 0 0;
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+    }
+
+    > strong {
+      display: grid;
+      width: 2.1rem;
+      height: 2.1rem;
+      color: #6d490e;
+      background: #ffe9a6;
+      border-radius: 50%;
+      place-items: center;
+    }
+  }
+}
+
+.trophy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
+  gap: 0.65rem;
+
+  button {
+    display: grid;
+    gap: 0.22rem;
+    justify-items: center;
+    padding: 0.75rem 0.5rem;
+    color: inherit;
+    background: #fbf5e3;
+    border: 1px solid rgb(163 105 15 / 18%);
+    border-radius: 1rem;
+
+    &:hover {
+      background: #fff9e7;
+      transform: translateY(-0.12rem);
+    }
+  }
+
+  span {
+    margin-top: 0.25rem;
+    color: var(--muted);
+    font-size: 0.56rem;
+    font-weight: 800;
+  }
+
+  strong {
+    font-family: var(--font-display);
+    font-size: 0.72rem;
+  }
+}
+
+.trophy-dialog {
+  width: min(31rem, calc(100vw - 1.5rem));
+  max-width: none;
+  padding: 0;
+  overflow: visible;
+  background: transparent;
+  border: 0;
+
+  &::backdrop {
+    background: rgb(25 26 31 / 70%);
+    backdrop-filter: blur(0.35rem);
+  }
+
+  article {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    padding: 1.25rem;
+    text-align: center;
+    background: #fffaf0;
+    border: 1px solid rgb(255 255 255 / 70%);
+    border-radius: 1.5rem;
+    box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 34%);
+  }
+
+  > article > span {
+    margin-top: 0.85rem;
+    color: #8a6114;
+    font-size: 0.62rem;
+    font-weight: 900;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0.15rem 0 0.5rem;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 7vw, 2.2rem);
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+}
+
+.dialog-close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  color: var(--muted);
+  font-size: 1.2rem;
+  background: rgb(255 255 255 / 82%);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  place-items: center;
+}
+
+.skeleton {
+  min-height: 7rem;
+  background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
+  background-size: 220% 100%;
+  animation: shimmer 1.3s infinite linear;
+}
+
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position-x: -220%;
+  }
+}
+
+@media (min-width: 42rem) {
+  .player-hero,
+  .trophy-cabinet {
+    padding: 1.25rem;
+  }
+
+  .stat-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}

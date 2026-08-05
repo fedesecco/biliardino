@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import type { Player } from '../../core/models';
 import { PlayerAvatar } from '../../core/player-avatar';
 
 @Component({
   selector: 'app-players-page',
-  imports: [PlayerAvatar, ReactiveFormsModule],
+  imports: [PlayerAvatar, ReactiveFormsModule, RouterLink],
   templateUrl: './players-page.html',
   styleUrl: './players-page.scss',
 })

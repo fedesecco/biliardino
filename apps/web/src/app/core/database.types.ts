@@ -102,6 +102,42 @@ export type Database = {
         }
         Relationships: []
       }
+      monthly_champions: {
+        Row: {
+          awarded_at: string
+          elo_gained: number
+          month_start: string
+          player_id: string
+        }
+        Insert: {
+          awarded_at?: string
+          elo_gained: number
+          month_start: string
+          player_id: string
+        }
+        Update: {
+          awarded_at?: string
+          elo_gained?: number
+          month_start?: string
+          player_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "monthly_champions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_statistics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "monthly_champions_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       players: {
         Row: {
           active: boolean
@@ -155,6 +191,30 @@ export type Database = {
       }
     }
     Views: {
+      monthly_elo_rankings: {
+        Row: {
+          elo_gained: number | null
+          month_start: string | null
+          player_id: string | null
+          rank: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "player_statistics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_players_player_id_fkey"
+            columns: ["player_id"]
+            isOneToOne: false
+            referencedRelation: "players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       player_statistics: {
         Row: {
           avatar_color: string | null
@@ -174,6 +234,7 @@ export type Database = {
     }
     Functions: {
       delete_match: { Args: { p_match_id: string }; Returns: undefined }
+      finalize_monthly_champions: { Args: never; Returns: number }
       hook_restrict_signup_to_company: { Args: { event: Json }; Returns: Json }
       is_company_user: { Args: never; Returns: boolean }
       pick_teams: {

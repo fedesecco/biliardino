@@ -25,7 +25,13 @@ Every completed implementation task must be represented in `CHANGELOG.md`. Every
 - After a commit, the next implementation task starts a new pending version.
 - Example: with committed version `1.0.1`, two fixes initially form pending `1.0.2`; adding a feature before committing changes the single pending release to `1.1.0`, containing both fixes and the feature.
 - Update every repository-owned version source, including `package.json` and its lockfile.
-- Use `### Corretto` for fixes, `### Aggiunto` for features, `### Migliorato` for refinements, and `### Manutenzione` for relevant maintenance work.
+- Use only the section headings demonstrated by the current project changelog:
+  - `### Features` for new user-visible capabilities.
+  - `### Changes` for visible changes to existing behavior, placement, wording, appearance, fixes, or refinements that do not add a new capability.
+  - `### Chores` for strictly internal structural or maintenance work with no user-visible effect.
+- Never place a user-visible change under `### Chores`.
+- Whenever practical, begin an entry with the affected product area in bold followed by a colon, for example: `- **Storico:** ora carica 25 risultati alla volta...`.
+- Use the current pending release in `CHANGELOG.md` as the canonical example for heading names, language, tone, and formatting.
 - Write entries in user-facing language and describe observable behavior, not implementation details.
 
 Changelog and version updates happen only after the behavioral change has been smoke-tested successfully.

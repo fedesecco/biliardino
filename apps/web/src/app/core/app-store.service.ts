@@ -1,8 +1,10 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type {
   MatchParticipant,
   MatchRecord,
+  MonthlyChampion,
+  MonthlyEloRanking,
   PickedPlayer,
   Player,
   PlayerStatistic,
@@ -11,24 +13,57 @@ import type {
   TeamPickingMode,
 } from './models';
 import { SupabaseService } from './supabase.service';
+import type { Database } from './database.types';
+import {
+  calculateWeeklyBadgesFromStandings,
+  calculateWeeklyEloStandings,
+  type WeeklyBadge,
+} from './weekly-awards';
+import { romeMonthKey } from './rome-calendar';
+
+type MatchRow = Database['public']['Tables']['matches']['Row'];
+type MatchParticipantRow =
+  Database['public']['Tables']['match_players']['Row'];
+
+interface MatchHistoryCursor {
+  playedAt: string;
+  id: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class AppStore {
   private readonly supabase = inject(SupabaseService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly currentTime = signal(Date.now());
   private readonly playerColorReplacements: Record<string, string> = {
     '#e84a5f': '#fbc4ab',
     '#3279f6': '#bde0fe',
   };
   private realtimeChannel: RealtimeChannel | null = null;
+  private readonly historyPageSize = 25;
+  private historyCursor: MatchHistoryCursor | null = null;
+  private historyInitialized = false;
 
   readonly players = signal<Player[]>([]);
   readonly statistics = signal<PlayerStatistic[]>([]);
   readonly matches = signal<MatchRecord[]>([]);
+  readonly monthlyRankings = signal<MonthlyEloRanking[]>([]);
+  readonly monthlyChampions = signal<MonthlyChampion[]>([]);
+  readonly historyMatches = signal<MatchRecord[]>([]);
+  readonly historyLoading = signal(false);
+  readonly historyError = signal<string | null>(null);
+  readonly historyHasMore = signal(true);
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly notice = signal<string | null>(null);
   readonly activePlayers = computed(() =>
     this.players().filter((player) => player.active),
+  );
+  readonly weeklyStandings = computed(() =>
+    calculateWeeklyEloStandings(this.matches(), new Date(this.currentTime())),
+  );
+  readonly weeklyBadges = computed(() =>
+    calculateWeeklyBadgesFromStandings(this.weeklyStandings()),
   );
   readonly playSelection = signal(new Map<string, SelectionMode>());
   readonly teamPickingMode = signal<TeamPickingMode>('elo-balanced');
@@ -37,6 +72,11 @@ export class AppStore {
   readonly playConfirming = signal(false);
 
   constructor() {
+    const timer = window.setInterval(
+      () => this.currentTime.set(Date.now()),
+      60_000,
+    );
+    this.destroyRef.onDestroy(() => window.clearInterval(timer));
     if (!this.supabase.configured()) {
       this.loading.set(false);
       return;
@@ -46,18 +86,54 @@ export class AppStore {
     this.subscribeToChanges();
   }
 
+  weeklyBadgeFor(playerId: string): WeeklyBadge | null {
+    return this.weeklyBadges().get(playerId) ?? null;
+  }
+
   async refresh(): Promise<void> {
     this.loading.set(true);
     this.error.set(null);
 
     try {
       await this.loadPlayers();
-      await Promise.all([this.loadStatistics(), this.loadMatches()]);
+      await Promise.all([
+        this.loadStatistics(),
+        this.loadRecentMatches(),
+        this.loadMonthlyAwards(),
+      ]);
     } catch (error: unknown) {
       this.error.set(this.errorMessage(error));
     } finally {
       this.loading.set(false);
     }
+  }
+
+  async loadInitialHistory(force = false): Promise<void> {
+    if (this.historyLoading() || (this.historyInitialized && !force)) {
+      return;
+    }
+    if (this.players().length === 0) {
+      await this.loadPlayers();
+    }
+
+
+    this.historyInitialized = true;
+    this.historyCursor = null;
+    this.historyMatches.set([]);
+    this.historyHasMore.set(true);
+    await this.loadHistoryPage();
+  }
+
+  async loadMoreHistory(): Promise<void> {
+    if (
+      !this.historyInitialized ||
+      this.historyLoading() ||
+      !this.historyHasMore()
+    ) {
+      return;
+    }
+
+    await this.loadHistoryPage();
   }
 
   async pickTeams(
@@ -100,7 +176,7 @@ export class AppStore {
     }
 
     this.notice.set('Partita registrata. Classifica aggiornata.');
-    await this.refresh();
+    await this.refreshMatchData();
   }
 
   async deleteMatch(matchId: string): Promise<void> {
@@ -114,7 +190,7 @@ export class AppStore {
     }
 
     this.notice.set('Partita eliminata. Classifica aggiornata.');
-    await this.refresh();
+    await this.refreshMatchData();
   }
 
   async createPlayer(name: string, avatarColor: string): Promise<void> {
@@ -214,45 +290,146 @@ export class AppStore {
     );
   }
 
-  private async loadMatches(): Promise<void> {
-    const pageSize = 1000;
-    const [matchesResult, firstParticipantsResult] = await Promise.all([
+  private async loadMonthlyAwards(): Promise<void> {
+    const currentMonthStart = romeMonthKey(new Date(this.currentTime()));
+    const [rankingsResult, championsResult] = await Promise.all([
       this.supabase.client
-        .from('matches')
+        .from('monthly_elo_rankings')
         .select('*')
-        .order('played_at', { ascending: false }),
+        .eq('month_start', currentMonthStart)
+        .order('rank'),
       this.supabase.client
-        .from('match_players')
+        .from('monthly_champions')
         .select('*')
-        .order('match_id')
-        .order('player_id')
-        .range(0, pageSize - 1),
+        .order('month_start', { ascending: false }),
     ]);
 
-    if (matchesResult.error) {
-      throw matchesResult.error;
+    if (rankingsResult.error) {
+      throw rankingsResult.error;
     }
-    if (firstParticipantsResult.error) {
-      throw firstParticipantsResult.error;
+    if (championsResult.error) {
+      throw championsResult.error;
     }
 
-    const participantRows = firstParticipantsResult.data;
-    while (
-      participantRows.length > 0 &&
-      participantRows.length % pageSize === 0
-    ) {
-      const nextParticipantsResult = await this.supabase.client
-        .from('match_players')
+    this.monthlyRankings.set(
+      rankingsResult.data
+        .filter(
+          (
+            row,
+          ): row is typeof row & {
+            month_start: string;
+            player_id: string;
+            elo_gained: number;
+            rank: number;
+          } =>
+            row.month_start !== null &&
+            row.player_id !== null &&
+            row.elo_gained !== null &&
+            row.rank !== null,
+        )
+        .map((row) => ({
+          month_start: row.month_start,
+          player_id: row.player_id,
+          elo_gained: Number(row.elo_gained),
+          rank: Number(row.rank),
+        })),
+    );
+    this.monthlyChampions.set(
+      championsResult.data.map((row) => ({
+        ...row,
+        elo_gained: Number(row.elo_gained),
+      })),
+    );
+  }
+
+  private async loadRecentMatches(): Promise<void> {
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const { data, error } = await this.supabase.client
+      .from('matches')
+      .select('*')
+      .gte('played_at', sevenDaysAgo.toISOString())
+      .order('played_at', { ascending: false })
+      .order('id', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    this.matches.set(await this.hydrateMatches(data));
+  }
+
+  private async loadHistoryPage(): Promise<void> {
+    this.historyLoading.set(true);
+    this.historyError.set(null);
+
+    try {
+      let query = this.supabase.client
+        .from('matches')
         .select('*')
-        .order('match_id')
-        .order('player_id')
-        .range(participantRows.length, participantRows.length + pageSize - 1);
-      if (nextParticipantsResult.error) {
-        throw nextParticipantsResult.error;
+        .order('played_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(this.historyPageSize + 1);
+
+      if (this.historyCursor) {
+        const { playedAt, id } = this.historyCursor;
+        query = query.or(
+          `played_at.lt.${playedAt},and(played_at.eq.${playedAt},id.lt.${id})`,
+        );
       }
-      participantRows.push(...nextParticipantsResult.data);
+
+      const { data, error } = await query;
+      if (error) {
+        throw error;
+      }
+
+      const pageRows = data.slice(0, this.historyPageSize);
+      const page = await this.hydrateMatches(pageRows);
+      this.historyMatches.update((current) => {
+        const knownIds = new Set(current.map((match) => match.id));
+        return [
+          ...current,
+          ...page.filter((match) => !knownIds.has(match.id)),
+        ];
+      });
+      this.historyHasMore.set(data.length > this.historyPageSize);
+
+      const lastMatch = pageRows[pageRows.length - 1];
+      this.historyCursor = lastMatch
+        ? { playedAt: lastMatch.played_at, id: lastMatch.id }
+        : null;
+    } catch (error: unknown) {
+      this.historyError.set(this.errorMessage(error));
+    } finally {
+      this.historyLoading.set(false);
+    }
+  }
+
+  private async hydrateMatches(rows: MatchRow[]): Promise<MatchRecord[]> {
+    if (rows.length === 0) {
+      return [];
     }
 
+    const { data, error } = await this.supabase.client
+      .from('match_players')
+      .select('*')
+      .in(
+        'match_id',
+        rows.map((match) => match.id),
+      )
+      .order('match_id')
+      .order('player_id');
+
+    if (error) {
+      throw error;
+    }
+
+    return this.mapMatches(rows, data);
+  }
+
+  private mapMatches(
+    rows: MatchRow[],
+    participantRows: MatchParticipantRow[],
+  ): MatchRecord[] {
     const playersById = new Map(
       this.players().map((player) => [player.id, player] as const),
     );
@@ -279,12 +456,17 @@ export class AppStore {
       participantsByMatch.set(participant.match_id, current);
     }
 
-    this.matches.set(
-      matchesResult.data.map((match) => ({
-        ...match,
-        participants: participantsByMatch.get(match.id) ?? [],
-      })),
-    );
+    return rows.map((match) => ({
+      ...match,
+      participants: participantsByMatch.get(match.id) ?? [],
+    }));
+  }
+
+  private async refreshMatchData(): Promise<void> {
+    await this.refresh();
+    if (this.historyInitialized) {
+      await this.loadInitialHistory(true);
+    }
   }
 
   private subscribeToChanges(): void {
@@ -298,7 +480,12 @@ export class AppStore {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'matches' },
-        () => void this.refresh(),
+        () => void this.refreshMatchData(),
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'monthly_champions' },
+        () => void this.loadMonthlyAwards(),
       )
       .subscribe();
   }

@@ -20,6 +20,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
+            [badge]="store.weeklyBadgeFor(player.id)"
           />
           <strong>{{ player.name }}</strong>
         </div>
@@ -70,6 +71,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
+            [badge]="store.weeklyBadgeFor(player.id)"
           />
           <strong>{{ player.name }}</strong>
         </div>
@@ -201,7 +203,11 @@
         [attr.aria-pressed]="selection().has(player.id)"
         [attr.aria-label]="'Seleziona ' + player.name"
       >
-        <app-player-avatar [name]="player.name" [color]="player.avatar_color" />
+        <app-player-avatar
+          [name]="player.name"
+          [color]="player.avatar_color"
+          [badge]="store.weeklyBadgeFor(player.id)"
+        />
         <span class="player-copy">
           <strong>{{ player.name }}</strong>
           <small>{{ player.current_elo | number: '1.0-0' }} ELO</small>

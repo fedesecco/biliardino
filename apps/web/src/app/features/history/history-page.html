@@ -10,17 +10,30 @@
     <p class="error-banner" role="alert">{{ error }}</p>
   }
 
-  @if (store.loading()) {
+  @if (store.historyLoading() && store.historyMatches().length === 0) {
     <div class="match-list" aria-label="Caricamento partite">
       @for (item of [1, 2, 3]; track item) {
         <div class="history-card surface skeleton"></div>
       }
     </div>
-  } @else if (store.matches().length === 0) {
-    <div class="empty-state">Nessuna partita registrata.</div>
+  } @else if (store.historyMatches().length === 0) {
+    @if (store.historyError(); as error) {
+      <div class="history-status error-banner" role="alert">
+        <span>{{ error }}</span>
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="loadMoreHistory()"
+        >
+          Riprova
+        </button>
+      </div>
+    } @else {
+      <div class="empty-state">Nessuna partita registrata.</div>
+    }
   } @else {
     <div class="match-list">
-      @for (match of store.matches(); track match.id) {
+      @for (match of store.historyMatches(); track match.id) {
         <article class="history-card surface">
           <header class="match-meta">
             <time [attr.datetime]="match.played_at">
@@ -149,5 +162,36 @@
         </article>
       }
     </div>
+
+    @if (store.historyError(); as error) {
+      <div class="history-status error-banner" role="alert">
+        <span>{{ error }}</span>
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="loadMoreHistory()"
+        >
+          Riprova
+        </button>
+      </div>
+    }
+    <div
+      #loadMoreSentinel
+      class="history-status"
+      [hidden]="!store.historyHasMore() || store.historyError() !== null"
+      aria-live="polite"
+    >
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="loadMoreHistory()"
+        [disabled]="store.historyLoading()"
+      >
+        {{ store.historyLoading() ? 'Caricamento…' : 'Carica altre partite' }}
+      </button>
+    </div>
+    @if (!store.historyHasMore() && store.historyError() === null) {
+      <p class="history-end">Hai raggiunto l’inizio dello storico.</p>
+    }
   }
 </section>

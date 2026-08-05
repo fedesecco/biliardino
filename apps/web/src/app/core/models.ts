@@ -52,6 +52,20 @@ export interface PlayerStatistic {
   win_rate: number;
 }
 
+export interface MonthlyEloRanking {
+  month_start: string;
+  player_id: string;
+  elo_gained: number;
+  rank: number;
+}
+
+export interface MonthlyChampion {
+  month_start: string;
+  player_id: string;
+  elo_gained: number;
+  awarded_at: string;
+}
+
 export interface TeamDraft {
   red: Player[];
   blue: Player[];

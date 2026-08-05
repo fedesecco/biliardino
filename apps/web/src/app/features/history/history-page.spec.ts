@@ -13,9 +13,13 @@ describe('HistoryPage', () => {
   const recentMatch = matchCreatedMinutesAgo('recent', 5);
   const expiredMatch = matchCreatedMinutesAgo('expired', 11);
   const deleteMatch = vi.fn().mockResolvedValue(undefined);
+  const loadInitialHistory = vi.fn().mockResolvedValue(undefined);
+  const loadMoreHistory = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(async () => {
     deleteMatch.mockClear();
+    loadInitialHistory.mockClear();
+    loadMoreHistory.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [HistoryPage],
@@ -25,7 +29,12 @@ describe('HistoryPage', () => {
           useValue: {
             error: signal<string | null>(null),
             loading: signal(false),
-            matches: signal([recentMatch, expiredMatch]),
+            historyMatches: signal([recentMatch, expiredMatch]),
+            historyLoading: signal(false),
+            historyError: signal<string | null>(null),
+            historyHasMore: signal(false),
+            loadInitialHistory,
+            loadMoreHistory,
             deleteMatch,
           },
         },

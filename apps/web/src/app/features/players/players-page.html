@@ -102,18 +102,21 @@
   <div class="roster-grid">
     @for (player of store.players(); track player.id) {
     <article class="roster-card surface" [class.inactive]="!player.active">
-      <app-player-avatar
-        [name]="player.name"
-        [color]="player.avatar_color"
-        size="large"
-      />
-      <div>
-        <strong>{{ player.name }}</strong>
-        <span>
-          {{ player.current_elo }} ELO · {{ player.active ? 'Attivo' : 'Fuori
-          rosa' }}
-        </span>
-      </div>
+      <a class="player-link" [routerLink]="['/giocatore', player.id]">
+        <app-player-avatar
+          [name]="player.name"
+          [color]="player.avatar_color"
+          [badge]="store.weeklyBadgeFor(player.id)"
+          size="large"
+        />
+        <div>
+          <strong>{{ player.name }}</strong>
+          <span>
+            {{ player.current_elo }} ELO · {{ player.active ? 'Attivo' : 'Fuori
+            rosa' }}
+          </span>
+        </div>
+      </a>
       <button class="edit-button" type="button" (click)="editPlayer(player)">
         Modifica
       </button>

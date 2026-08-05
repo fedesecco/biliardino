@@ -2,8 +2,13 @@ import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import type { MatchRecord, PlayerStatistic } from '../../core/models';
+import type {
+  MatchRecord,
+  MonthlyEloRanking,
+  PlayerStatistic,
+} from '../../core/models';
 import { AnalyticsPage } from './analytics-page';
 
 registerLocaleData(localeIt);
@@ -13,6 +18,7 @@ describe('AnalyticsPage', () => {
     await TestBed.configureTestingModule({
       imports: [AnalyticsPage],
       providers: [
+        provideRouter([]),
         {
           provide: AppStore,
           useValue: {
@@ -20,45 +26,67 @@ describe('AnalyticsPage', () => {
             loading: signal(false),
             matches: signal(matches),
             statistics: signal(statistics),
+            monthlyRankings: signal(monthlyRankings),
+            weeklyStandings: signal([
+              { playerId: 'player-one', elo: 32 },
+              { playerId: 'player-two', elo: -32 },
+            ]),
+            weeklyBadgeFor: vi.fn().mockReturnValue(null),
           },
         },
       ],
     }).compileComponents();
   });
 
-  it('plots each player ELO against time', () => {
+  it('shows color performance without the ELO history graph', () => {
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(element.querySelectorAll('.player-line')).toHaveLength(2);
-    expect(element.querySelectorAll('.x-label')).toHaveLength(5);
-    expect(element.querySelectorAll('.y-label').length).toBeGreaterThan(1);
-    expect(element.querySelector('.history-chart')?.getAttribute('aria-label')).toBe(
-      'Andamento ELO dei giocatori nel tempo',
+    expect(element.querySelector('.team-card')?.textContent).toContain(
+      '2 partite',
     );
+    expect(element.querySelector('.history-chart')).toBeNull();
   });
 
-  it('isolates the selected player series', () => {
+  it('opens the monthly and weekly award rankings', () => {
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    const firstLegendButton = element.querySelector(
-      '.chart-legend button',
-    ) as HTMLButtonElement;
+    const triggers = element.querySelectorAll<HTMLButtonElement>('.award-trigger');
 
-    firstLegendButton.click();
+    triggers[0].click();
+    triggers[1].click();
     fixture.detectChanges();
 
-    expect(firstLegendButton.getAttribute('aria-pressed')).toBe('true');
-    expect(element.querySelectorAll('.player-line.selected')).toHaveLength(1);
-    expect(element.querySelectorAll('.player-line.dimmed')).toHaveLength(1);
+    expect(element.querySelectorAll('#monthly-ranking a')).toHaveLength(2);
+    expect(element.querySelectorAll('#weekly-ranking a')).toHaveLength(2);
+    expect(
+      element.querySelector<HTMLAnchorElement>('#monthly-ranking a')?.getAttribute('href'),
+    ).toBe('/giocatore/player-one');
+    expect(triggers[0].getAttribute('aria-expanded')).toBe('true');
+    expect(triggers[1].getAttribute('aria-expanded')).toBe('true');
   });
 });
 
 const statistics: PlayerStatistic[] = [
   statistic('player-one', 'Mario Rossi', '#1f9d70', 1032),
   statistic('player-two', 'Luigi Bianchi', '#3279f6', 968),
+];
+
+const monthlyRankings: MonthlyEloRanking[] = [
+  {
+    month_start: '2026-08-01',
+    player_id: 'player-one',
+    elo_gained: 24,
+    rank: 1,
+  },
+  {
+    month_start: '2026-08-01',
+    player_id: 'player-two',
+    elo_gained: -24,
+    rank: 2,
+  },
 ];
 
 const matches: MatchRecord[] = [

@@ -6,7 +6,6 @@ import type {
   Player,
   SelectionMode,
   TeamColor,
-  TeamDraft,
   TeamPickingMode,
 } from '../../core/models';
 import { PlayerAvatar } from '../../core/player-avatar';

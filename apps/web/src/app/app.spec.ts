@@ -24,7 +24,7 @@ describe('App', () => {
     );
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.app-footer a');
-    expect(versionLink?.textContent?.trim()).toBe('v1.1.0');
+    expect(versionLink?.textContent?.trim()).toBe('v1.2.0');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
     expect(versionLink?.getAttribute('target')).toBeNull();
   });
