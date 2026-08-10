@@ -7,6 +7,17 @@
   animation: page-in 360ms ease-out;
 }
 
+.history-toolbar {
+  display: grid;
+  gap: 0.75rem;
+  align-items: end;
+  margin-bottom: 0.8rem;
+
+  .page-heading {
+    margin-bottom: 0;
+  }
+}
+
 .match-list {
   display: grid;
   gap: 0.8rem;
@@ -236,7 +247,6 @@
   }
 }
 
-
 .skeleton {
   min-height: 9rem;
   background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
@@ -258,6 +268,9 @@
 }
 
 @media (min-width: 44rem) {
+  .history-toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 16rem);
+  }
   .history-card {
     padding: 1.1rem 1.25rem;
   }

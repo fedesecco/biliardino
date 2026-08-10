@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.3.0]
+
+### Features
+
+- **Storico:** puoi filtrare le partite per giocatore.
+- **Profilo giocatore:** la bacheca dei premi mostra gli ultimi 5 risultati, con un collegamento allo storico già filtrato.
+- **Profilo giocatore:** mostra:
+  - **Miglior amico:** giocatore con cui si è vinto più ELO quando si era in squadra assieme.
+  - **Peggior amico:** giocatore con cui si è perso più ELO quando si era in squadra assieme, con il messaggio “Sarà colpa sua o tua?”.
+  - **Miglior nemico:** giocatore contro cui si è vinto più ELO.
+  - **Peggior nemico:** giocatore contro cui si è perso più ELO.
+  - I rapporti con saldo ELO zero non vengono mostrati.
+
+### Changes
+
+- **Classifica:** i giocatori con meno di 10 partite sono mostrati in grigio e senza numero, ma nella giusta posizione. È indicato quante partite mancano per entrare in classifica.
+- **Statistiche e premi**: rinominata in **Premi**. La sezione non mostra più “Vittorie per colore”.
+
 ## [1.2.0]
 
 ### Features
@@ -7,7 +25,7 @@
 - Ogni mese, il giocatore che ha guadagnato più punti riceverà per sempre un badge esclusivo. Il badge è visible in "classifiche e premi".
 - Badge settimanale temporaneo per chi ha guadagnato più punti: il bomboclat
 - Badge settimanale temporaneo per chi ha perso più punti: lo scemo del villaggio
-- **Statistiche**: rinominata in **statistiche e premi**. Contiene i premi con le loro classifiche
+- **Statistiche**: rinominata in **Statistiche e premi**. Contiene i premi con le loro classifiche
 - Aggiunta la pagina **Dettaglio giocatore**. Contiene una bacheca con i premi permanenti vinti fino ad ora. Accessibile in vari punti premendo il nome del giocatore
 
 ### Changes

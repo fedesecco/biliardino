@@ -1,211 +1,170 @@
 <section class="analytics-page" aria-labelledby="analytics-title">
   <div class="page-heading">
-    <h1 id="analytics-title">Statistiche e premi</h1>
+    <h1 id="analytics-title">Premi</h1>
   </div>
 
   @if (store.error(); as error) {
-    <p class="error-banner" role="alert">{{ error }}</p>
-  }
-
-  @if (store.loading()) {
-    <div
-      class="surface loading-block"
-      aria-label="Caricamento statistiche e premi"
-    ></div>
+  <p class="error-banner" role="alert">{{ error }}</p>
+  } @if (store.loading()) {
+  <div class="surface loading-block" aria-label="Caricamento premi"></div>
   } @else {
-    <div class="awards-grid">
-      <section class="award-card monthly-award surface" aria-labelledby="monthly-award-title">
-        <button
-          type="button"
-          class="award-trigger"
-          (click)="toggleMonthlyRanking()"
-          [attr.aria-expanded]="monthlyRankingOpen()"
-          aria-controls="monthly-ranking"
-        >
-          <div class="award-copy">
-            <h2 id="monthly-award-title">Badge esclusivo {{ monthLabel() }}</h2>
-            @if (monthlyLeaders().length === 0) {
-              <p>Nessuna partita giocata questo mese.</p>
-            } @else {
-              <div class="award-leaders">
-                @for (leader of monthlyLeaders(); track leader.playerId) {
-                  <app-player-avatar
-                    [name]="leader.player.name"
-                    [color]="leader.player.avatar_color"
-                    [badge]="store.weeklyBadgeFor(leader.playerId)"
-                  />
-                  <span>
-                    <small>In testa</small>
-                    <strong>{{ leader.player.name }}</strong>
-                  </span>
-                  <b>{{ leader.elo > 0 ? '+' : '' }}{{ leader.elo | number: '1.0-2' }} ELO</b>
-                }
-              </div>
+  <div class="awards-grid">
+    <section
+      class="award-card monthly-award surface"
+      aria-labelledby="monthly-award-title"
+    >
+      <button
+        type="button"
+        class="award-trigger"
+        (click)="toggleMonthlyRanking()"
+        [attr.aria-expanded]="monthlyRankingOpen()"
+        aria-controls="monthly-ranking"
+      >
+        <div class="award-copy">
+          <h2 id="monthly-award-title">Badge esclusivo {{ monthLabel() }}</h2>
+          @if (monthlyLeaders().length === 0) {
+          <p>Nessuna partita giocata questo mese.</p>
+          } @else {
+          <div class="award-leaders">
+            @for (leader of monthlyLeaders(); track leader.playerId) {
+            <app-player-avatar
+              [name]="leader.player.name"
+              [color]="leader.player.avatar_color"
+              [badge]="store.weeklyBadgeFor(leader.playerId)"
+            />
+            <span>
+              <small>In testa</small>
+              <strong>{{ leader.player.name }}</strong>
+            </span>
+            <b
+              >{{ leader.elo > 0 ? '+' : '' }}{{ leader.elo | number: '1.0-2' }}
+              ELO</b
+            >
             }
-            <p>A fine mese, resterà per sempre nella bacheca del vincitore.</p>
-            <strong class="open-ranking">
-              {{ monthlyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica del mese' }}
-            </strong>
           </div>
-          <app-trophy-artwork [monthStart]="monthStart()" size="hero" />
-        </button>
+          }
+          <p>A fine mese, resterà per sempre nella bacheca del vincitore.</p>
+          <strong class="open-ranking">
+            {{ monthlyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica
+            del mese' }}
+          </strong>
+        </div>
+        <app-trophy-artwork [monthStart]="monthStart()" size="hero" />
+      </button>
 
-        @if (monthlyRankingOpen()) {
-          <div id="monthly-ranking" class="award-ranking">
-            <h3>Classifica di {{ monthLabel() }}</h3>
-            @if (monthlyStandings().length === 0) {
-              <p class="empty-ranking">Nessun punteggio mensile disponibile.</p>
-            } @else {
-              @for (standing of monthlyStandings(); track standing.playerId) {
-                <a [routerLink]="['/giocatore', standing.playerId]">
-                  <span class="award-rank">{{ standing.rank }}</span>
-                  <app-player-avatar
-                    [name]="standing.player.name"
-                    [color]="standing.player.avatar_color"
-                    [badge]="store.weeklyBadgeFor(standing.playerId)"
-                    size="small"
-                  />
-                  <strong>{{ standing.player.name }}</strong>
-                  <b
-                    [class.positive]="standing.elo > 0"
-                    [class.negative]="standing.elo < 0"
-                  >
-                    {{ standing.elo > 0 ? '+' : '' }}{{ standing.elo | number: '1.0-2' }} ELO
-                  </b>
-                </a>
+      @if (monthlyRankingOpen()) {
+      <div id="monthly-ranking" class="award-ranking">
+        <h3>Classifica di {{ monthLabel() }}</h3>
+        @if (monthlyStandings().length === 0) {
+        <p class="empty-ranking">Nessun punteggio mensile disponibile.</p>
+        } @else { @for (standing of monthlyStandings(); track standing.playerId)
+        {
+        <a [routerLink]="['/giocatore', standing.playerId]">
+          <span class="award-rank">{{ standing.rank }}</span>
+          <app-player-avatar
+            [name]="standing.player.name"
+            [color]="standing.player.avatar_color"
+            [badge]="store.weeklyBadgeFor(standing.playerId)"
+            size="small"
+          />
+          <strong>{{ standing.player.name }}</strong>
+          <b
+            [class.positive]="standing.elo > 0"
+            [class.negative]="standing.elo < 0"
+          >
+            {{ standing.elo > 0 ? '+' : '' }}{{ standing.elo | number: '1.0-2'
+            }} ELO
+          </b>
+        </a>
+        } }
+      </div>
+      }
+    </section>
+
+    <section
+      class="award-card weekly-award surface"
+      aria-labelledby="weekly-award-title"
+    >
+      <button
+        type="button"
+        class="award-trigger"
+        (click)="toggleWeeklyRanking()"
+        [attr.aria-expanded]="weeklyRankingOpen()"
+        aria-controls="weekly-ranking"
+      >
+        <div class="award-copy">
+          <h2 id="weekly-award-title">Questa settimana</h2>
+          <div class="badge-rules">
+            <div>
+              <span class="badge-rule-title">
+                <img
+                  src="/awards/bomboclat.webp"
+                  alt=""
+                  width="128"
+                  height="128"
+                />
+                <strong>Bomboclat</strong>
+              </span>
+              <p>Chi ha guadagnato più ELO netto nella settimana.</p>
+              @if (weeklyChampions().length > 0) {
+              <small>
+                Ora: @for (winner of weeklyChampions(); track winner.playerId;
+                let last = $last) { {{ winner.player.name }}{{ last ? '' : ', '
+                }} }
+              </small>
               }
-            }
-          </div>
-        }
-      </section>
-
-      <section class="award-card weekly-award surface" aria-labelledby="weekly-award-title">
-        <button
-          type="button"
-          class="award-trigger"
-          (click)="toggleWeeklyRanking()"
-          [attr.aria-expanded]="weeklyRankingOpen()"
-          aria-controls="weekly-ranking"
-        >
-          <div class="award-copy">
-            <h2 id="weekly-award-title">Questa settimana</h2>
-            <div class="badge-rules">
-              <div>
-                <span class="badge-rule-title">
-                  <img
-                    src="/awards/bomboclat.webp"
-                    alt=""
-                    width="128"
-                    height="128"
-                  />
-                  <strong>Bomboclat</strong>
-                </span>
-                <p>Chi ha guadagnato più ELO netto nella settimana.</p>
-                @if (weeklyChampions().length > 0) {
-                  <small>
-                    Ora: @for (winner of weeklyChampions(); track winner.playerId; let last = $last) {
-                      {{ winner.player.name }}{{ last ? '' : ', ' }}
-                    }
-                  </small>
-                }
-              </div>
-              <div>
-                <span class="badge-rule-title">
-                  <img
-                    src="/awards/scemo.webp"
-                    alt=""
-                    width="128"
-                    height="128"
-                  />
-                  <strong>Scemo del Villaggio</strong>
-                </span>
-                <p>Chi ha perso più ELO netto nella settimana.</p>
-                @if (weeklyLosers().length > 0) {
-                  <small>
-                    Ora: @for (loser of weeklyLosers(); track loser.playerId; let last = $last) {
-                      {{ loser.player.name }}{{ last ? '' : ', ' }}
-                    }
-                  </small>
-                }
-              </div>
             </div>
-            <p>I badge si azzerano ogni lunedì e non restano nella bacheca.</p>
-            <strong class="open-ranking">
-              {{ weeklyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica della settimana' }}
-            </strong>
-          </div>
-        </button>
-
-        @if (weeklyRankingOpen()) {
-          <div id="weekly-ranking" class="award-ranking">
-            <h3>Classifica della settimana</h3>
-            @if (weeklyStandings().length === 0) {
-              <p class="empty-ranking">Nessuna partita giocata questa settimana.</p>
-            } @else {
-              @for (standing of weeklyStandings(); track standing.playerId) {
-                <a [routerLink]="['/giocatore', standing.playerId]">
-                  <span class="award-rank">{{ standing.rank }}</span>
-                  <app-player-avatar
-                    [name]="standing.player.name"
-                    [color]="standing.player.avatar_color"
-                    [badge]="store.weeklyBadgeFor(standing.playerId)"
-                    size="small"
-                  />
-                  <strong>{{ standing.player.name }}</strong>
-                  <b
-                    [class.positive]="standing.elo > 0"
-                    [class.negative]="standing.elo < 0"
-                  >
-                    {{ standing.elo > 0 ? '+' : '' }}{{ standing.elo | number: '1.0-2' }} ELO
-                  </b>
-                </a>
+            <div>
+              <span class="badge-rule-title">
+                <img src="/awards/scemo.webp" alt="" width="128" height="128" />
+                <strong>Scemo del Villaggio</strong>
+              </span>
+              <p>Chi ha perso più ELO netto nella settimana.</p>
+              @if (weeklyLosers().length > 0) {
+              <small>
+                Ora: @for (loser of weeklyLosers(); track loser.playerId; let
+                last = $last) { {{ loser.player.name }}{{ last ? '' : ', ' }} }
+              </small>
               }
-            }
+            </div>
           </div>
-        }
-      </section>
-    </div>
-
-      <article class="team-card surface">
-        <header class="card-heading">
-          <div>
-            <span>Ultimi 7 giorni</span>
-            <h2>Vittorie per colore</h2>
-          </div>
-          <strong>{{ teamPerformance().total }} partite</strong>
-        </header>
-
-        <div class="team-split">
-          <div class="blue-value">
-            <small>Blu</small>
-            <strong>{{ teamPerformance().blueRate | number: '1.0-1' }}%</strong>
-          </div>
-          <div class="red-value">
-            <small>Rossi</small>
-            <strong>{{ teamPerformance().redRate | number: '1.0-1' }}%</strong>
-          </div>
+          <p>I badge si azzerano ogni lunedì e non restano nella bacheca.</p>
+          <strong class="open-ranking">
+            {{ weeklyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica
+            della settimana' }}
+          </strong>
         </div>
+      </button>
 
-        <div
-          class="team-balance-bar"
-          role="img"
-          [attr.aria-label]="
-            'Vittorie blu ' +
-            (teamPerformance().blueRate | number: '1.0-1') +
-            ' per cento, vittorie rosse ' +
-            (teamPerformance().redRate | number: '1.0-1') +
-            ' per cento'
-          "
-        >
-          <span class="blue-share" [style.width.%]="teamPerformance().blueRate"></span>
-          <span class="red-share" [style.width.%]="teamPerformance().redRate"></span>
-        </div>
-
-        <div class="team-totals">
-          <span>{{ teamPerformance().blueWins }} vittorie blu</span>
-          <span>{{ teamPerformance().redWins }} vittorie rosse</span>
-        </div>
-      </article>
+      @if (weeklyRankingOpen()) {
+      <div id="weekly-ranking" class="award-ranking">
+        <h3>Classifica della settimana</h3>
+        @if (weeklyStandings().length === 0) {
+        <p class="empty-ranking">Nessuna partita giocata questa settimana.</p>
+        } @else { @for (standing of weeklyStandings(); track standing.playerId)
+        {
+        <a [routerLink]="['/giocatore', standing.playerId]">
+          <span class="award-rank">{{ standing.rank }}</span>
+          <app-player-avatar
+            [name]="standing.player.name"
+            [color]="standing.player.avatar_color"
+            [badge]="store.weeklyBadgeFor(standing.playerId)"
+            size="small"
+          />
+          <strong>{{ standing.player.name }}</strong>
+          <b
+            [class.positive]="standing.elo > 0"
+            [class.negative]="standing.elo < 0"
+          >
+            {{ standing.elo > 0 ? '+' : '' }}{{ standing.elo | number: '1.0-2'
+            }} ELO
+          </b>
+        </a>
+        } }
+      </div>
+      }
+    </section>
+  </div>
 
   }
 </section>

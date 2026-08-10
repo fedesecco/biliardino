@@ -7,7 +7,6 @@
   animation: page-in 360ms ease-out;
 }
 
-
 .ranking {
   overflow: hidden;
 }
@@ -56,6 +55,11 @@
   &:last-child {
     border-bottom: 0;
   }
+}
+
+.ranking-row.unranked {
+  filter: grayscale(1);
+  opacity: 0.58;
 }
 
 .identity {

@@ -50,3 +50,5 @@
 - Use a patch version while the pending work contains only fixes. If a feature is added before commit, promote the pending release to the next minor version and fold every earlier uncommitted fix into it; remove any intermediate patch heading.
 - Update both `package.json` and `package-lock.json` to the single pending version.
 - Run project tasks through Nx. Prefer the narrow target that proves the changed behavior.
+
+- `### Bugfixes` is an allowed changelog section for verified regressions and defect corrections; use `### Changes` for non-defect refinements.

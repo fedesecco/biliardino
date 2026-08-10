@@ -14,12 +14,13 @@ describe('HistoryPage', () => {
   const expiredMatch = matchCreatedMinutesAgo('expired', 11);
   const deleteMatch = vi.fn().mockResolvedValue(undefined);
   const loadInitialHistory = vi.fn().mockResolvedValue(undefined);
+  const loadHistoryForPlayer = vi.fn().mockResolvedValue(undefined);
   const loadMoreHistory = vi.fn().mockResolvedValue(undefined);
 
   beforeEach(async () => {
     deleteMatch.mockClear();
     loadInitialHistory.mockClear();
-    loadMoreHistory.mockClear();
+    loadHistoryForPlayer.mockClear();
 
     await TestBed.configureTestingModule({
       imports: [HistoryPage],
@@ -28,12 +29,14 @@ describe('HistoryPage', () => {
           provide: AppStore,
           useValue: {
             error: signal<string | null>(null),
+            players: signal([{ id: 'player-id', name: 'Mario Rossi' }]),
             loading: signal(false),
             historyMatches: signal([recentMatch, expiredMatch]),
             historyLoading: signal(false),
             historyError: signal<string | null>(null),
             historyHasMore: signal(false),
             loadInitialHistory,
+            loadHistoryForPlayer,
             loadMoreHistory,
             deleteMatch,
           },
@@ -59,6 +62,21 @@ describe('HistoryPage', () => {
       '5 minuti disponibili',
     );
 
+    fixture.destroy();
+  });
+
+  it('filters the history by the selected player', () => {
+    const fixture = TestBed.createComponent(HistoryPage);
+    fixture.detectChanges();
+    const select = fixture.nativeElement.querySelector(
+      '#history-player-filter',
+    ) as HTMLSelectElement;
+
+    select.value = 'player-id';
+    select.dispatchEvent(new Event('change'));
+
+    expect(loadHistoryForPlayer).toHaveBeenCalledWith('player-id');
+    expect(select.value).toBe('player-id');
     fixture.destroy();
   });
 

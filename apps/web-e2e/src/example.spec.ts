@@ -82,6 +82,11 @@ test('creates teams and records a first-to-six match', async ({ page }) => {
       body = [];
     } else if (url.includes('/rest/v1/matches')) {
       body = [];
+    } else if (
+      url.includes('/rest/v1/monthly_elo_rankings') ||
+      url.includes('/rest/v1/monthly_champions')
+    ) {
+      body = [];
     } else if (url.includes('/rest/v1/players')) {
       body = playerRows;
     } else if (url.includes('/rest/v1/rpc/pick_teams')) {
@@ -116,7 +121,7 @@ test('creates teams and records a first-to-six match', async ({ page }) => {
   }
   await expect(page.locator('.counter strong')).toHaveText('5');
 
-  await page.getByRole('button', { name: 'Crea squadre' }).click();
+  await page.getByRole('button', { name: 'ELO balanced' }).click();
   await expect(page.locator('.team-panel')).toHaveCount(2);
   await expect(page.locator('.bench')).toContainText('Andrea');
 

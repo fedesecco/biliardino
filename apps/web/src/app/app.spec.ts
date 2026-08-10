@@ -18,14 +18,20 @@ describe('App', () => {
     expect(compiled.querySelector('.brand strong')?.textContent).toBe(
       'Coppa Telenia',
     );
+    const brandIcon = compiled.querySelector<HTMLImageElement>('.brand-mark');
+    expect(brandIcon?.getAttribute('src')).toBe('/favicon.ico');
+    expect(brandIcon?.getAttribute('alt')).toBe('');
     expect(compiled.querySelectorAll('.bottom-nav a')).toHaveLength(4);
+    expect(
+      compiled.querySelector('.bottom-nav a[href="/statistiche"] span')
+        ?.textContent,
+    ).toBe('Premi');
     expect(compiled.querySelector('.config-alert')?.textContent).toContain(
       'Configurazione server mancante.',
     );
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.app-footer a');
-    expect(versionLink?.textContent?.trim()).toBe('v1.2.0');
+    expect(versionLink?.textContent?.trim()).toBe('v1.3.0');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
-    expect(versionLink?.getAttribute('target')).toBeNull();
   });
 });

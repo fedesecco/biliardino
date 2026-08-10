@@ -34,7 +34,7 @@ export const appRoutes: Route[] = [
   },
   {
     path: 'statistiche',
-    title: 'Statistiche e premi · Coppa Telenia',
+    title: 'Premi · Coppa Telenia',
     loadComponent: () =>
       import('./features/analytics/analytics-page').then(
         (module) => module.AnalyticsPage,

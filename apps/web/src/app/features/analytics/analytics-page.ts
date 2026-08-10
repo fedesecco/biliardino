@@ -29,7 +29,8 @@ export class AnalyticsPage {
   protected readonly monthlyRankingOpen = signal(false);
   protected readonly weeklyRankingOpen = signal(false);
   protected readonly monthStart = computed(
-    () => this.store.monthlyRankings()[0]?.month_start ?? romeMonthKey(new Date()),
+    () =>
+      this.store.monthlyRankings()[0]?.month_start ?? romeMonthKey(new Date()),
   );
   protected readonly monthLabel = computed(() =>
     capitalize(italianMonthLabel(this.monthStart())),
@@ -87,29 +88,6 @@ export class AnalyticsPage {
     ),
   );
 
-  protected readonly teamPerformance = computed(() => {
-    let blueWins = 0;
-    let redWins = 0;
-
-    for (const match of this.store.matches()) {
-      if (match.blue_score > match.red_score) {
-        blueWins += 1;
-      } else {
-        redWins += 1;
-      }
-    }
-
-    const total = blueWins + redWins;
-    return {
-      total,
-      blueWins,
-      redWins,
-      blueRate: total === 0 ? 0 : (blueWins / total) * 100,
-      redRate: total === 0 ? 0 : (redWins / total) * 100,
-    };
-  });
-
-
   protected toggleMonthlyRanking(): void {
     this.monthlyRankingOpen.update((open) => !open);
   }
@@ -117,7 +95,6 @@ export class AnalyticsPage {
   protected toggleWeeklyRanking(): void {
     this.weeklyRankingOpen.update((open) => !open);
   }
-
 
   private toAwardStanding(
     standing: MonthlyEloRanking,
@@ -133,5 +110,4 @@ export class AnalyticsPage {
         }
       : null;
   }
-
 }

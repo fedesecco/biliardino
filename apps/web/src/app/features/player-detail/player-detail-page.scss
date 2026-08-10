@@ -122,6 +122,271 @@
   }
 }
 
+.recent-results {
+  padding: 1rem;
+}
+
+.recent-results-heading {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+
+  > div {
+    display: grid;
+  }
+
+  span {
+    color: var(--muted);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0.08rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+  }
+}
+
+.recent-results-link {
+  color: var(--blue-dark);
+  font-size: 0.68rem;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.recent-result-list {
+  display: grid;
+}
+
+.recent-result {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.45rem 0;
+  border-top: 1px solid var(--line);
+
+  &:first-child {
+    padding-top: 0;
+    border-top: 0;
+  }
+
+  time {
+    color: var(--muted);
+    font-size: 0.54rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+}
+
+.recent-result-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.recent-team {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) max-content;
+  column-gap: 0.35rem;
+  row-gap: 0.12rem;
+  min-width: 0;
+}
+
+.recent-team-blue {
+  text-align: right;
+}
+
+.recent-team-name {
+  display: flex;
+  grid-column: 1;
+  grid-row: 1;
+  gap: 0.3rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.54rem;
+  font-weight: 850;
+  text-transform: uppercase;
+
+  i {
+    width: 0.45rem;
+    height: 0.45rem;
+    background: var(--red);
+    border-radius: 50%;
+  }
+}
+
+.recent-team-blue .recent-team-name {
+  grid-column: 2;
+  justify-content: flex-end;
+
+  i {
+    background: var(--blue);
+  }
+}
+
+.recent-names {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: 0.18rem;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  white-space: nowrap;
+
+  strong {
+    min-width: 0;
+    overflow: hidden;
+    font-size: 0.58rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.recent-team-blue .recent-names {
+  justify-content: flex-end;
+}
+
+.recent-elo {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.82rem;
+  font-weight: 900;
+  line-height: 1;
+  text-align: right;
+  white-space: nowrap;
+
+  &.positive {
+    color: var(--green);
+  }
+
+  &.negative {
+    color: var(--red-dark);
+  }
+}
+
+.recent-team-blue .recent-elo {
+  grid-column: 1;
+  text-align: left;
+}
+
+.recent-score {
+  display: flex;
+  gap: 0.12rem;
+  align-items: center;
+  color: var(--muted);
+  font-size: 0.68rem;
+
+  strong {
+    display: grid;
+    width: 1.45rem;
+    height: 1.6rem;
+    color: var(--ink);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+    place-items: center;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 0.45rem;
+  }
+}
+
+.recent-results-loading {
+  min-height: 10rem;
+  background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
+  background-size: 220% 100%;
+  border-radius: 0.8rem;
+  animation: shimmer 1.3s infinite linear;
+}
+
+.rivalry-section {
+  padding: 1rem;
+}
+
+.rivalry-heading {
+  margin-bottom: 0.8rem;
+
+  > div {
+    display: grid;
+  }
+
+  span {
+    color: var(--muted);
+    font-size: 0.58rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h2 {
+    margin: 0.08rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
+  }
+}
+
+.rivalry-grid {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.rivalry-card {
+  display: grid;
+  gap: 0.28rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 0.8rem;
+
+  &.best-friend {
+    background: var(--green-soft);
+  }
+
+  &.best-enemy {
+    background: var(--blue-soft);
+  }
+
+  &.worst-friend {
+    background: #fff0cf;
+  }
+
+  &.worst-enemy {
+    background: var(--red-soft);
+  }
+}
+
+.rivalry-label {
+  color: var(--muted);
+  font-size: 0.58rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.rivalry-player {
+  width: max-content;
+  color: inherit;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.rivalry-card strong {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.rivalry-loading {
+  min-height: 5.5rem;
+  background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
+  background-size: 220% 100%;
+  border-radius: 0.8rem;
+  animation: shimmer 1.3s infinite linear;
+}
+
 .trophy-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
@@ -241,6 +506,9 @@
 }
 
 @media (min-width: 42rem) {
+  .rivalry-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .player-hero,
   .trophy-cabinet {
     padding: 1.25rem;

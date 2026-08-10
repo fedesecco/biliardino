@@ -19,8 +19,61 @@ const statistic: PlayerStatistic = {
   win_rate: 66.7,
 };
 
+const statistics: PlayerStatistic[] = [
+  statistic,
+  {
+    ...statistic,
+    id: 'newcomer-id',
+    name: 'Luigi Bianchi',
+    current_elo: 1100,
+    games: 9,
+  },
+  {
+    ...statistic,
+    id: 'qualified-id',
+    name: 'Anna Verdi',
+    current_elo: 1080,
+    games: 10,
+  },
+];
 
 describe('RankingPage', () => {
+  it('keeps ELO order but numbers only classified players', async () => {
+    await TestBed.configureTestingModule({
+      imports: [RankingPage],
+      providers: [
+        provideRouter([]),
+        {
+          provide: AppStore,
+          useValue: {
+            error: signal<string | null>(null),
+            loading: signal(false),
+            statistics: signal(statistics),
+            weeklyBadgeFor: vi.fn().mockReturnValue(null),
+          },
+        },
+      ],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(RankingPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const rows = element.querySelectorAll('.ranking-row');
+
+    expect(
+      [...rows].map((row) =>
+        row.querySelector('.player-name strong')?.textContent?.trim(),
+      ),
+    ).toEqual(['Mario Rossi', 'Luigi Bianchi', 'Anna Verdi']);
+    expect(rows[0].querySelector('.rank')?.textContent?.trim()).toBe('1');
+    expect(rows[1].classList).toContain('unranked');
+    expect(rows[1].querySelector('.rank')?.textContent?.trim()).toBe('—');
+    expect(
+      rows[1].querySelector('.classification-progress')?.textContent,
+    ).toMatch(/Manca\s+1\s+partita/);
+    expect(rows[2].querySelector('.rank')?.textContent?.trim()).toBe('2');
+  });
+
   it('links every ranking row to the player detail', async () => {
     await TestBed.configureTestingModule({
       imports: [RankingPage],

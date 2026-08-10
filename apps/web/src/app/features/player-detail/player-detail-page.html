@@ -1,95 +1,288 @@
-<section class="player-detail-page" aria-labelledby="player-title">
+<section class="player-detail-page">
   <a class="back-link" routerLink="/classifica">← Torna alla classifica</a>
 
   @if (store.loading()) {
-    <div class="player-hero surface skeleton" aria-label="Caricamento giocatore"></div>
+  <div
+    class="player-hero surface skeleton"
+    aria-label="Caricamento giocatore"
+  ></div>
   } @else if (statistic(); as player) {
-    <article class="player-hero surface">
-      <app-player-avatar
-        [name]="player.name"
-        [color]="player.avatar_color"
-        [badge]="store.weeklyBadgeFor(player.id)"
-        size="large"
-      />
-      <div>
-        <span>Giocatore</span>
-        <h1 id="player-title">{{ player.name }}</h1>
-        @if (store.weeklyBadgeFor(player.id); as badge) {
-          <small>{{ badge.label }} · {{ badge.elo > 0 ? '+' : '' }}{{ badge.elo | number: '1.0-2' }} ELO</small>
-        }
-      </div>
-      <strong>{{ player.current_elo | number: '1.0-0' }} <small>ELO</small></strong>
-    </article>
-
-    <div class="stat-grid" aria-label="Statistiche del giocatore">
-      <article class="surface"><span>Partite</span><strong>{{ player.games }}</strong></article>
-      <article class="surface"><span>Vittorie</span><strong>{{ player.wins }}</strong></article>
-      <article class="surface"><span>Winrate</span><strong>{{ player.win_rate | number: '1.0-1' }}%</strong></article>
-      <article class="surface"><span>GF−GS</span><strong>{{ player.goal_diff > 0 ? '+' : '' }}{{ player.goal_diff }}</strong></article>
-    </div>
-
-    <section class="trophy-cabinet surface" aria-labelledby="trophy-title">
-      <header>
-        <div>
-          <span>Premi permanenti</span>
-          <h2 id="trophy-title">Bacheca</h2>
-        </div>
-        <strong>{{ trophies().length }}</strong>
-      </header>
-
-      @if (trophies().length === 0) {
-        <div class="empty-state">Nessun premio mensile ancora conquistato.</div>
-      } @else {
-        <div class="trophy-grid">
-          @for (trophy of trophies(); track trophy.month_start) {
-            <button
-              type="button"
-              (click)="openTrophy(trophy)"
-              [attr.aria-label]="'Apri ' + trophy.title"
-              [attr.title]="trophy.title"
-            >
-              <app-trophy-artwork [monthStart]="trophy.month_start" />
-              <span>{{ trophy.exclusive ? 'Premio permanente' : 'Premio retroattivo' }}</span>
-              <strong>{{ trophy.title }}</strong>
-            </button>
-          }
-        </div>
+  <article class="player-hero surface">
+    <app-player-avatar
+      [name]="player.name"
+      [color]="player.avatar_color"
+      [badge]="store.weeklyBadgeFor(player.id)"
+      size="large"
+    />
+    <div>
+      <span>Giocatore</span>
+      <h1 id="player-title">{{ player.name }}</h1>
+      @if (store.weeklyBadgeFor(player.id); as badge) {
+      <small
+        >{{ badge.label }} · {{ badge.elo > 0 ? '+' : '' }}{{ badge.elo |
+        number: '1.0-2' }} ELO</small
+      >
       }
-    </section>
-  } @else {
-    <div class="empty-state">
-      <h1 id="player-title">Giocatore non trovato</h1>
-      <p>Il giocatore richiesto non è disponibile.</p>
     </div>
+    <strong
+      >{{ player.current_elo | number: '1.0-0' }} <small>ELO</small></strong
+    >
+  </article>
+
+  <div class="stat-grid" aria-label="Statistiche del giocatore">
+    <article class="surface">
+      <span>Partite</span><strong>{{ player.games }}</strong>
+    </article>
+    <article class="surface">
+      <span>Vittorie</span><strong>{{ player.wins }}</strong>
+    </article>
+    <article class="surface">
+      <span>Winrate</span
+      ><strong>{{ player.win_rate | number: '1.0-1' }}%</strong>
+    </article>
+    <article class="surface">
+      <span>GF−GS</span
+      ><strong
+        >{{ player.goal_diff > 0 ? '+' : '' }}{{ player.goal_diff }}</strong
+      >
+    </article>
+  </div>
+
+  <section class="trophy-cabinet surface" aria-labelledby="trophy-title">
+    <header>
+      <div>
+        <span>Premi permanenti</span>
+        <h2 id="trophy-title">Bacheca</h2>
+      </div>
+      <strong>{{ trophies().length }}</strong>
+    </header>
+
+    @if (trophies().length === 0) {
+    <div class="empty-state">Nessun premio mensile ancora conquistato.</div>
+    } @else {
+    <div class="trophy-grid">
+      @for (trophy of trophies(); track trophy.month_start) {
+      <button
+        type="button"
+        (click)="openTrophy(trophy)"
+        [attr.aria-label]="'Apri ' + trophy.title"
+        [attr.title]="trophy.title"
+      >
+        <app-trophy-artwork [monthStart]="trophy.month_start" />
+        <span
+          >{{ trophy.exclusive ? 'Premio permanente' : 'Premio retroattivo'
+          }}</span
+        >
+        <strong>{{ trophy.title }}</strong>
+      </button>
+      }
+    </div>
+    }
+  </section>
+
+  <section
+    class="recent-results surface"
+    aria-labelledby="recent-results-title"
+  >
+    <header class="recent-results-heading">
+      <div>
+        <span>Storico personale</span>
+        <h2 id="recent-results-title">Ultimi 5 risultati</h2>
+      </div>
+      <a
+        class="recent-results-link"
+        [routerLink]="['/storico']"
+        [queryParams]="{ giocatore: player.id }"
+      >
+        Vedi tutto
+      </a>
+    </header>
+
+    @if (recentMatchesLoading()) {
+    <div
+      class="recent-results-loading"
+      aria-label="Caricamento risultati"
+    ></div>
+    } @else if (recentMatchesError(); as error) {
+    <p class="error-banner" role="alert">{{ error }}</p>
+    } @else if (recentMatches().length === 0) {
+    <div class="empty-state">Nessuna partita recente.</div>
+    } @else {
+    <div class="recent-result-list">
+      @for (match of recentMatches(); track match.id) {
+      <article class="recent-result">
+        <time [attr.datetime]="match.played_at">
+          {{ match.played_at | date: 'EEE d MMM, HH:mm' : undefined : 'it' }}
+        </time>
+        <div class="recent-result-row">
+          <div class="recent-team recent-team-red">
+            <span class="recent-team-name"><i></i> Rossi</span>
+            <span
+              class="recent-elo"
+              [hidden]="playerTeam(match) !== 'red'"
+              [class.positive]="teamDelta(match, 'red') > 0"
+              [class.negative]="teamDelta(match, 'red') < 0"
+            >
+              {{ teamDelta(match, 'red') > 0 ? '+' : '' }}{{ teamDelta(match,
+              'red') | number: '1.0-2' }} ELO
+            </span>
+            <div class="recent-names">
+              @for (participant of participants(match, 'red'); track
+              participant.player_id) {
+              <strong>{{ participant.player.name }}</strong>
+              }
+            </div>
+          </div>
+
+          <div class="recent-score" aria-label="Punteggio finale">
+            <strong>{{ match.red_score }}</strong>
+            <span>:</span>
+            <strong>{{ match.blue_score }}</strong>
+          </div>
+
+          <div class="recent-team recent-team-blue">
+            <span class="recent-team-name">Blu <i></i></span>
+            <span
+              class="recent-elo"
+              [hidden]="playerTeam(match) !== 'blue'"
+              [class.positive]="teamDelta(match, 'blue') > 0"
+              [class.negative]="teamDelta(match, 'blue') < 0"
+            >
+              {{ teamDelta(match, 'blue') > 0 ? '+' : '' }}{{ teamDelta(match,
+              'blue') | number: '1.0-2' }} ELO
+            </span>
+            <div class="recent-names">
+              @for (participant of participants(match, 'blue'); track
+              participant.player_id) {
+              <strong>{{ participant.player.name }}</strong>
+              }
+            </div>
+          </div>
+        </div>
+      </article>
+      }
+    </div>
+    }
+  </section>
+  <section class="rivalry-section surface" aria-labelledby="rivalry-title">
+    <header class="rivalry-heading">
+      <div>
+        <span>Confronti nello storico</span>
+        <h2 id="rivalry-title">Amici e nemici</h2>
+      </div>
+    </header>
+
+    @if (rivalryLoading()) {
+    <div class="rivalry-loading" aria-label="Caricamento confronti"></div>
+    } @else if (rivalryError(); as error) {
+    <p class="error-banner" role="alert">{{ error }}</p>
+    } @else if (rivalry(); as relationships) { @if (
+    relationships.best_friend_id || relationships.worst_friend_id ||
+    relationships.best_enemy_id || relationships.worst_enemy_id ) {
+    <div class="rivalry-grid">
+      @if ( relationships.best_friend_id && relationships.best_friend_name ) {
+      <article class="rivalry-card best-friend">
+        <span class="rivalry-label">Miglior amico</span>
+        <a
+          [routerLink]="['/giocatore', relationships.best_friend_id]"
+          class="rivalry-player"
+        >
+          {{ relationships.best_friend_name }}
+        </a>
+        <strong>
+          +{{ relationships.best_friend_elo_net | number: '1.0-2' }} ELO vinto
+          assieme
+        </strong>
+      </article>
+      } @if ( relationships.worst_friend_id && relationships.worst_friend_name )
+      {
+      <article class="rivalry-card worst-friend">
+        <span class="rivalry-label">Peggior amico</span>
+        <a
+          [routerLink]="['/giocatore', relationships.worst_friend_id]"
+          class="rivalry-player"
+        >
+          {{ relationships.worst_friend_name }}
+        </a>
+        <strong>
+          {{ relationships.worst_friend_elo_net | number: '1.0-2' }} ELO quando
+          in squadra assieme. Sarà colpa sua o tua?
+        </strong>
+      </article>
+      @if ( relationships.best_enemy_id && relationships.best_enemy_name ) {
+      <article class="rivalry-card best-enemy">
+        <span class="rivalry-label">Miglior nemico</span>
+        <a
+          [routerLink]="['/giocatore', relationships.best_enemy_id]"
+          class="rivalry-player"
+        >
+          {{ relationships.best_enemy_name }}
+        </a>
+        <strong>
+          Ti ha regalato +{{ relationships.best_enemy_elo_net | number: '1.0-2'
+          }} ELO
+        </strong>
+      </article>
+      } } @if ( relationships.worst_enemy_id && relationships.worst_enemy_name )
+      {
+      <article class="rivalry-card worst-enemy">
+        <span class="rivalry-label">Peggior nemico</span>
+        <a
+          [routerLink]="['/giocatore', relationships.worst_enemy_id]"
+          class="rivalry-player"
+        >
+          {{ relationships.worst_enemy_name }}
+        </a>
+        <strong>
+          {{ relationships.worst_enemy_elo_net | number: '1.0-2' }} ELO contro
+          di lui
+        </strong>
+      </article>
+      }
+    </div>
+    } @else {
+    <div class="empty-state">Servono partite per calcolare i confronti.</div>
+    } } @else {
+    <div class="empty-state">Servono partite per calcolare i confronti.</div>
+    }
+  </section>
+  } @else {
+  <div class="empty-state">
+    <h1 id="player-title">Giocatore non trovato</h1>
+    <p>Il giocatore richiesto non è disponibile.</p>
+  </div>
   }
 </section>
 
 @if (selectedTrophy(); as trophy) {
-  <dialog
-    #trophyDialog
-    tabindex="-1"
-    (keydown.escape)="closeTrophy()"
-    class="trophy-dialog"
-    aria-labelledby="trophy-dialog-title"
-    (close)="selectedTrophy.set(null)"
-    (click)="closeFromBackdrop($event)"
-  >
-    <article>
-      <button
-        class="dialog-close"
-        type="button"
-        aria-label="Chiudi bacheca"
-        (click)="closeTrophy()"
-      >
-        ×
-      </button>
-      <app-trophy-artwork [monthStart]="trophy.month_start" size="hero" />
-      <span>{{ trophy.exclusive ? 'Premio permanente' : 'Riconoscimento retroattivo' }}</span>
-      <h2 id="trophy-dialog-title">{{ trophy.title }}</h2>
-      @if (statistic(); as player) {
-        <strong>{{ player.name }}</strong>
-      }
-      <p>+{{ trophy.elo_gained | number: '1.0-2' }} ELO conquistati nel mese</p>
-    </article>
-  </dialog>
+<dialog
+  #trophyDialog
+  tabindex="-1"
+  (keydown.escape)="closeTrophy()"
+  class="trophy-dialog"
+  aria-labelledby="trophy-dialog-title"
+  (close)="selectedTrophy.set(null)"
+  (click)="closeFromBackdrop($event)"
+>
+  <article>
+    <button
+      class="dialog-close"
+      type="button"
+      aria-label="Chiudi bacheca"
+      (click)="closeTrophy()"
+    >
+      ×
+    </button>
+    <app-trophy-artwork [monthStart]="trophy.month_start" size="hero" />
+    <span
+      >{{ trophy.exclusive ? 'Premio permanente' : 'Riconoscimento retroattivo'
+      }}</span
+    >
+    <h2 id="trophy-dialog-title">{{ trophy.title }}</h2>
+    @if (statistic(); as player) {
+    <strong>{{ player.name }}</strong>
+    }
+    <p>+{{ trophy.elo_gained | number: '1.0-2' }} ELO conquistati nel mese</p>
+  </article>
+</dialog>
 }

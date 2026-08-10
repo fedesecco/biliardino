@@ -66,6 +66,22 @@ export interface MonthlyChampion {
   awarded_at: string;
 }
 
+export interface PlayerRivalry {
+  player_id: string;
+  best_friend_id: string | null;
+  best_friend_name: string | null;
+  best_friend_elo_net: number;
+  worst_friend_id: string | null;
+  worst_friend_name: string | null;
+  worst_friend_elo_net: number;
+  best_enemy_id: string | null;
+  best_enemy_name: string | null;
+  best_enemy_elo_net: number;
+  worst_enemy_id: string | null;
+  worst_enemy_name: string | null;
+  worst_enemy_elo_net: number;
+}
+
 export interface TeamDraft {
   red: Player[];
   blue: Player[];

@@ -230,99 +230,6 @@
   font-size: 0.7rem;
 }
 
-.team-card {
-  padding: 1rem;
-  margin-bottom: 0.8rem;
-}
-
-.card-heading {
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-
-  span,
-  > small {
-    color: var(--muted);
-    font-size: 0.58rem;
-    font-weight: 850;
-    letter-spacing: 0.09em;
-    text-align: right;
-    text-transform: uppercase;
-  }
-
-  h2 {
-    margin: 0.15rem 0 0;
-    font-family: var(--font-display);
-    font-size: 1rem;
-  }
-
-  > strong {
-    color: var(--muted);
-    font-size: 0.65rem;
-  }
-}
-
-.team-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin: 1.2rem 0 0.75rem;
-
-  > div {
-    display: grid;
-    gap: 0.1rem;
-  }
-
-  small {
-    font-size: 0.62rem;
-    font-weight: 900;
-    text-transform: uppercase;
-  }
-
-  strong {
-    font-family: var(--font-display);
-    font-size: clamp(1.8rem, 9vw, 2.8rem);
-    letter-spacing: -0.06em;
-  }
-}
-
-.blue-value {
-  color: var(--blue-dark);
-}
-
-.red-value {
-  color: var(--red-dark);
-  text-align: right;
-}
-
-.team-balance-bar {
-  display: flex;
-  height: 0.8rem;
-  overflow: hidden;
-  background: var(--line);
-  border-radius: 999px;
-}
-
-.blue-share {
-  background: var(--blue);
-}
-
-.red-share {
-  background: var(--red);
-}
-
-.team-totals {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 0.55rem;
-  color: var(--muted);
-  font-size: 0.58rem;
-  font-weight: 750;
-}
-
-
 .loading-block {
   min-height: 30rem;
   background: linear-gradient(100deg, #e8e4dc 20%, #f8f5ee 40%, #e8e4dc 60%);
@@ -344,10 +251,6 @@
 }
 
 @media (min-width: 48rem) {
-  .team-card {
-    padding: 1.25rem;
-  }
-
   .award-trigger {
     padding: 1.25rem;
   }
@@ -359,5 +262,4 @@
   .award-ranking {
     padding: 0 1.25rem 1.25rem;
   }
-
 }

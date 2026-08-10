@@ -1,4 +1,10 @@
-import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  DestroyRef,
+  inject,
+  Injectable,
+  signal,
+} from '@angular/core';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type {
   MatchParticipant,
@@ -7,6 +13,7 @@ import type {
   MonthlyEloRanking,
   PickedPlayer,
   Player,
+  PlayerRivalry,
   PlayerStatistic,
   SelectionMode,
   TeamDraft,
@@ -22,8 +29,11 @@ import {
 import { romeMonthKey } from './rome-calendar';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
-type MatchParticipantRow =
-  Database['public']['Tables']['match_players']['Row'];
+type MatchParticipantRow = Database['public']['Tables']['match_players']['Row'];
+
+type FilteredMatchRow = MatchRow & {
+  match_players: Array<Pick<MatchParticipantRow, 'player_id'>>;
+};
 
 interface MatchHistoryCursor {
   playedAt: string;
@@ -39,9 +49,11 @@ export class AppStore {
     '#e84a5f': '#fbc4ab',
     '#3279f6': '#bde0fe',
   };
+  private historyLoadPromise: Promise<void> | null = null;
   private realtimeChannel: RealtimeChannel | null = null;
   private readonly historyPageSize = 25;
   private historyCursor: MatchHistoryCursor | null = null;
+  private historyPlayerId: string | null = null;
   private historyInitialized = false;
 
   readonly players = signal<Player[]>([]);
@@ -109,19 +121,78 @@ export class AppStore {
   }
 
   async loadInitialHistory(force = false): Promise<void> {
-    if (this.historyLoading() || (this.historyInitialized && !force)) {
+    if (this.historyLoading()) {
+      if (!force) {
+        return;
+      }
+      const activeLoad = this.historyLoadPromise;
+      if (activeLoad) {
+        await activeLoad;
+      }
+      if (this.historyLoading()) {
+        return;
+      }
+    }
+    if (this.historyInitialized && !force) {
       return;
     }
     if (this.players().length === 0) {
       await this.loadPlayers();
     }
 
-
     this.historyInitialized = true;
     this.historyCursor = null;
     this.historyMatches.set([]);
     this.historyHasMore.set(true);
-    await this.loadHistoryPage();
+    await this.loadHistoryPageTracked();
+  }
+
+  async loadHistoryForPlayer(playerId: string | null): Promise<void> {
+    this.historyPlayerId = playerId;
+    await this.loadInitialHistory(true);
+  }
+
+  async loadPlayerRecentMatches(
+    playerId: string,
+    limit = 5,
+  ): Promise<MatchRecord[]> {
+    if (this.players().length === 0) {
+      await this.loadPlayers();
+    }
+    return this.hydrateMatches(
+      await this.fetchMatchRows(playerId, limit, null),
+    );
+  }
+
+  async loadPlayerRivalry(playerId: string): Promise<PlayerRivalry | null> {
+    const { data, error } = await this.supabase.client
+      .from('player_rivalries')
+      .select('*')
+      .eq('player_id', playerId)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+    if (!data?.player_id) {
+      return null;
+    }
+
+    return {
+      player_id: data.player_id,
+      best_friend_id: data.best_friend_id,
+      best_friend_name: data.best_friend_name,
+      best_friend_elo_net: data.best_friend_elo_net ?? 0,
+      worst_friend_id: data.worst_friend_id,
+      worst_friend_name: data.worst_friend_name,
+      worst_friend_elo_net: data.worst_friend_elo_net ?? 0,
+      best_enemy_id: data.best_enemy_id,
+      best_enemy_name: data.best_enemy_name,
+      best_enemy_elo_net: data.best_enemy_elo_net ?? 0,
+      worst_enemy_id: data.worst_enemy_id,
+      worst_enemy_name: data.worst_enemy_name,
+      worst_enemy_elo_net: data.worst_enemy_elo_net ?? 0,
+    };
   }
 
   async loadMoreHistory(): Promise<void> {
@@ -133,7 +204,7 @@ export class AppStore {
       return;
     }
 
-    await this.loadHistoryPage();
+    await this.loadHistoryPageTracked();
   }
 
   async pickTeams(
@@ -358,38 +429,34 @@ export class AppStore {
     this.matches.set(await this.hydrateMatches(data));
   }
 
+  private async loadHistoryPageTracked(): Promise<void> {
+    const pageLoad = this.loadHistoryPage();
+    this.historyLoadPromise = pageLoad;
+    try {
+      await pageLoad;
+    } finally {
+      if (this.historyLoadPromise === pageLoad) {
+        this.historyLoadPromise = null;
+      }
+    }
+  }
+
   private async loadHistoryPage(): Promise<void> {
     this.historyLoading.set(true);
     this.historyError.set(null);
 
     try {
-      let query = this.supabase.client
-        .from('matches')
-        .select('*')
-        .order('played_at', { ascending: false })
-        .order('id', { ascending: false })
-        .limit(this.historyPageSize + 1);
-
-      if (this.historyCursor) {
-        const { playedAt, id } = this.historyCursor;
-        query = query.or(
-          `played_at.lt.${playedAt},and(played_at.eq.${playedAt},id.lt.${id})`,
-        );
-      }
-
-      const { data, error } = await query;
-      if (error) {
-        throw error;
-      }
+      const data = await this.fetchMatchRows(
+        this.historyPlayerId,
+        this.historyPageSize + 1,
+        this.historyCursor,
+      );
 
       const pageRows = data.slice(0, this.historyPageSize);
       const page = await this.hydrateMatches(pageRows);
       this.historyMatches.update((current) => {
         const knownIds = new Set(current.map((match) => match.id));
-        return [
-          ...current,
-          ...page.filter((match) => !knownIds.has(match.id)),
-        ];
+        return [...current, ...page.filter((match) => !knownIds.has(match.id))];
       });
       this.historyHasMore.set(data.length > this.historyPageSize);
 
@@ -402,6 +469,62 @@ export class AppStore {
     } finally {
       this.historyLoading.set(false);
     }
+  }
+  private async fetchMatchRows(
+    playerId: string | null,
+    limit: number,
+    cursor: MatchHistoryCursor | null,
+  ): Promise<MatchRow[]> {
+    if (playerId) {
+      let query = this.supabase.client
+        .from('matches')
+        .select('*, match_players!inner(player_id)')
+        .eq('match_players.player_id', playerId)
+        .order('played_at', { ascending: false })
+        .order('id', { ascending: false })
+        .limit(limit);
+
+      if (cursor) {
+        const { playedAt, id } = cursor;
+        query = query.or(
+          `played_at.lt.${playedAt},and(played_at.eq.${playedAt},id.lt.${id})`,
+        );
+      }
+
+      const { data, error } = await query.overrideTypes<
+        FilteredMatchRow[],
+        { merge: false }
+      >();
+      if (error) {
+        throw error;
+      }
+
+      return data.map((row) => {
+        const { match_players, ...match } = row;
+        void match_players;
+        return match;
+      });
+    }
+
+    let query = this.supabase.client
+      .from('matches')
+      .select('*')
+      .order('played_at', { ascending: false })
+      .order('id', { ascending: false })
+      .limit(limit);
+
+    if (cursor) {
+      const { playedAt, id } = cursor;
+      query = query.or(
+        `played_at.lt.${playedAt},and(played_at.eq.${playedAt},id.lt.${id})`,
+      );
+    }
+
+    const { data, error } = await query;
+    if (error) {
+      throw error;
+    }
+    return data;
   }
 
   private async hydrateMatches(rows: MatchRow[]): Promise<MatchRecord[]> {
