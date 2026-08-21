@@ -9,8 +9,11 @@ import { AnalyticsPage } from './analytics-page';
 
 registerLocaleData(localeIt);
 
+const monthlyRankingsSignal = signal<MonthlyEloRanking[]>([]);
+
 describe('AnalyticsPage', () => {
   beforeEach(async () => {
+    monthlyRankingsSignal.set(monthlyRankings);
     await TestBed.configureTestingModule({
       imports: [AnalyticsPage],
       providers: [
@@ -21,7 +24,7 @@ describe('AnalyticsPage', () => {
             error: signal<string | null>(null),
             loading: signal(false),
             statistics: signal(statistics),
-            monthlyRankings: signal(monthlyRankings),
+            monthlyRankings: monthlyRankingsSignal,
             weeklyStandings: signal([
               { playerId: 'player-one', elo: 32 },
               { playerId: 'player-two', elo: -32 },
@@ -33,16 +36,40 @@ describe('AnalyticsPage', () => {
     }).compileComponents();
   });
 
-  it('shows the awards section without color performance', () => {
+  it('shows the classifications landing page with three ranking cards', () => {
+    const fixture = TestBed.createComponent(AnalyticsPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const globalCard = element.querySelector<HTMLAnchorElement>('.global-card');
+
+    expect(element.querySelector('#classifications-title')?.textContent).toBe(
+      'Classifiche',
+    );
+    expect(element.querySelectorAll('.awards-grid > *')).toHaveLength(3);
+    expect(globalCard?.textContent).toContain('Classifica globale');
+    expect(globalCard?.getAttribute('href')).toBe('/classifiche/globale');
+    expect(element.querySelector('.team-card')).toBeNull();
+    expect(element.textContent).not.toContain('Vittorie per colore');
+  });
+  it('shows a pending message when the current month has no badge artwork', () => {
+    monthlyRankingsSignal.set(
+      monthlyRankings.map((standing) => ({
+        ...standing,
+        month_start: '2026-10-01',
+      })),
+    );
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(element.querySelector('#analytics-title')?.textContent).toBe(
-      'Premi',
-    );
-    expect(element.querySelector('.team-card')).toBeNull();
-    expect(element.textContent).not.toContain('Vittorie per colore');
+    expect(
+      element.querySelector('#monthly-award-title')?.textContent?.trim(),
+    ).toBe("Non c'è ancora un premio per questo mese");
+    expect(
+      element
+        .querySelector('.fallback-trophy')
+        ?.getAttribute('aria-label'),
+    ).toBe('Nessun premio disponibile per ottobre 2026');
   });
 
   it('opens the monthly and weekly award rankings', () => {

@@ -17,24 +17,16 @@ export const appRoutes: Route[] = [
       ),
   },
   {
-    path: 'classifica',
-    title: 'Classifica · Coppa Telenia',
+    path: 'classifiche/globale',
+    title: 'Classifica globale · Coppa Telenia',
     loadComponent: () =>
       import('./features/ranking/ranking-page').then(
         (module) => module.RankingPage,
       ),
   },
   {
-    path: 'giocatore/:id',
-    title: 'Dettaglio giocatore · Coppa Telenia',
-    loadComponent: () =>
-      import('./features/player-detail/player-detail-page').then(
-        (module) => module.PlayerDetailPage,
-      ),
-  },
-  {
-    path: 'statistiche',
-    title: 'Premi · Coppa Telenia',
+    path: 'classifiche',
+    title: 'Classifiche · Coppa Telenia',
     loadComponent: () =>
       import('./features/analytics/analytics-page').then(
         (module) => module.AnalyticsPage,

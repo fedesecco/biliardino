@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.1]
+
+### Changes
+
+- **Classifiche:** unificate le sezioni Classifica e Premi in un'unica pagina con anteprime della classifica globale, mensile e settimanale.
+- **Classifica globale:** aggiunta una pagina dedicata con la classifica ELO completa.
+- **Badge mensile:** aggiunta l'illustrazione del badge esclusivo di settembre 2026.
+- **Navigazione:** la voce unica **Classifiche** sostituisce Classifica e Premi.
+- **Versione:** spostato il collegamento alla versione accanto al titolo dell'app.
+- **Premio mensile:** se l'immagine del badge non è ancora disponibile, viene mostrato un messaggio di attesa invece del titolo del premio.
+
 ## [1.3.0]
 
 ### Features

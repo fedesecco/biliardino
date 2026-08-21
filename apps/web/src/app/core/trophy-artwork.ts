@@ -14,7 +14,14 @@ const TROPHY_IMAGE_BY_MONTH: Record<string, TrophyImages> = {
     thumbnail: '/trophies/2026-08-256.webp',
     hero: '/trophies/2026-08-1024.webp',
   },
+  '2026-09-01': {
+    thumbnail: '/trophies/2026-09-256.webp',
+    hero: '/trophies/2026-09-1024.webp',
+  },
 };
+export function hasExclusiveTrophyArtwork(monthStart: string): boolean {
+  return Boolean(TROPHY_IMAGE_BY_MONTH[monthStart]);
+}
 
 const LEGACY_PAPER_IMAGES: TrophyImages = {
   thumbnail: '/trophies/legacy-paper-256.webp',
@@ -37,7 +44,7 @@ const LEGACY_PAPER_IMAGES: TrophyImages = {
         class="fallback-trophy"
         viewBox="0 0 160 160"
         role="img"
-        [attr.aria-label]="'Badge esclusivo ' + monthLabel()"
+        [attr.aria-label]="artworkLabel()"
       >
         <defs>
           <linearGradient id="cup-gold" x1="0" x2="1" y1="0" y2="1">
@@ -159,11 +166,14 @@ export class TrophyArtwork {
       : LEGACY_PAPER_IMAGES;
     return images?.[this.size()] ?? null;
   });
-  protected readonly artworkLabel = computed(() =>
-    this.isExclusive()
+  protected readonly artworkLabel = computed(() => {
+    if (this.isExclusive() && !hasExclusiveTrophyArtwork(this.monthStart())) {
+      return `Nessun premio disponibile per ${this.monthLabel()}`;
+    }
+    return this.isExclusive()
       ? `Badge esclusivo ${this.monthLabel()}`
-      : `Miglior giocatore di ${this.monthLabel()}`,
-  );
+      : `Miglior giocatore di ${this.monthLabel()}`;
+  });
   protected readonly imageDimension = computed(() =>
     this.size() === 'hero' ? 1024 : 256,
   );

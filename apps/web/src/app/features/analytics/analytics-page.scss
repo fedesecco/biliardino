@@ -12,6 +12,85 @@
   gap: 0.8rem;
   margin-bottom: 0.8rem;
 }
+.global-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  color: inherit;
+  text-decoration: none;
+  background:
+    linear-gradient(135deg, rgb(50 121 246 / 12%), transparent 62%),
+    rgb(255 255 255 / 72%);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease;
+
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-0.1rem);
+  }
+
+  &:focus-visible {
+    outline: 3px solid rgb(50 121 246 / 42%);
+    outline-offset: -3px;
+  }
+}
+
+.global-preview {
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.7rem;
+  background: rgb(255 255 255 / 58%);
+  border: 1px solid var(--line);
+  border-radius: 0.95rem;
+}
+
+.global-preview-heading {
+  color: var(--muted);
+  font-size: 0.6rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.global-preview-row {
+  display: grid;
+  grid-template-columns: 1.3rem auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: 2.35rem;
+  padding-top: 0.35rem;
+
+  & + & {
+    border-top: 1px solid var(--line);
+  }
+
+  > strong {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  > b {
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+  }
+}
+
+.global-preview-rank {
+  color: var(--muted);
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.global-card-copy {
+  align-content: center;
+}
+
 
 .award-card {
   overflow: hidden;
@@ -251,6 +330,18 @@
 }
 
 @media (min-width: 48rem) {
+  .awards-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .global-card {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 1fr);
+    gap: 1.5rem;
+    padding: 1.25rem;
+  }
+
   .award-trigger {
     padding: 1.25rem;
   }

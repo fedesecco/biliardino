@@ -5,7 +5,10 @@ import { AppStore } from '../../core/app-store.service';
 import type { MonthlyEloRanking, PlayerStatistic } from '../../core/models';
 import { PlayerAvatar } from '../../core/player-avatar';
 import { italianMonthLabel, romeMonthKey } from '../../core/rome-calendar';
-import { TrophyArtwork } from '../../core/trophy-artwork';
+import {
+  hasExclusiveTrophyArtwork,
+  TrophyArtwork,
+} from '../../core/trophy-artwork';
 
 interface AwardStanding {
   elo: number;
@@ -26,6 +29,9 @@ function capitalize(value: string): string {
 })
 export class AnalyticsPage {
   protected readonly store = inject(AppStore);
+  protected readonly globalLeaders = computed(() =>
+    this.store.statistics().slice(0, 3),
+  );
   protected readonly monthlyRankingOpen = signal(false);
   protected readonly weeklyRankingOpen = signal(false);
   protected readonly monthStart = computed(
@@ -34,6 +40,9 @@ export class AnalyticsPage {
   );
   protected readonly monthLabel = computed(() =>
     capitalize(italianMonthLabel(this.monthStart())),
+  );
+  protected readonly hasMonthlyArtwork = computed(() =>
+    hasExclusiveTrophyArtwork(this.monthStart()),
   );
   protected readonly monthlyStandings = computed<AwardStanding[]>(() => {
     const players = new Map(

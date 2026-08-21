@@ -21,17 +21,18 @@ describe('App', () => {
     const brandIcon = compiled.querySelector<HTMLImageElement>('.brand-mark');
     expect(brandIcon?.getAttribute('src')).toBe('/favicon.ico');
     expect(brandIcon?.getAttribute('alt')).toBe('');
-    expect(compiled.querySelectorAll('.bottom-nav a')).toHaveLength(4);
+    expect(compiled.querySelectorAll('.bottom-nav a')).toHaveLength(3);
     expect(
-      compiled.querySelector('.bottom-nav a[href="/statistiche"] span')
+      compiled.querySelector('.bottom-nav a[href="/classifiche"] span')
         ?.textContent,
-    ).toBe('Premi');
+    ).toBe('Classifiche');
     expect(compiled.querySelector('.config-alert')?.textContent).toContain(
       'Configurazione server mancante.',
     );
     const versionLink =
-      compiled.querySelector<HTMLAnchorElement>('.app-footer a');
-    expect(versionLink?.textContent?.trim()).toBe('v1.3.0');
+      compiled.querySelector<HTMLAnchorElement>('.version-link');
+    expect(versionLink?.textContent?.trim()).toBe('v1.3.1');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
+    expect(compiled.querySelector('.app-footer')).toBeNull();
   });
 });

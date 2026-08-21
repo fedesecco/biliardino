@@ -1,14 +1,49 @@
-<section class="analytics-page" aria-labelledby="analytics-title">
+<section class="analytics-page" aria-labelledby="classifications-title">
   <div class="page-heading">
-    <h1 id="analytics-title">Premi</h1>
+    <h1 id="classifications-title">Classifiche</h1>
   </div>
 
   @if (store.error(); as error) {
   <p class="error-banner" role="alert">{{ error }}</p>
   } @if (store.loading()) {
-  <div class="surface loading-block" aria-label="Caricamento premi"></div>
+  <div class="surface loading-block" aria-label="Caricamento classifiche"></div>
   } @else {
   <div class="awards-grid">
+    <a
+      class="global-card surface"
+      routerLink="/classifiche/globale"
+      aria-labelledby="global-ranking-title"
+    >
+      <div class="award-copy global-card-copy">
+        <span>Classifica ELO</span>
+        <h2 id="global-ranking-title">Classifica globale</h2>
+        <p>La graduatoria completa di tutti i giocatori.</p>
+        <strong class="open-ranking">Apri la classifica globale</strong>
+      </div>
+      <div
+        class="global-preview"
+        aria-label="Anteprima della classifica globale"
+      >
+        <span class="global-preview-heading">Primi tre giocatori</span>
+        @if (globalLeaders().length === 0) {
+        <p class="empty-ranking">La classifica comparirà dopo la prima partita.</p>
+        } @else {
+        @for (player of globalLeaders(); track player.id; let position = $index) {
+        <div class="global-preview-row">
+          <span class="global-preview-rank">{{ position + 1 }}</span>
+          <app-player-avatar
+            [name]="player.name"
+            [color]="player.avatar_color"
+            [badge]="store.weeklyBadgeFor(player.id)"
+            size="small"
+          />
+          <strong>{{ player.name }}</strong>
+          <b>{{ player.current_elo | number: '1.0-0' }}</b>
+        </div>
+        }
+        }
+      </div>
+    </a>
     <section
       class="award-card monthly-award surface"
       aria-labelledby="monthly-award-title"
@@ -21,7 +56,16 @@
         aria-controls="monthly-ranking"
       >
         <div class="award-copy">
-          <h2 id="monthly-award-title">Badge esclusivo {{ monthLabel() }}</h2>
+          <span>Classifica mensile</span>
+          @if (hasMonthlyArtwork()) {
+          <h2 id="monthly-award-title">
+            Badge esclusivo {{ monthLabel() }}
+          </h2>
+          } @else {
+          <h2 id="monthly-award-title">
+            Non c'è ancora un premio per questo mese
+          </h2>
+          }
           @if (monthlyLeaders().length === 0) {
           <p>Nessuna partita giocata questo mese.</p>
           } @else {
@@ -93,6 +137,7 @@
         aria-controls="weekly-ranking"
       >
         <div class="award-copy">
+          <span>Classifica settimanale</span>
           <h2 id="weekly-award-title">Questa settimana</h2>
           <div class="badge-rules">
             <div>

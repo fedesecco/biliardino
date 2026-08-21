@@ -1,13 +1,14 @@
 {
   "name": "biliardino",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "license": "MIT",
   "scripts": {
     "start": "node tools/generate-env.mjs && nx serve web",
     "build:web": "node tools/generate-env.mjs && nx build web",
     "lint:web": "nx lint web",
     "test:web": "nx test web",
-    "e2e:web": "nx e2e web-e2e"
+    "e2e:web": "nx e2e web-e2e",
+    "badge:prepare": "node .agents/skills/monthly-badge-artwork/scripts/prepare-monthly-badge.mjs"
   },
   "private": true,
   "dependencies": {
@@ -46,6 +47,7 @@
     "jsonc-eslint-parser": "^2.1.0",
     "nx": "23.1.0",
     "prettier": "^3.8.1",
+    "sharp": "^0.35.3",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.40.0",
     "vitest": "~4.1.0"

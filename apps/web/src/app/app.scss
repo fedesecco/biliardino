@@ -21,6 +21,12 @@
 
 .brand {
   display: flex;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.brand-home {
+  display: flex;
   gap: 0.5rem;
   align-items: center;
   color: var(--ink);
@@ -33,12 +39,26 @@
   }
 }
 
+.version-link {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  text-decoration: none;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--ink);
+    text-decoration: underline;
+  }
+}
 .brand-mark {
   width: 2rem;
   height: 2rem;
   border-radius: 0.75rem;
   object-fit: contain;
 }
+
 
 .account-pill {
   display: flex;
@@ -94,26 +114,6 @@ main {
   margin: 0 auto;
 }
 
-.app-footer {
-  display: flex;
-  justify-content: center;
-  width: min(100%, 72rem);
-  margin: 1.5rem auto 0;
-
-  a {
-    color: var(--muted);
-    font-size: 0.625rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-decoration: none;
-
-    &:hover,
-    &:focus-visible {
-      color: var(--ink);
-      text-decoration: underline;
-    }
-  }
-}
 
 .bottom-nav {
   position: fixed;
