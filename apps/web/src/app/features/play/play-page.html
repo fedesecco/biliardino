@@ -20,7 +20,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badge]="store.weeklyBadgeFor(player.id)"
+            [badges]="store.monthlyBadgesFor(player.id)"
           />
           <strong>{{ player.name }}</strong>
         </div>
@@ -30,11 +30,19 @@
       <div class="elo-preview" aria-label="Anteprima punti ELO squadra rossa">
         <span>
           <small>Se vince</small>
-          <strong class="positive">+{{ elo.red.win | number: '1.0-2' }}</strong>
+          <strong class="positive"
+            >+{{ elo.red.win.min | number: '1.0-2' }}/{{
+              elo.red.win.max | number: '1.0-2'
+            }}</strong
+          >
         </span>
         <span>
           <small>Se perde</small>
-          <strong class="negative">{{ elo.red.loss | number: '1.0-2' }}</strong>
+          <strong class="negative"
+            >-{{ elo.red.loss.min | number: '1.0-2' }}/{{
+              elo.red.loss.max | number: '1.0-2'
+            }}</strong
+          >
         </span>
       </div>
       }
@@ -71,7 +79,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badge]="store.weeklyBadgeFor(player.id)"
+            [badges]="store.monthlyBadgesFor(player.id)"
           />
           <strong>{{ player.name }}</strong>
         </div>
@@ -82,13 +90,17 @@
         <span>
           <small>Se vince</small>
           <strong class="positive"
-            >+{{ elo.blue.win | number: '1.0-2' }}</strong
+            >+{{ elo.blue.win.min | number: '1.0-2' }}/{{
+              elo.blue.win.max | number: '1.0-2'
+            }}</strong
           >
         </span>
         <span>
           <small>Se perde</small>
           <strong class="negative"
-            >{{ elo.blue.loss | number: '1.0-2' }}</strong
+            >-{{ elo.blue.loss.min | number: '1.0-2' }}/{{
+              elo.blue.loss.max | number: '1.0-2'
+            }}</strong
           >
         </span>
       </div>
@@ -206,7 +218,7 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
-          [badge]="store.weeklyBadgeFor(player.id)"
+          [badges]="store.monthlyBadgesFor(player.id)"
         />
         <span class="player-copy">
           <strong>{{ player.name }}</strong>

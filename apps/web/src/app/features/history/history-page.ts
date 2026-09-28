@@ -9,8 +9,9 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
+import { PlayerAvatar } from '../../core/player-avatar';
 import type {
   MatchParticipant,
   MatchRecord,
@@ -20,7 +21,7 @@ import { SupabaseService } from '../../core/supabase.service';
 
 @Component({
   selector: 'app-history-page',
-  imports: [DatePipe, DecimalPipe],
+  imports: [DatePipe, DecimalPipe, PlayerAvatar, RouterLink],
   templateUrl: './history-page.html',
   styleUrl: './history-page.scss',
 })

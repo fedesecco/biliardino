@@ -25,18 +25,14 @@ describe('AnalyticsPage', () => {
             loading: signal(false),
             statistics: signal(statistics),
             monthlyRankings: monthlyRankingsSignal,
-            weeklyStandings: signal([
-              { playerId: 'player-one', elo: 32 },
-              { playerId: 'player-two', elo: -32 },
-            ]),
-            weeklyBadgeFor: vi.fn().mockReturnValue(null),
+            monthlyBadgesFor: vi.fn().mockReturnValue([]),
           },
         },
       ],
     }).compileComponents();
   });
 
-  it('shows the classifications landing page with three ranking cards', () => {
+  it('shows the classifications landing page with the monthly ranking card', () => {
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -45,17 +41,38 @@ describe('AnalyticsPage', () => {
     expect(element.querySelector('#classifications-title')?.textContent).toBe(
       'Classifiche',
     );
-    expect(element.querySelectorAll('.awards-grid > *')).toHaveLength(3);
+    expect(element.querySelectorAll('.awards-grid > *')).toHaveLength(2);
     expect(globalCard?.textContent).toContain('Classifica globale');
     expect(globalCard?.getAttribute('href')).toBe('/classifiche/globale');
-    expect(element.querySelector('.team-card')).toBeNull();
+    expect(element.querySelector('.monthly-badge-rules')).toBeNull();
     expect(element.textContent).not.toContain('Vittorie per colore');
   });
-  it('shows a pending message when the current month has no badge artwork', () => {
+
+  it('renders the registered hero artwork for October 2026', () => {
     monthlyRankingsSignal.set(
       monthlyRankings.map((standing) => ({
         ...standing,
         month_start: '2026-10-01',
+      })),
+    );
+    const fixture = TestBed.createComponent(AnalyticsPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(element.querySelector('#monthly-award-title')?.textContent?.trim()).toBe(
+      'Premio esclusivo Ottobre 2026',
+    );
+    expect(
+      element
+        .querySelector<HTMLImageElement>('app-trophy-artwork.hero img')
+        ?.getAttribute('src'),
+    ).toBe('/trophies/2026-10-1024.webp');
+  });
+  it('shows a pending message when the current month has no prize artwork', () => {
+    monthlyRankingsSignal.set(
+      monthlyRankings.map((standing) => ({
+        ...standing,
+        month_start: '2026-11-01',
       })),
     );
     const fixture = TestBed.createComponent(AnalyticsPage);
@@ -69,29 +86,25 @@ describe('AnalyticsPage', () => {
       element
         .querySelector('.fallback-trophy')
         ?.getAttribute('aria-label'),
-    ).toBe('Nessun premio disponibile per ottobre 2026');
+    ).toBe('Nessun premio disponibile per novembre 2026');
   });
 
-  it('opens the monthly and weekly award rankings', () => {
+  it('opens the monthly award ranking', () => {
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    const triggers =
-      element.querySelectorAll<HTMLButtonElement>('.award-trigger');
+    const trigger = element.querySelector<HTMLButtonElement>('.award-trigger');
 
-    triggers[0].click();
-    triggers[1].click();
+    trigger?.click();
     fixture.detectChanges();
 
     expect(element.querySelectorAll('#monthly-ranking a')).toHaveLength(2);
-    expect(element.querySelectorAll('#weekly-ranking a')).toHaveLength(2);
     expect(
       element
         .querySelector<HTMLAnchorElement>('#monthly-ranking a')
         ?.getAttribute('href'),
     ).toBe('/giocatore/player-one');
-    expect(triggers[0].getAttribute('aria-expanded')).toBe('true');
-    expect(triggers[1].getAttribute('aria-expanded')).toBe('true');
+    expect(trigger?.getAttribute('aria-expanded')).toBe('true');
   });
 });
 

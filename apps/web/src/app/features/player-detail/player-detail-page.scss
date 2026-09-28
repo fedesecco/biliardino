@@ -45,6 +45,46 @@
     white-space: nowrap;
   }
 
+  .profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    align-items: flex-start;
+    margin-top: 0.45rem;
+  }
+
+  .profile-badge {
+    max-width: 5rem;
+    text-align: center;
+
+    .profile-badge-button {
+      display: grid;
+      gap: 0.2rem;
+      justify-items: center;
+      padding: 0;
+      color: inherit;
+      font: inherit;
+      text-align: inherit;
+      background: transparent;
+      border: 0;
+      cursor: pointer;
+
+      &:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 0.2rem;
+      }
+    }
+
+    img {
+      width: 3.5rem;
+      height: 3.5rem;
+      object-fit: cover;
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0.18rem 0.45rem rgb(32 35 47 / 24%);
+    }
+  }
+
   > strong {
     display: grid;
     font-family: var(--font-display);
@@ -96,16 +136,8 @@
       display: grid;
     }
 
-    span {
-      color: #8a6114;
-      font-size: 0.58rem;
-      font-weight: 900;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
     h2 {
-      margin: 0.08rem 0 0;
+      margin: 0;
       font-family: var(--font-display);
       font-size: 1.35rem;
     }
@@ -137,16 +169,8 @@
     display: grid;
   }
 
-  span {
-    color: var(--muted);
-    font-size: 0.58rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   h2 {
-    margin: 0.08rem 0 0;
+    margin: 0;
     font-family: var(--font-display);
     font-size: 1.35rem;
   }
@@ -314,16 +338,8 @@
     display: grid;
   }
 
-  span {
-    color: var(--muted);
-    font-size: 0.58rem;
-    font-weight: 900;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
   h2 {
-    margin: 0.08rem 0 0;
+    margin: 0;
     font-family: var(--font-display);
     font-size: 1.35rem;
   }
@@ -421,7 +437,7 @@
   }
 }
 
-.trophy-dialog {
+.award-dialog {
   width: min(31rem, calc(100vw - 1.5rem));
   max-width: none;
   padding: 0;
@@ -444,6 +460,12 @@
     border: 1px solid rgb(255 255 255 / 70%);
     border-radius: 1.5rem;
     box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 34%);
+  }
+
+  .badge-dialog-image {
+    width: min(16rem, 70vw);
+    height: min(16rem, 70vw);
+    object-fit: contain;
   }
 
   > article > span {

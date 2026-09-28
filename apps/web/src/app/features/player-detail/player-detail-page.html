@@ -13,17 +13,39 @@
     <app-player-avatar
       [name]="player.name"
       [color]="player.avatar_color"
-      [badge]="store.weeklyBadgeFor(player.id)"
       size="large"
     />
     <div>
       <span>Giocatore</span>
       <h1 id="player-title">{{ player.name }}</h1>
-      @if (store.weeklyBadgeFor(player.id); as badge) {
-      <small
-        >{{ badge.label }} · {{ badge.elo > 0 ? '+' : '' }}{{ badge.elo |
-        number: '1.0-2' }} ELO</small
+      @if (playerBadges(); as badges) {
+      @if (badges.length > 0) {
+      <div
+        class="profile-badges"
+        role="list"
+        aria-label="Badge correnti del giocatore"
       >
+        @for (badge of badges; track badge.kind) {
+        <div class="profile-badge" role="listitem">
+          <button
+            class="profile-badge-button"
+            type="button"
+            (click)="openBadge(badge)"
+            [attr.aria-label]="'Apri ' + badge.label"
+          >
+            <img
+              [src]="badge.imageUrl"
+              alt=""
+              aria-hidden="true"
+              width="128"
+              height="128"
+            />
+            <span>{{ badge.label }}</span>
+          </button>
+        </div>
+        }
+      </div>
+      }
       }
     </div>
     <strong
@@ -53,7 +75,6 @@
   <section class="trophy-cabinet surface" aria-labelledby="trophy-title">
     <header>
       <div>
-        <span>Premi permanenti</span>
         <h2 id="trophy-title">Bacheca</h2>
       </div>
       <strong>{{ trophies().length }}</strong>
@@ -88,7 +109,6 @@
   >
     <header class="recent-results-heading">
       <div>
-        <span>Storico personale</span>
         <h2 id="recent-results-title">Ultimi 5 risultati</h2>
       </div>
       <a
@@ -169,7 +189,6 @@
   <section class="rivalry-section surface" aria-labelledby="rivalry-title">
     <header class="rivalry-heading">
       <div>
-        <span>Confronti nello storico</span>
         <h2 id="rivalry-title">Amici e nemici</h2>
       </div>
     </header>
@@ -256,35 +275,63 @@
   }
 </section>
 
-@if (selectedTrophy(); as trophy) {
+@if (selectedAward(); as award) {
 <dialog
-  #trophyDialog
+  #awardDialog
   tabindex="-1"
-  (keydown.escape)="closeTrophy()"
-  class="trophy-dialog"
-  aria-labelledby="trophy-dialog-title"
-  (close)="selectedTrophy.set(null)"
+  (keydown.escape)="closeAward()"
+  class="award-dialog"
+  aria-labelledby="award-dialog-title"
+  (close)="closeAward()"
   (click)="closeFromBackdrop($event)"
 >
   <article>
     <button
       class="dialog-close"
       type="button"
-      aria-label="Chiudi bacheca"
-      (click)="closeTrophy()"
+      aria-label="Chiudi dettaglio premio"
+      (click)="closeAward()"
     >
       ×
     </button>
-    <app-trophy-artwork [monthStart]="trophy.month_start" size="hero" />
+    @if (award.type === 'trophy') {
+    <app-trophy-artwork
+      [monthStart]="award.value.month_start"
+      size="hero"
+    />
     <span
-      >{{ trophy.exclusive ? 'Premio permanente' : 'Riconoscimento retroattivo'
-      }}</span
+      >{{ award.value.exclusive ? 'Premio permanente' : 'Riconoscimento retroattivo' }}</span
     >
-    <h2 id="trophy-dialog-title">{{ trophy.title }}</h2>
+    <h2 id="award-dialog-title">{{ award.value.title }}</h2>
     @if (statistic(); as player) {
     <strong>{{ player.name }}</strong>
     }
-    <p>+{{ trophy.elo_gained | number: '1.0-2' }} ELO conquistati nel mese</p>
+    <p>
+      +{{ award.value.elo_gained | number: '1.0-2' }} ELO conquistati nel mese
+    </p>
+    } @else {
+    <img
+      class="badge-dialog-image"
+      [src]="award.value.imageUrl"
+      alt=""
+      aria-hidden="true"
+      width="256"
+      height="256"
+    />
+    <span>Badge corrente</span>
+    <h2 id="award-dialog-title">{{ award.value.label }}</h2>
+    @if (statistic(); as player) {
+    <strong>{{ player.name }}</strong>
+    }
+    @if (award.value.elo !== null) {
+    <p>
+      {{ award.value.elo > 0 ? '+' : '' }}{{ award.value.elo | number: '1.0-2'
+      }} ELO questo mese
+    </p>
+    } @else {
+    <p>Riconoscimento nella classifica globale</p>
+    }
+    }
   </article>
 </dialog>
 }

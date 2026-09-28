@@ -1,6 +1,7 @@
 import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
 import { signal } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 import { AppStore } from '../../core/app-store.service';
 import type { MatchRecord } from '../../core/models';
@@ -16,10 +17,10 @@ describe('HistoryPage', () => {
   const loadInitialHistory = vi.fn().mockResolvedValue(undefined);
   const loadHistoryForPlayer = vi.fn().mockResolvedValue(undefined);
   const loadMoreHistory = vi.fn().mockResolvedValue(undefined);
-
+  const monthlyBadgesFor = vi.fn().mockReturnValue([]);
   beforeEach(async () => {
     deleteMatch.mockClear();
-    loadInitialHistory.mockClear();
+    monthlyBadgesFor.mockClear();
     loadHistoryForPlayer.mockClear();
 
     await TestBed.configureTestingModule({
@@ -39,12 +40,14 @@ describe('HistoryPage', () => {
             loadHistoryForPlayer,
             loadMoreHistory,
             deleteMatch,
+            monthlyBadgesFor,
           },
         },
         {
           provide: SupabaseService,
           useValue: { companyUser: signal(true) },
         },
+        provideRouter([]),
       ],
     }).compileComponents();
   });
@@ -80,6 +83,35 @@ describe('HistoryPage', () => {
     fixture.destroy();
   });
 
+  it('renders clickable player profiles with their current badges', () => {
+    monthlyBadgesFor.mockReturnValue([
+      {
+        kind: 'global-gold',
+        label: "Medaglia d'oro",
+        elo: null,
+        imageUrl: '/awards/oro.webp',
+      },
+    ]);
+    const fixture = TestBed.createComponent(HistoryPage);
+    fixture.detectChanges();
+
+    const redPlayerLink = fixture.nativeElement.querySelector(
+      '.team-red .player-link',
+    ) as HTMLAnchorElement;
+
+    expect(redPlayerLink.getAttribute('href')).toBe(
+      '/giocatore/red-player',
+    );
+    expect(redPlayerLink.querySelector('app-player-avatar')).not.toBeNull();
+    expect(
+      redPlayerLink.querySelector<HTMLImageElement>('img')?.getAttribute('src'),
+    ).toBe('/awards/oro.webp');
+    expect(monthlyBadgesFor).toHaveBeenCalledWith('red-player');
+
+    fixture.destroy();
+  });
+
+
   it('requires confirmation before deleting a match', async () => {
     const fixture = TestBed.createComponent(HistoryPage);
     fixture.detectChanges();
@@ -114,6 +146,29 @@ function matchCreatedMinutesAgo(id: string, minutes: number): MatchRecord {
     created_by: 'user-id',
     edited_at: null,
     edited_by: null,
-    participants: [],
+    participants: [
+      {
+        player_id: 'red-player',
+        team: 'red',
+        elo_before: 1000,
+        elo_delta: 10,
+        player: {
+          id: 'red-player',
+          name: 'Mario Rossi',
+          avatar_color: '#a8e6cf',
+        },
+      },
+      {
+        player_id: 'blue-player',
+        team: 'blue',
+        elo_before: 1000,
+        elo_delta: -10,
+        player: {
+          id: 'blue-player',
+          name: 'Luigi Bianchi',
+          avatar_color: '#bde0fe',
+        },
+      },
+    ],
   };
 }

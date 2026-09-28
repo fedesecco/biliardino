@@ -1,15 +1,31 @@
 # Changelog
 
+## [1.4.0]
+
+### Features
+
+- **Premio mensile:** aggiunta l'illustrazione del premio esclusivo di ottobre 2026 (sarà visibile nella classifica mensile dal primo ottobre!)
+- **Badge temporanei:** Bomboclat e Scemo del Villaggio spostati dalla classifica settimanale a quella mensile. Rimossa la classifica settimanale
+- **Badge globali:** aggiunte le medaglie d’oro, d’argento e di bronzo per la classifica globale
+
+### Changes
+
+- **ELO:** le nuove partite (fatte dal 29/09/26 in poi) passano da K 32 a K 28, con bonus in base ai gol: la variazione ELO è moltiplicata per `min(1,30; 1 + 0,15 × ln(1 + Δgol))`, dove `Δgol` è il margine assoluto della vittoria. Anteprima ELO aggiornata di conseguenza.
+- **Classifica globale:** i nomi dei giocatori ora aprono il relativo profilo.
+- **Badge temporanei:** a parità di ELO, ogni posizione viene assegnata una sola volta, evitando duplicati di badge.
+- **Storico:** i giocatori delle partite mostrano avatar e badge correnti e aprono il relativo profilo.
+- **Profilo giocatore:** badge correnti mostrati in grande accanto al profilo, senza sovrapporli all’avatar. Sono ingrandibili.
+
 ## [1.3.1]
 
 ### Changes
 
 - **Classifiche:** unificate le sezioni Classifica e Premi in un'unica pagina con anteprime della classifica globale, mensile e settimanale.
 - **Classifica globale:** aggiunta una pagina dedicata con la classifica ELO completa.
-- **Badge mensile:** aggiunta l'illustrazione del badge esclusivo di settembre 2026.
+- **Premio mensile:** aggiunta l'illustrazione del premio esclusivo di settembre 2026.
 - **Navigazione:** la voce unica **Classifiche** sostituisce Classifica e Premi.
 - **Versione:** spostato il collegamento alla versione accanto al titolo dell'app.
-- **Premio mensile:** se l'immagine del badge non è ancora disponibile, viene mostrato un messaggio di attesa invece del titolo del premio.
+- **Premio mensile:** se l'immagine del premio non è ancora disponibile, viene mostrato un messaggio di attesa invece del titolo del premio.
 
 ## [1.3.0]
 
@@ -33,9 +49,9 @@
 
 ### Features
 
-- Ogni mese, il giocatore che ha guadagnato più punti riceverà per sempre un badge esclusivo. Il badge è visible in "classifiche e premi".
-- Badge settimanale temporaneo per chi ha guadagnato più punti: il bomboclat
-- Badge settimanale temporaneo per chi ha perso più punti: lo scemo del villaggio
+- Ogni mese, il giocatore che ha guadagnato più punti riceverà un premio permanente, visibile in "classifiche e premi".
+- Badge temporaneo settimanale per chi ha guadagnato più punti: il Bomboclat
+- Badge temporaneo settimanale per chi ha perso più punti: lo Scemo del Villaggio
 - **Statistiche**: rinominata in **Statistiche e premi**. Contiene i premi con le loro classifiche
 - Aggiunta la pagina **Dettaglio giocatore**. Contiene una bacheca con i premi permanenti vinti fino ad ora. Accessibile in vari punti premendo il nome del giocatore
 

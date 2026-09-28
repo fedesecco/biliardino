@@ -18,6 +18,7 @@ import type {
   PlayerRivalry,
   TeamColor,
 } from '../../core/models';
+import type { MonthlyBadge } from '../../core/monthly-badges';
 import { PlayerAvatar } from '../../core/player-avatar';
 import { italianMonthLabel } from '../../core/rome-calendar';
 import { TrophyArtwork } from '../../core/trophy-artwork';
@@ -27,6 +28,10 @@ interface PlayerAward extends MonthlyChampion {
   monthLabel: string;
   title: string;
 }
+
+type SelectedAward =
+  | { type: 'trophy'; value: PlayerAward }
+  | { type: 'badge'; value: MonthlyBadge };
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -55,6 +60,9 @@ export class PlayerDetailPage {
         .statistics()
         .find((statistic) => statistic.id === this.playerId()) ?? null,
   );
+  protected readonly playerBadges = computed(() =>
+    this.store.monthlyBadgesFor(this.playerId()),
+  );
   protected readonly recentMatches = signal<MatchRecord[]>([]);
   protected readonly recentMatchesLoading = signal(true);
   protected readonly recentMatchesError = signal<string | null>(null);
@@ -73,14 +81,14 @@ export class PlayerDetailPage {
           exclusive,
           monthLabel,
           title: exclusive
-            ? `Badge esclusivo ${capitalize(monthLabel)}`
+            ? `Premio esclusivo ${capitalize(monthLabel)}`
             : `Miglior giocatore di ${monthLabel}`,
         };
       }),
   );
-  protected readonly selectedTrophy = signal<PlayerAward | null>(null);
-  private readonly trophyDialog =
-    viewChild<ElementRef<HTMLDialogElement>>('trophyDialog');
+  protected readonly selectedAward = signal<SelectedAward | null>(null);
+  private readonly awardDialog =
+    viewChild<ElementRef<HTMLDialogElement>>('awardDialog');
   private loadRequestVersion = 0;
 
   constructor() {
@@ -91,9 +99,9 @@ export class PlayerDetailPage {
       void this.loadRivalry(playerId, this.loadRequestVersion);
     });
     effect(() => {
-      const dialog = this.trophyDialog()?.nativeElement;
-      if (dialog && this.selectedTrophy() && !dialog.open) {
-        dialog.showModal();
+      const dialog = this.awardDialog()?.nativeElement;
+      if (dialog && this.selectedAward() && !dialog.open) {
+        dialog.showModal?.();
       }
     });
   }
@@ -194,20 +202,24 @@ export class PlayerDetailPage {
   }
 
   protected openTrophy(trophy: PlayerAward): void {
-    this.selectedTrophy.set(trophy);
+    this.selectedAward.set({ type: 'trophy', value: trophy });
   }
 
-  protected closeTrophy(): void {
-    const dialog = this.trophyDialog()?.nativeElement;
+  protected openBadge(badge: MonthlyBadge): void {
+    this.selectedAward.set({ type: 'badge', value: badge });
+  }
+
+  protected closeAward(): void {
+    const dialog = this.awardDialog()?.nativeElement;
     if (dialog?.open) {
       dialog.close();
     }
-    this.selectedTrophy.set(null);
+    this.selectedAward.set(null);
   }
 
   protected closeFromBackdrop(event: MouseEvent): void {
     if (event.target === event.currentTarget) {
-      this.closeTrophy();
+      this.closeAward();
     }
   }
 }

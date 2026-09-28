@@ -33,7 +33,7 @@ const store = {
   activePlayers: computed(() => players),
   loading: signal(false),
   error: signal<string | null>(null),
-  weeklyBadgeFor: vi.fn().mockReturnValue(null),
+  monthlyBadgesFor: vi.fn().mockReturnValue([]),
   playSelection,
   teamPickingMode,
   playDraft,
@@ -102,6 +102,30 @@ describe('PlayPage', () => {
     expect(fixture.nativeElement.querySelector('.match-view')).not.toBeNull();
     expect(teamPickingMode()).toBe('random');
     expect(playSelection().size).toBe(4);
+  });
+
+  it('previews ELO ranges for the possible winning margins', () => {
+    playDraft.set({
+      red: [players[0], players[3]],
+      blue: [players[1], players[2]],
+      benched: [],
+    });
+
+    const fixture = TestBed.createComponent(PlayPage);
+    fixture.detectChanges();
+
+    expect(
+      [...fixture.nativeElement.querySelectorAll('.elo-preview strong')].map(
+        (value) => value.textContent?.trim(),
+      ),
+    ).toEqual([
+      '+15.46/18.09',
+      '-15.46/18.09',
+      '+15.46/18.09',
+      '-15.46/18.09',
+    ]);
+
+    fixture.destroy();
   });
 
   it('keeps an unfinished score across navigation', () => {

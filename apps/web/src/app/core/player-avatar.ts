@@ -1,6 +1,6 @@
-import { Component, input } from '@angular/core';
+import { Component, computed, input } from '@angular/core';
 import { PlayerInitialsPipe } from './player-initials.pipe';
-import type { WeeklyBadge } from './weekly-awards';
+import type { MonthlyBadge } from './monthly-badges';
 
 export type PlayerAvatarSize = 'small' | 'medium' | 'large';
 
@@ -11,31 +11,23 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
     <span class="initials" aria-hidden="true">
       {{ name() | playerInitials }}
     </span>
-    @if (badge(); as weeklyBadge) {
+    @if (badges().length > 0) {
       <span
-        class="weekly-badge"
-        [class.champion]="weeklyBadge.kind === 'weekly-champion'"
-        [class.loser]="weeklyBadge.kind === 'weekly-loser'"
-        [attr.aria-label]="
-          weeklyBadge.label +
-          ', ' +
-          (weeklyBadge.elo > 0 ? '+' : '') +
-          weeklyBadge.elo +
-          ' ELO questa settimana'
-        "
-        [attr.title]="weeklyBadge.label"
+        class="monthly-badges"
+        role="group"
+        [attr.aria-label]="badgeSummary()"
       >
-        <img
-          [src]="
-            weeklyBadge.kind === 'weekly-champion'
-              ? '/awards/bomboclat.webp'
-              : '/awards/scemo.webp'
-          "
-          alt=""
-          aria-hidden="true"
-          width="128"
-          height="128"
-        />
+        @for (badge of badges(); track badge.kind) {
+          <span class="monthly-badge" [attr.title]="badge.label">
+            <img
+              [src]="badge.imageUrl"
+              alt=""
+              aria-hidden="true"
+              width="128"
+              height="128"
+            />
+          </span>
+        }
       </span>
     }
   `,
@@ -78,11 +70,17 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
       line-height: 1;
     }
 
-    .weekly-badge {
+    .monthly-badges {
       position: absolute;
       top: -0.42rem;
       right: -0.42rem;
       z-index: 1;
+      display: flex;
+      gap: 0.05rem;
+      align-items: center;
+    }
+
+    .monthly-badge {
       display: grid;
       width: 1.2rem;
       height: 1.2rem;
@@ -99,12 +97,14 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
         object-fit: cover;
         border-radius: inherit;
       }
-
     }
 
-    :host(.small) .weekly-badge {
+    :host(.small) .monthly-badges {
       top: -0.34rem;
       right: -0.34rem;
+    }
+
+    :host(.small) .monthly-badge {
       width: 1rem;
       height: 1rem;
     }
@@ -118,5 +118,10 @@ export class PlayerAvatar {
   readonly name = input.required<string>();
   readonly color = input.required<string>();
   readonly size = input<PlayerAvatarSize>('medium');
-  readonly badge = input<WeeklyBadge | null>(null);
+  readonly badges = input<MonthlyBadge[]>([]);
+  protected readonly badgeSummary = computed(() =>
+    this.badges()
+      .map(({ label }) => label)
+      .join(', '),
+  );
 }

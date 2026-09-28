@@ -1,6 +1,5 @@
 import {
   computed,
-  DestroyRef,
   inject,
   Injectable,
   signal,
@@ -22,10 +21,9 @@ import type {
 import { SupabaseService } from './supabase.service';
 import type { Database } from './database.types';
 import {
-  calculateWeeklyBadgesFromStandings,
-  calculateWeeklyEloStandings,
-  type WeeklyBadge,
-} from './weekly-awards';
+  calculateMonthlyBadgesFromStandings,
+  type MonthlyBadge,
+} from './monthly-badges';
 import { romeMonthKey } from './rome-calendar';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
@@ -43,8 +41,6 @@ interface MatchHistoryCursor {
 @Injectable({ providedIn: 'root' })
 export class AppStore {
   private readonly supabase = inject(SupabaseService);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly currentTime = signal(Date.now());
   private readonly playerColorReplacements: Record<string, string> = {
     '#e84a5f': '#fbc4ab',
     '#3279f6': '#bde0fe',
@@ -58,7 +54,6 @@ export class AppStore {
 
   readonly players = signal<Player[]>([]);
   readonly statistics = signal<PlayerStatistic[]>([]);
-  readonly matches = signal<MatchRecord[]>([]);
   readonly monthlyRankings = signal<MonthlyEloRanking[]>([]);
   readonly monthlyChampions = signal<MonthlyChampion[]>([]);
   readonly historyMatches = signal<MatchRecord[]>([]);
@@ -71,11 +66,11 @@ export class AppStore {
   readonly activePlayers = computed(() =>
     this.players().filter((player) => player.active),
   );
-  readonly weeklyStandings = computed(() =>
-    calculateWeeklyEloStandings(this.matches(), new Date(this.currentTime())),
-  );
-  readonly weeklyBadges = computed(() =>
-    calculateWeeklyBadgesFromStandings(this.weeklyStandings()),
+  readonly monthlyBadges = computed(() =>
+    calculateMonthlyBadgesFromStandings(
+      this.monthlyRankings(),
+      this.statistics(),
+    ),
   );
   readonly playSelection = signal(new Map<string, SelectionMode>());
   readonly teamPickingMode = signal<TeamPickingMode>('elo-balanced');
@@ -84,11 +79,6 @@ export class AppStore {
   readonly playConfirming = signal(false);
 
   constructor() {
-    const timer = window.setInterval(
-      () => this.currentTime.set(Date.now()),
-      60_000,
-    );
-    this.destroyRef.onDestroy(() => window.clearInterval(timer));
     if (!this.supabase.configured()) {
       this.loading.set(false);
       return;
@@ -98,8 +88,8 @@ export class AppStore {
     this.subscribeToChanges();
   }
 
-  weeklyBadgeFor(playerId: string): WeeklyBadge | null {
-    return this.weeklyBadges().get(playerId) ?? null;
+  monthlyBadgesFor(playerId: string): MonthlyBadge[] {
+    return this.monthlyBadges().get(playerId) ?? [];
   }
 
   async refresh(): Promise<void> {
@@ -110,7 +100,6 @@ export class AppStore {
       await this.loadPlayers();
       await Promise.all([
         this.loadStatistics(),
-        this.loadRecentMatches(),
         this.loadMonthlyAwards(),
       ]);
     } catch (error: unknown) {
@@ -362,7 +351,7 @@ export class AppStore {
   }
 
   private async loadMonthlyAwards(): Promise<void> {
-    const currentMonthStart = romeMonthKey(new Date(this.currentTime()));
+    const currentMonthStart = romeMonthKey(new Date());
     const [rankingsResult, championsResult] = await Promise.all([
       this.supabase.client
         .from('monthly_elo_rankings')
@@ -413,21 +402,6 @@ export class AppStore {
     );
   }
 
-  private async loadRecentMatches(): Promise<void> {
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
-    const { data, error } = await this.supabase.client
-      .from('matches')
-      .select('*')
-      .gte('played_at', sevenDaysAgo.toISOString())
-      .order('played_at', { ascending: false })
-      .order('id', { ascending: false });
-
-    if (error) {
-      throw error;
-    }
-
-    this.matches.set(await this.hydrateMatches(data));
-  }
 
   private async loadHistoryPageTracked(): Promise<void> {
     const pageLoad = this.loadHistoryPage();

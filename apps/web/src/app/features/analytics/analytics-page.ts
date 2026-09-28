@@ -33,7 +33,6 @@ export class AnalyticsPage {
     this.store.statistics().slice(0, 3),
   );
   protected readonly monthlyRankingOpen = signal(false);
-  protected readonly weeklyRankingOpen = signal(false);
   protected readonly monthStart = computed(
     () =>
       this.store.monthlyRankings()[0]?.month_start ?? romeMonthKey(new Date()),
@@ -58,51 +57,9 @@ export class AnalyticsPage {
   protected readonly monthlyLeaders = computed(() =>
     this.monthlyStandings().filter((standing) => standing.rank === 1),
   );
-  protected readonly weeklyStandings = computed<AwardStanding[]>(() => {
-    const players = new Map(
-      this.store.statistics().map((player) => [player.id, player]),
-    );
-    let previousElo: number | null = null;
-    let rank = 0;
-    return this.store
-      .weeklyStandings()
-      .map((standing, index): AwardStanding | null => {
-        const player = players.get(standing.playerId);
-        if (!player) {
-          return null;
-        }
-        if (previousElo === null || standing.elo !== previousElo) {
-          rank = index + 1;
-          previousElo = standing.elo;
-        }
-        return {
-          elo: standing.elo,
-          player,
-          playerId: standing.playerId,
-          rank,
-        };
-      })
-      .filter((standing): standing is AwardStanding => standing !== null);
-  });
-  protected readonly weeklyChampions = computed(() =>
-    this.weeklyStandings().filter(
-      ({ playerId }) =>
-        this.store.weeklyBadgeFor(playerId)?.kind === 'weekly-champion',
-    ),
-  );
-  protected readonly weeklyLosers = computed(() =>
-    this.weeklyStandings().filter(
-      ({ playerId }) =>
-        this.store.weeklyBadgeFor(playerId)?.kind === 'weekly-loser',
-    ),
-  );
 
   protected toggleMonthlyRanking(): void {
     this.monthlyRankingOpen.update((open) => !open);
-  }
-
-  protected toggleWeeklyRanking(): void {
-    this.weeklyRankingOpen.update((open) => !open);
   }
 
   private toAwardStanding(

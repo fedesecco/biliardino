@@ -42,7 +42,7 @@
         <app-player-avatar
           [name]="row.stat.name"
           [color]="row.stat.avatar_color"
-          [badge]="store.weeklyBadgeFor(row.stat.id)"
+          [badges]="store.monthlyBadgesFor(row.stat.id)"
         />
         <span class="player-name">
           <strong>{{ row.stat.name }}</strong>

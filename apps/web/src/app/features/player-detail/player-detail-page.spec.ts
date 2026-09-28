@@ -47,6 +47,13 @@ const trophy: MonthlyChampion = {
   awarded_at: '2026-08-01T03:05:00.000Z',
 };
 
+const octoberTrophy: MonthlyChampion = {
+  month_start: '2026-10-01',
+  player_id: player.id,
+  elo_gained: 51,
+  awarded_at: '2026-11-01T03:05:00.000Z',
+};
+
 const exclusiveTrophy: MonthlyChampion = {
   month_start: '2026-08-01',
   player_id: player.id,
@@ -108,6 +115,21 @@ const loadPlayerRecentMatches =
   vi.fn<(playerId: string, limit?: number) => Promise<MatchRecord[]>>();
 const loadPlayerRivalry =
   vi.fn<(playerId: string) => Promise<PlayerRivalry | null>>();
+const profileBadges = [
+  {
+    kind: 'monthly-champion' as const,
+    label: 'Bomboclat',
+    elo: 24,
+    imageUrl: '/awards/bomboclat.webp',
+  },
+  {
+    kind: 'global-gold' as const,
+    label: "Medaglia d'oro",
+    elo: null,
+    imageUrl: '/awards/oro.webp',
+  },
+];
+const monthlyBadgesFor = vi.fn().mockReturnValue(profileBadges);
 
 describe('PlayerDetailPage', () => {
   let routeParamMap: BehaviorSubject<ParamMap>;
@@ -115,6 +137,7 @@ describe('PlayerDetailPage', () => {
     routeParamMap = new BehaviorSubject(convertToParamMap({ id: player.id }));
     loadPlayerRecentMatches.mockReset().mockResolvedValue([recentMatch]);
     loadPlayerRivalry.mockReset().mockResolvedValue(rivalry);
+    monthlyBadgesFor.mockClear().mockReturnValue(profileBadges);
     await TestBed.configureTestingModule({
       imports: [PlayerDetailPage],
       providers: [
@@ -131,8 +154,8 @@ describe('PlayerDetailPage', () => {
           useValue: {
             loading: signal(false),
             statistics: signal([player, secondPlayer]),
-            monthlyChampions: signal([exclusiveTrophy, trophy]),
-            weeklyBadgeFor: vi.fn().mockReturnValue(null),
+            monthlyChampions: signal([octoberTrophy, exclusiveTrophy, trophy]),
+            monthlyBadgesFor,
             loadPlayerRecentMatches,
             loadPlayerRivalry,
           },
@@ -141,7 +164,7 @@ describe('PlayerDetailPage', () => {
     }).compileComponents();
   });
 
-  it('shows retroactive paper awards and exclusive badges in the bacheca', () => {
+  it('shows retroactive paper awards and exclusive prizes in the bacheca', () => {
     const fixture = TestBed.createComponent(PlayerDetailPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -152,18 +175,90 @@ describe('PlayerDetailPage', () => {
     expect(element.querySelector('#trophy-title')?.textContent?.trim()).toBe(
       'Bacheca',
     );
+
+    expect(element.querySelector('.trophy-cabinet header span')).toBeNull();
+    expect(element.querySelector('.recent-results-heading span')).toBeNull();
+    expect(element.querySelector('.rivalry-heading span')).toBeNull();
     const awardLabels = [
       ...element.querySelectorAll<HTMLButtonElement>('.trophy-grid button'),
     ].map((button) => button.getAttribute('aria-label'));
     expect(awardLabels).toEqual([
-      'Apri Badge esclusivo Agosto 2026',
+      'Apri Premio esclusivo Ottobre 2026',
+      'Apri Premio esclusivo Agosto 2026',
       'Apri Miglior giocatore di luglio 2026',
+    ]);
+    expect(
+      [...element.querySelectorAll<HTMLImageElement>('app-trophy-artwork.exclusive img')].map(
+        (image) => image.getAttribute('src'),
+      ),
+    ).toEqual([
+      '/trophies/2026-10-256.webp',
+      '/trophies/2026-08-256.webp',
     ]);
     expect(
       element
         .querySelector<HTMLImageElement>('app-trophy-artwork.legacy img')
         ?.getAttribute('src'),
     ).toBe('/trophies/legacy-paper-256.webp');
+  });
+
+  it('renders current badges larger beside the profile instead of on the avatar', () => {
+    const fixture = TestBed.createComponent(PlayerDetailPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+
+    expect(
+      element.querySelector('.player-hero app-player-avatar .monthly-badges'),
+    ).toBeNull();
+    expect(
+      [...element.querySelectorAll<HTMLImageElement>('.profile-badge img')].map(
+        (image) => ({
+          src: image.getAttribute('src'),
+          width: image.getAttribute('width'),
+        }),
+      ),
+    ).toEqual([
+      { src: '/awards/bomboclat.webp', width: '128' },
+      { src: '/awards/oro.webp', width: '128' },
+    ]);
+    expect(
+      [...element.querySelectorAll('.profile-badge span')].map((label) =>
+        label.textContent?.trim(),
+      ),
+    ).toEqual(['Bomboclat', "Medaglia d'oro"]);
+    expect(element.querySelector('.player-hero > div > small')).toBeNull();
+
+    fixture.destroy();
+  });
+
+  it('opens a current badge in the shared award dialog', async () => {
+    const fixture = TestBed.createComponent(PlayerDetailPage);
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const badgeButton = element.querySelector<HTMLButtonElement>(
+      '.profile-badge-button',
+    );
+    badgeButton?.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector(
+      '.award-dialog',
+    ) as HTMLElement | null;
+    expect(dialog).not.toBeNull();
+    expect(
+      dialog?.querySelector<HTMLImageElement>('.badge-dialog-image')?.getAttribute(
+        'src',
+      ),
+    ).toBe('/awards/bomboclat.webp');
+    expect(dialog?.querySelector('h2')?.textContent?.trim()).toBe('Bomboclat');
+    expect(dialog?.querySelector('p')?.textContent).toContain(
+      '+24 ELO questo mese',
+    );
+
+    fixture.destroy();
   });
 
   it('shows the latest personal results with a link to the filtered history', async () => {

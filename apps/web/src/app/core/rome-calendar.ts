@@ -14,17 +14,6 @@ function romeDateParts(date: Date): Record<string, number> {
   );
 }
 
-export function romeWeekKey(date: Date): string {
-  const parts = romeDateParts(date);
-  const localDate = new Date(
-    Date.UTC(parts['year'], parts['month'] - 1, parts['day']),
-  );
-  const weekday = localDate.getUTCDay();
-  localDate.setUTCDate(
-    localDate.getUTCDate() + (weekday === 0 ? -6 : 1 - weekday),
-  );
-  return localDate.toISOString().slice(0, 10);
-}
 
 export function romeMonthKey(date: Date): string {
   const parts = romeDateParts(date);

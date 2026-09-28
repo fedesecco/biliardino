@@ -75,9 +75,9 @@ export type Database = {
           edited_at: string | null;
           edited_by: string | null;
           elo_locked: boolean;
+          elo_model_version: number;
           id: string;
           legacy_rules: boolean;
-          legacy_source_key: string | null;
           played_at: string;
           red_score: number;
         };
@@ -88,9 +88,9 @@ export type Database = {
           edited_at?: string | null;
           edited_by?: string | null;
           elo_locked?: boolean;
+          elo_model_version?: number;
           id?: string;
           legacy_rules?: boolean;
-          legacy_source_key?: string | null;
           played_at?: string;
           red_score: number;
         };
@@ -101,9 +101,9 @@ export type Database = {
           edited_at?: string | null;
           edited_by?: string | null;
           elo_locked?: boolean;
+          elo_model_version?: number;
           id?: string;
           legacy_rules?: boolean;
-          legacy_source_key?: string | null;
           played_at?: string;
           red_score?: number;
         };

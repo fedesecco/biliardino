@@ -192,52 +192,6 @@
   }
 }
 
-.badge-rules {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.55rem;
-  margin: 0.2rem 0;
-
-  > div {
-    padding: 0.7rem;
-    background: rgb(255 255 255 / 56%);
-    border: 1px solid var(--line);
-    border-radius: 0.8rem;
-  }
-
-  .badge-rule-title {
-    display: flex;
-    gap: 0.35rem;
-    align-items: center;
-
-    img {
-      width: 1.15rem;
-      height: 1.15rem;
-      object-fit: cover;
-      border: 1px solid white;
-      border-radius: 50%;
-      box-shadow: 0 0.1rem 0.25rem rgb(32 35 47 / 18%);
-    }
-  }
-
-  strong {
-    font-family: var(--font-display);
-    font-size: 0.78rem;
-  }
-
-  p {
-    margin-top: 0.2rem;
-    font-size: 0.62rem;
-  }
-
-  small {
-    display: block;
-    margin-top: 0.4rem;
-    color: #8a6114;
-    font-size: 0.58rem;
-    font-weight: 850;
-  }
-}
 
 .open-ranking {
   justify-self: start;

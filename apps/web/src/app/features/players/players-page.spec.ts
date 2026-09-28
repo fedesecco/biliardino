@@ -12,7 +12,7 @@ const players = signal<Player[]>([
 
 const store = {
   players,
-  weeklyBadgeFor: vi.fn().mockReturnValue(null),
+  monthlyBadgesFor: vi.fn().mockReturnValue([]),
   createPlayer: vi.fn(),
   updatePlayer: vi.fn(),
 };

@@ -41,6 +41,14 @@ export const appRoutes: Route[] = [
       ),
   },
   {
+    path: 'giocatore/:id',
+    title: 'Profilo giocatore · Coppa Telenia',
+    loadComponent: () =>
+      import('./features/player-detail/player-detail-page').then(
+        (module) => module.PlayerDetailPage,
+      ),
+  },
+  {
     path: 'giocatori',
     title: 'Giocatori · Coppa Telenia',
     canActivate: [companyUserGuard],

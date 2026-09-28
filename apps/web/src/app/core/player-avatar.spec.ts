@@ -26,22 +26,33 @@ describe('PlayerAvatar', () => {
     expect(getComputedStyle(avatar).color).toBe('rgb(32, 35, 47)');
   });
 
-  it('exposes the weekly award and ELO through an accessible label', () => {
-    fixture.componentRef.setInput('badge', {
-      kind: 'weekly-champion',
-      label: 'Bomboclat',
-      elo: 12.5,
-    });
+  it('exposes all current monthly badges through one accessible label', () => {
+    fixture.componentRef.setInput('badges', [
+      {
+        kind: 'monthly-champion',
+        label: 'Bomboclat',
+        elo: 12.5,
+        imageUrl: '/awards/bomboclat.webp',
+      },
+      {
+        kind: 'global-gold',
+        label: "Medaglia d'oro",
+        elo: 12.5,
+        imageUrl: '/awards/oro.webp',
+      },
+    ]);
     fixture.detectChanges();
 
-    const badge = fixture.nativeElement.querySelector(
-      '.weekly-badge',
+    const badges = fixture.nativeElement.querySelector(
+      '.monthly-badges',
     ) as HTMLElement;
-    expect(badge.getAttribute('aria-label')).toBe(
-      'Bomboclat, +12.5 ELO questa settimana',
+    expect(badges.getAttribute('aria-label')).toBe(
+      "Bomboclat, Medaglia d'oro",
     );
     expect(
-      badge.querySelector<HTMLImageElement>('img')?.getAttribute('src'),
-    ).toBe('/awards/bomboclat.webp');
+      [...badges.querySelectorAll<HTMLImageElement>('img')].map((image) =>
+        image.getAttribute('src'),
+      ),
+    ).toEqual(['/awards/bomboclat.webp', '/awards/oro.webp']);
   });
 });

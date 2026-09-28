@@ -106,7 +106,7 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
-          [badge]="store.weeklyBadgeFor(player.id)"
+          [badges]="store.monthlyBadgesFor(player.id)"
           size="large"
         />
         <div>

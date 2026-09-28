@@ -18,6 +18,10 @@ const TROPHY_IMAGE_BY_MONTH: Record<string, TrophyImages> = {
     thumbnail: '/trophies/2026-09-256.webp',
     hero: '/trophies/2026-09-1024.webp',
   },
+  '2026-10-01': {
+    thumbnail: '/trophies/2026-10-256.webp',
+    hero: '/trophies/2026-10-1024.webp',
+  },
 };
 export function hasExclusiveTrophyArtwork(monthStart: string): boolean {
   return Boolean(TROPHY_IMAGE_BY_MONTH[monthStart]);
@@ -171,7 +175,7 @@ export class TrophyArtwork {
       return `Nessun premio disponibile per ${this.monthLabel()}`;
     }
     return this.isExclusive()
-      ? `Badge esclusivo ${this.monthLabel()}`
+      ? `Premio esclusivo ${this.monthLabel()}`
       : `Miglior giocatore di ${this.monthLabel()}`;
   });
   protected readonly imageDimension = computed(() =>

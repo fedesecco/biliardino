@@ -11,6 +11,22 @@ import type {
 import { PlayerAvatar } from '../../core/player-avatar';
 import { SupabaseService } from '../../core/supabase.service';
 
+interface EloPreviewRange {
+  min: number;
+  max: number;
+}
+
+const ELO_K = 28;
+const MINIMUM_GOAL_MARGIN = 1;
+const MAXIMUM_GOAL_MARGIN = 6;
+const MINIMUM_MARGIN_MULTIPLIER =
+  1 + 0.15 * Math.log(1 + MINIMUM_GOAL_MARGIN);
+const MAXIMUM_MARGIN_MULTIPLIER = Math.min(
+  1.3,
+  1 + 0.15 * Math.log(1 + MAXIMUM_GOAL_MARGIN),
+);
+
+
 @Component({
   selector: 'app-play-page',
   imports: [DecimalPipe, PlayerAvatar, RouterLink],
@@ -61,12 +77,18 @@ export class PlayPage {
       teams.blue.reduce((total, player) => total + player.current_elo, 0) /
       teams.blue.length;
     const expectedRed = 1 / (1 + 10 ** ((blueRating - redRating) / 400));
-    const redWin = roundElo(32 * (1 - expectedRed));
-    const redLoss = roundElo(-32 * expectedRed);
+    const redWinBase = ELO_K * (1 - expectedRed);
+    const redLossBase = ELO_K * expectedRed;
 
     return {
-      red: { win: redWin, loss: redLoss },
-      blue: { win: -redLoss, loss: -redWin },
+      red: {
+        win: previewRange(redWinBase),
+        loss: previewRange(redLossBase),
+      },
+      blue: {
+        win: previewRange(redLossBase),
+        loss: previewRange(redWinBase),
+      },
     };
   });
 
@@ -233,6 +255,13 @@ export class PlayPage {
   private errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : 'Operazione non riuscita.';
   }
+}
+
+function previewRange(base: number): EloPreviewRange {
+  return {
+    min: roundElo(base * MINIMUM_MARGIN_MULTIPLIER),
+    max: roundElo(base * MAXIMUM_MARGIN_MULTIPLIER),
+  };
 }
 
 function roundElo(value: number): number {

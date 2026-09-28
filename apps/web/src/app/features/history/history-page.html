@@ -119,7 +119,18 @@
           <div class="names">
             @for ( participant of participants(match, 'red'); track
             participant.player_id ) {
-            <strong>{{ participant.player.name }}</strong>
+            <a
+              class="player-link"
+              [routerLink]="['/giocatore', participant.player_id]"
+            >
+              <app-player-avatar
+                [name]="participant.player.name"
+                [color]="participant.player.avatar_color"
+                [badges]="store.monthlyBadgesFor(participant.player_id)"
+                size="small"
+              />
+              <strong>{{ participant.player.name }}</strong>
+            </a>
             }
           </div>
           <span
@@ -143,7 +154,18 @@
           <div class="names">
             @for ( participant of participants(match, 'blue'); track
             participant.player_id ) {
-            <strong>{{ participant.player.name }}</strong>
+            <a
+              class="player-link"
+              [routerLink]="['/giocatore', participant.player_id]"
+            >
+              <app-player-avatar
+                [name]="participant.player.name"
+                [color]="participant.player.avatar_color"
+                [badges]="store.monthlyBadgesFor(participant.player_id)"
+                size="small"
+              />
+              <strong>{{ participant.player.name }}</strong>
+            </a>
             }
           </div>
           <span

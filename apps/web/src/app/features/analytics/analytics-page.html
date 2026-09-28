@@ -34,7 +34,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badge]="store.weeklyBadgeFor(player.id)"
+            [badges]="store.monthlyBadgesFor(player.id)"
             size="small"
           />
           <strong>{{ player.name }}</strong>
@@ -59,7 +59,7 @@
           <span>Classifica mensile</span>
           @if (hasMonthlyArtwork()) {
           <h2 id="monthly-award-title">
-            Badge esclusivo {{ monthLabel() }}
+            Premio esclusivo {{ monthLabel() }}
           </h2>
           } @else {
           <h2 id="monthly-award-title">
@@ -74,7 +74,7 @@
             <app-player-avatar
               [name]="leader.player.name"
               [color]="leader.player.avatar_color"
-              [badge]="store.weeklyBadgeFor(leader.playerId)"
+              [badges]="store.monthlyBadgesFor(leader.playerId)"
             />
             <span>
               <small>In testa</small>
@@ -108,92 +108,7 @@
           <app-player-avatar
             [name]="standing.player.name"
             [color]="standing.player.avatar_color"
-            [badge]="store.weeklyBadgeFor(standing.playerId)"
-            size="small"
-          />
-          <strong>{{ standing.player.name }}</strong>
-          <b
-            [class.positive]="standing.elo > 0"
-            [class.negative]="standing.elo < 0"
-          >
-            {{ standing.elo > 0 ? '+' : '' }}{{ standing.elo | number: '1.0-2'
-            }} ELO
-          </b>
-        </a>
-        } }
-      </div>
-      }
-    </section>
-
-    <section
-      class="award-card weekly-award surface"
-      aria-labelledby="weekly-award-title"
-    >
-      <button
-        type="button"
-        class="award-trigger"
-        (click)="toggleWeeklyRanking()"
-        [attr.aria-expanded]="weeklyRankingOpen()"
-        aria-controls="weekly-ranking"
-      >
-        <div class="award-copy">
-          <span>Classifica settimanale</span>
-          <h2 id="weekly-award-title">Questa settimana</h2>
-          <div class="badge-rules">
-            <div>
-              <span class="badge-rule-title">
-                <img
-                  src="/awards/bomboclat.webp"
-                  alt=""
-                  width="128"
-                  height="128"
-                />
-                <strong>Bomboclat</strong>
-              </span>
-              <p>Chi ha guadagnato più ELO netto nella settimana.</p>
-              @if (weeklyChampions().length > 0) {
-              <small>
-                Ora: @for (winner of weeklyChampions(); track winner.playerId;
-                let last = $last) { {{ winner.player.name }}{{ last ? '' : ', '
-                }} }
-              </small>
-              }
-            </div>
-            <div>
-              <span class="badge-rule-title">
-                <img src="/awards/scemo.webp" alt="" width="128" height="128" />
-                <strong>Scemo del Villaggio</strong>
-              </span>
-              <p>Chi ha perso più ELO netto nella settimana.</p>
-              @if (weeklyLosers().length > 0) {
-              <small>
-                Ora: @for (loser of weeklyLosers(); track loser.playerId; let
-                last = $last) { {{ loser.player.name }}{{ last ? '' : ', ' }} }
-              </small>
-              }
-            </div>
-          </div>
-          <p>I badge si azzerano ogni lunedì e non restano nella bacheca.</p>
-          <strong class="open-ranking">
-            {{ weeklyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica
-            della settimana' }}
-          </strong>
-        </div>
-      </button>
-
-      @if (weeklyRankingOpen()) {
-      <div id="weekly-ranking" class="award-ranking">
-        <h3>Classifica della settimana</h3>
-        @if (weeklyStandings().length === 0) {
-        <p class="empty-ranking">Nessuna partita giocata questa settimana.</p>
-        } @else { @for (standing of weeklyStandings(); track standing.playerId)
-        {
-        <a [routerLink]="['/giocatore', standing.playerId]">
-          <span class="award-rank">{{ standing.rank }}</span>
-          <app-player-avatar
-            [name]="standing.player.name"
-            [color]="standing.player.avatar_color"
-            [badge]="store.weeklyBadgeFor(standing.playerId)"
+            [badges]="store.monthlyBadgesFor(standing.playerId)"
             size="small"
           />
           <strong>{{ standing.player.name }}</strong>
