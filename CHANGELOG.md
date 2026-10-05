@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.1]
+
+### Bugfixes
+
+- **Notifiche:** il toast dopo la registrazione di una partita ora scompare dopo 2 secondi.
+- **Partita:** sui dispositivi iOS il doppio tap sui pulsanti goal non attiva più lo zoom della pagina.
+
+### Chores
+
+- **Versione:** ora viene letta direttamente da `package.json`, evitando duplicazioni.
+
 ## [1.4.0]
 
 ### Features

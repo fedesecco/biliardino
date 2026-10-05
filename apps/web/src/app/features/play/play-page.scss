@@ -422,6 +422,7 @@
   color: inherit;
   background: transparent;
   border: 0;
+  touch-action: manipulation;
 
   span {
     font-family: var(--font-display);
