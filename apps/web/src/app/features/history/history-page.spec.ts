@@ -106,9 +106,10 @@ describe('HistoryPage', () => {
     );
     expect(redPlayerLink.querySelector('app-player-avatar')).not.toBeNull();
     expect(
-      redPlayerLink.querySelector<HTMLImageElement>('img')?.getAttribute('src'),
-    ).toBe('/awards/winstreak-5.webp');
-    expect(badgesFor).toHaveBeenCalledWith('red-player');
+      redPlayerLink
+        .querySelector<HTMLImageElement>('.streak-effect img')
+        ?.getAttribute('src'),
+    ).toBe('/effects/winstreak-5.png');
 
     fixture.destroy();
   });

@@ -94,6 +94,16 @@ describe('RankingPage', () => {
       rows[2].querySelector('app-player-avatar')?.classList,
     ).toContain('avatar-medal-silver');
     expect(
+      rows[0]
+        .querySelector<HTMLImageElement>('.avatar-content')
+        ?.getAttribute('src'),
+    ).toBe('/awards/oro.webp');
+    expect(
+      rows[2]
+        .querySelector<HTMLImageElement>('.avatar-content')
+        ?.getAttribute('src'),
+    ).toBe('/awards/argento.webp');
+    expect(
       rows[0].querySelector('.player-name strong')?.classList,
     ).toContain('medal-name-gold');
     expect(

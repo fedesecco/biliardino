@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.5.1]
+
+### Changes
+
+- **Avatar:** Al posto dei badge, ora vengono mostrati effetti unici per ogni status.
+
 ## [1.5.0]
 
 ### Features

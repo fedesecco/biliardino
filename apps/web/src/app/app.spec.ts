@@ -34,7 +34,7 @@ describe('App', () => {
     expect(compiled.querySelector('.recognition-item')).toBeNull();
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.version-link');
-    expect(versionLink?.textContent?.trim()).toBe('v1.5.0');
+    expect(versionLink?.textContent?.trim()).toBe('v1.5.1');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
     expect(compiled.querySelector('.app-footer')).toBeNull();
   });
