@@ -1,4 +1,5 @@
 export type TeamColor = 'red' | 'blue';
+export type PlayerAvatarMedal = 'gold' | 'silver' | 'bronze';
 export type SelectionMode = 'off' | 'any' | TeamColor;
 export type TeamPickingMode = 'random' | 'elo-balanced';
 
@@ -7,6 +8,7 @@ export interface Player {
   name: string;
   avatar_color: string;
   current_elo: number;
+  current_win_streak: number;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -43,6 +45,7 @@ export interface PlayerStatistic {
   name: string;
   avatar_color: string;
   current_elo: number;
+  current_win_streak: number;
   games: number;
   wins: number;
   losses: number;

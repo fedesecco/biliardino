@@ -1,49 +1,33 @@
 import type { MonthlyEloRanking, PlayerStatistic } from './models';
-import { calculateMonthlyBadgesFromStandings } from './monthly-badges';
+import {
+  calculateMonthlyBadgesFromStandings,
+  calculateWinStreakBadges,
+} from './monthly-badges';
 
-describe('monthly badges', () => {
-  it('combines monthly awards with medals from the global ranking', () => {
-    const badges = calculateMonthlyBadgesFromStandings(
-      [
-        standing('monthly-leader', 1, 24),
-        standing('monthly-runner', 2, 12),
-        standing('monthly-last', 3, -18),
-      ],
-      [
-        statistic('unranked', 1400, 9),
-        statistic('monthly-leader', 1300, 10),
-        statistic('global-second', 1200, 10),
-        statistic('global-third', 1100, 10),
-        statistic('monthly-runner', 1000, 10),
-      ],
-    );
+describe('badges', () => {
+  it('calculates monthly awards without global ranking medals', () => {
+    const badges = calculateMonthlyBadgesFromStandings([
+      standing('monthly-leader', 1, 24),
+      standing('monthly-runner', 2, 12),
+      standing('monthly-last', 3, -18),
+    ]);
 
     expect(badges.get('monthly-leader')?.map(({ kind }) => kind)).toEqual([
       'monthly-champion',
-      'global-gold',
     ]);
     expect(badges.get('monthly-runner')).toBeUndefined();
     expect(badges.get('monthly-last')?.map(({ kind }) => kind)).toEqual([
       'monthly-last',
     ]);
-    expect(badges.get('global-second')?.map(({ kind }) => kind)).toEqual([
-      'global-silver',
-    ]);
-    expect(badges.get('global-third')?.map(({ kind }) => kind)).toEqual([
-      'global-bronze',
-    ]);
   });
 
   it('resolves tied source ranks to one monthly award per position', () => {
-    const badges = calculateMonthlyBadgesFromStandings(
-      [
-        standing('alpha', 1, 24),
-        standing('beta', 1, 24),
-        standing('gamma', 3, 6),
-        standing('omega', 4, -18),
-      ],
-      [],
-    );
+    const badges = calculateMonthlyBadgesFromStandings([
+      standing('alpha', 1, 24),
+      standing('beta', 1, 24),
+      standing('gamma', 3, 6),
+      standing('omega', 4, -18),
+    ]);
 
     expect(badges.get('alpha')?.map(({ kind }) => kind)).toEqual([
       'monthly-champion',
@@ -64,24 +48,18 @@ describe('monthly badges', () => {
   });
 
   it('removes the old leader badge when the monthly ranking changes', () => {
-    const before = calculateMonthlyBadgesFromStandings(
-      [
-        standing('alice', 1, 30),
-        standing('bob', 2, 20),
-        standing('carlo', 3, 10),
-        standing('dora', 4, -10),
-      ],
-      [],
-    );
-    const after = calculateMonthlyBadgesFromStandings(
-      [
-        standing('bob', 1, 32),
-        standing('alice', 2, 30),
-        standing('carlo', 3, 10),
-        standing('dora', 4, -10),
-      ],
-      [],
-    );
+    const before = calculateMonthlyBadgesFromStandings([
+      standing('alice', 1, 30),
+      standing('bob', 2, 20),
+      standing('carlo', 3, 10),
+      standing('dora', 4, -10),
+    ]);
+    const after = calculateMonthlyBadgesFromStandings([
+      standing('bob', 1, 32),
+      standing('alice', 2, 30),
+      standing('carlo', 3, 10),
+      standing('dora', 4, -10),
+    ]);
 
     expect(before.get('alice')?.map(({ kind }) => kind)).toEqual([
       'monthly-champion',
@@ -90,6 +68,39 @@ describe('monthly badges', () => {
     expect(after.get('bob')?.map(({ kind }) => kind)).toEqual([
       'monthly-champion',
     ]);
+  });
+
+  it('assigns the highest matching current win streak badge', () => {
+    const badges = calculateWinStreakBadges([
+      statistic('below-threshold', 1000, 12, 2),
+      statistic('streak-three', 1000, 12, 3),
+      statistic('streak-five', 1000, 12, 5),
+      statistic('streak-ten', 1000, 12, 10),
+      statistic('streak-longer', 1000, 12, 14),
+    ]);
+
+    expect(badges.get('below-threshold')).toBeUndefined();
+    expect(badges.get('streak-three')?.map(({ kind }) => kind)).toEqual([
+      'win-streak-3',
+    ]);
+    expect(badges.get('streak-five')?.map(({ kind }) => kind)).toEqual([
+      'win-streak-5',
+    ]);
+    expect(badges.get('streak-ten')?.map(({ kind }) => kind)).toEqual([
+      'win-streak-10',
+    ]);
+    expect(badges.get('streak-longer')?.map(({ kind }) => kind)).toEqual([
+      'win-streak-10',
+    ]);
+    expect(badges.get('streak-three')?.[0].label).toBe('Winstreak: 3');
+    expect(badges.get('streak-five')?.[0].label).toBe('Winstreak: 5');
+    expect(badges.get('streak-longer')?.[0].label).toBe('Winstreak: 14');
+    expect(badges.get('streak-longer')?.[0].description).toBe(
+      '14 vittorie consecutive',
+    );
+    expect(badges.get('streak-ten')?.[0].description).toBe(
+      '10 vittorie consecutive',
+    );
   });
 });
 
@@ -110,12 +121,14 @@ function statistic(
   id: string,
   currentElo: number,
   games: number,
+  currentWinStreak: number,
 ): PlayerStatistic {
   return {
     id,
     name: id,
     avatar_color: '#a8e6cf',
     current_elo: currentElo,
+    current_win_streak: currentWinStreak,
     games,
     wins: 0,
     losses: 0,

@@ -13,18 +13,42 @@
     <app-player-avatar
       [name]="player.name"
       [color]="player.avatar_color"
+      [medal]="store.globalMedalFor(player.id)"
       size="large"
     />
     <div>
       <span>Giocatore</span>
-      <h1 id="player-title">{{ player.name }}</h1>
-      @if (playerBadges(); as badges) {
-      @if (badges.length > 0) {
+      <h1
+        id="player-title"
+        [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+        [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+        [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+      >
+        {{ player.name }}
+      </h1>
+      @if (globalMedalArtwork() || playerBadges().length > 0) {
       <div
         class="profile-badges"
         role="list"
-        aria-label="Badge correnti del giocatore"
+        aria-label="Riconoscimenti correnti del giocatore"
       >
+        @if (globalMedalArtwork(); as medal) {
+        <div
+          class="profile-badge global-medal-badge"
+          role="listitem"
+          [attr.aria-label]="medal.alt"
+        >
+          <img
+            [src]="medal.imageUrl"
+            alt=""
+            aria-hidden="true"
+            width="128"
+            height="128"
+          />
+          <span>{{ medal.label }}</span>
+        </div>
+        }
+        @if (playerBadges(); as badges) {
         @for (badge of badges; track badge.kind) {
         <div class="profile-badge" role="listitem">
           <button
@@ -44,8 +68,8 @@
           </button>
         </div>
         }
+        }
       </div>
-      }
       }
     </div>
     <strong
@@ -323,13 +347,15 @@
     @if (statistic(); as player) {
     <strong>{{ player.name }}</strong>
     }
-    @if (award.value.elo !== null) {
+    @if (award.value.description; as description) {
+    <p>{{ description }}</p>
+    } @else if (award.value.elo !== null) {
     <p>
       {{ award.value.elo > 0 ? '+' : '' }}{{ award.value.elo | number: '1.0-2'
       }} ELO questo mese
     </p>
     } @else {
-    <p>Riconoscimento nella classifica globale</p>
+    <p>Riconoscimento corrente</p>
     }
     }
   </article>

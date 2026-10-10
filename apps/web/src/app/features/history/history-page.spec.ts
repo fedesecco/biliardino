@@ -17,10 +17,10 @@ describe('HistoryPage', () => {
   const loadInitialHistory = vi.fn().mockResolvedValue(undefined);
   const loadHistoryForPlayer = vi.fn().mockResolvedValue(undefined);
   const loadMoreHistory = vi.fn().mockResolvedValue(undefined);
-  const monthlyBadgesFor = vi.fn().mockReturnValue([]);
+  const badgesFor = vi.fn().mockReturnValue([]);
   beforeEach(async () => {
     deleteMatch.mockClear();
-    monthlyBadgesFor.mockClear();
+    badgesFor.mockClear();
     loadHistoryForPlayer.mockClear();
 
     await TestBed.configureTestingModule({
@@ -40,7 +40,8 @@ describe('HistoryPage', () => {
             loadHistoryForPlayer,
             loadMoreHistory,
             deleteMatch,
-            monthlyBadgesFor,
+            badgesFor,
+            globalMedalFor: vi.fn().mockReturnValue(null),
           },
         },
         {
@@ -84,12 +85,13 @@ describe('HistoryPage', () => {
   });
 
   it('renders clickable player profiles with their current badges', () => {
-    monthlyBadgesFor.mockReturnValue([
+    badgesFor.mockReturnValue([
       {
-        kind: 'global-gold',
-        label: "Medaglia d'oro",
+        kind: 'win-streak-5',
+        label: 'Winstreak: 5',
+        description: '5 vittorie consecutive',
         elo: null,
-        imageUrl: '/awards/oro.webp',
+        imageUrl: '/awards/winstreak-5.webp',
       },
     ]);
     const fixture = TestBed.createComponent(HistoryPage);
@@ -105,8 +107,8 @@ describe('HistoryPage', () => {
     expect(redPlayerLink.querySelector('app-player-avatar')).not.toBeNull();
     expect(
       redPlayerLink.querySelector<HTMLImageElement>('img')?.getAttribute('src'),
-    ).toBe('/awards/oro.webp');
-    expect(monthlyBadgesFor).toHaveBeenCalledWith('red-player');
+    ).toBe('/awards/winstreak-5.webp');
+    expect(badgesFor).toHaveBeenCalledWith('red-player');
 
     fixture.destroy();
   });

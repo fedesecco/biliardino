@@ -20,9 +20,15 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badges]="store.monthlyBadgesFor(player.id)"
+            [medal]="store.globalMedalFor(player.id)"
+            [badges]="store.badgesFor(player.id)"
           />
-          <strong>{{ player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+            >{{ player.name }}</strong
+          >
         </div>
         }
       </div>
@@ -79,9 +85,15 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badges]="store.monthlyBadgesFor(player.id)"
+            [medal]="store.globalMedalFor(player.id)"
+            [badges]="store.badgesFor(player.id)"
           />
-          <strong>{{ player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+            >{{ player.name }}</strong
+          >
         </div>
         }
       </div>
@@ -218,10 +230,16 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
-          [badges]="store.monthlyBadgesFor(player.id)"
+          [medal]="store.globalMedalFor(player.id)"
+          [badges]="store.badgesFor(player.id)"
         />
         <span class="player-copy">
-          <strong>{{ player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+            >{{ player.name }}</strong
+          >
           <small>{{ player.current_elo | number: '1.0-0' }} ELO</small>
         </span>
       </button>

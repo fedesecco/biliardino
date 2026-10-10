@@ -18,10 +18,14 @@ import type {
   PlayerRivalry,
   TeamColor,
 } from '../../core/models';
-import type { MonthlyBadge } from '../../core/monthly-badges';
+import type { Badge } from '../../core/monthly-badges';
 import { PlayerAvatar } from '../../core/player-avatar';
 import { italianMonthLabel } from '../../core/rome-calendar';
 import { TrophyArtwork } from '../../core/trophy-artwork';
+import {
+  GLOBAL_MEDAL_ARTWORK,
+  type GlobalMedalArtwork,
+} from '../../core/recognitions';
 
 interface PlayerAward extends MonthlyChampion {
   exclusive: boolean;
@@ -29,9 +33,10 @@ interface PlayerAward extends MonthlyChampion {
   title: string;
 }
 
+
 type SelectedAward =
   | { type: 'trophy'; value: PlayerAward }
-  | { type: 'badge'; value: MonthlyBadge };
+  | { type: 'badge'; value: Badge };
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -60,8 +65,15 @@ export class PlayerDetailPage {
         .statistics()
         .find((statistic) => statistic.id === this.playerId()) ?? null,
   );
+  protected readonly globalMedalArtwork = computed<GlobalMedalArtwork | null>(
+    () => {
+      const player = this.statistic();
+      const medal = player ? this.store.globalMedalFor(player.id) : null;
+      return medal ? GLOBAL_MEDAL_ARTWORK[medal] : null;
+    },
+  );
   protected readonly playerBadges = computed(() =>
-    this.store.monthlyBadgesFor(this.playerId()),
+    this.store.badgesFor(this.playerId()),
   );
   protected readonly recentMatches = signal<MatchRecord[]>([]);
   protected readonly recentMatchesLoading = signal(true);
@@ -205,7 +217,7 @@ export class PlayerDetailPage {
     this.selectedAward.set({ type: 'trophy', value: trophy });
   }
 
-  protected openBadge(badge: MonthlyBadge): void {
+  protected openBadge(badge: Badge): void {
     this.selectedAward.set({ type: 'badge', value: badge });
   }
 

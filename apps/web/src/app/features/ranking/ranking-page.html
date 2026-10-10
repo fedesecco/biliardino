@@ -42,10 +42,16 @@
         <app-player-avatar
           [name]="row.stat.name"
           [color]="row.stat.avatar_color"
-          [badges]="store.monthlyBadgesFor(row.stat.id)"
+          [medal]="row.medal"
+          [badges]="store.badgesFor(row.stat.id)"
         />
         <span class="player-name">
-          <strong>{{ row.stat.name }}</strong>
+          <strong
+            [class.medal-name-gold]="row.medal === 'gold'"
+            [class.medal-name-silver]="row.medal === 'silver'"
+            [class.medal-name-bronze]="row.medal === 'bronze'"
+            >{{ row.stat.name }}</strong
+          >
           <small>{{ row.stat.wins }}V · {{ row.stat.losses }}S</small>
           @if (row.gamesToRank; as gamesToRank) {
           <small class="classification-progress">

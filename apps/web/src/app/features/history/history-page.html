@@ -126,10 +126,16 @@
               <app-player-avatar
                 [name]="participant.player.name"
                 [color]="participant.player.avatar_color"
-                [badges]="store.monthlyBadgesFor(participant.player_id)"
+                [medal]="store.globalMedalFor(participant.player_id)"
+                [badges]="store.badgesFor(participant.player_id)"
                 size="small"
               />
-              <strong>{{ participant.player.name }}</strong>
+              <strong
+                [class.medal-name-gold]="store.globalMedalFor(participant.player_id) === 'gold'"
+                [class.medal-name-silver]="store.globalMedalFor(participant.player_id) === 'silver'"
+                [class.medal-name-bronze]="store.globalMedalFor(participant.player_id) === 'bronze'"
+                >{{ participant.player.name }}</strong
+              >
             </a>
             }
           </div>
@@ -161,10 +167,16 @@
               <app-player-avatar
                 [name]="participant.player.name"
                 [color]="participant.player.avatar_color"
-                [badges]="store.monthlyBadgesFor(participant.player_id)"
+                [medal]="store.globalMedalFor(participant.player_id)"
+                [badges]="store.badgesFor(participant.player_id)"
                 size="small"
               />
-              <strong>{{ participant.player.name }}</strong>
+              <strong
+                [class.medal-name-gold]="store.globalMedalFor(participant.player_id) === 'gold'"
+                [class.medal-name-silver]="store.globalMedalFor(participant.player_id) === 'silver'"
+                [class.medal-name-bronze]="store.globalMedalFor(participant.player_id) === 'bronze'"
+                >{{ participant.player.name }}</strong
+              >
             </a>
             }
           </div>

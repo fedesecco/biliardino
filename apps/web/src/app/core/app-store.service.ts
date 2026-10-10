@@ -14,6 +14,7 @@ import type {
   Player,
   PlayerRivalry,
   PlayerStatistic,
+  PlayerAvatarMedal,
   SelectionMode,
   TeamDraft,
   TeamPickingMode,
@@ -22,8 +23,15 @@ import { SupabaseService } from './supabase.service';
 import type { Database } from './database.types';
 import {
   calculateMonthlyBadgesFromStandings,
-  type MonthlyBadge,
+  calculateWinStreakBadges,
+  type Badge,
 } from './monthly-badges';
+import {
+  findNewRecognitions,
+  GLOBAL_MEDAL_ARTWORK,
+  type NewRecognition,
+  type RecognitionSnapshot,
+} from './recognitions';
 import { romeMonthKey } from './rome-calendar';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
@@ -37,6 +45,67 @@ interface MatchHistoryCursor {
   playedAt: string;
   id: string;
 }
+
+const MINIMUM_GAMES_FOR_GLOBAL_RANKING = 10;
+const GLOBAL_MEDAL_BY_POSITION: Record<
+  1 | 2 | 3,
+  PlayerAvatarMedal
+> = {
+  1: 'gold',
+  2: 'silver',
+  3: 'bronze',
+};
+
+const DEMO_RECOGNITIONS: readonly NewRecognition[] = [
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'global-medal',
+    label: GLOBAL_MEDAL_ARTWORK.gold.label,
+    description: GLOBAL_MEDAL_ARTWORK.gold.description,
+    imageUrl: GLOBAL_MEDAL_ARTWORK.gold.imageUrl,
+  },
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'monthly-champion',
+    label: 'Bomboclat',
+    description: 'In testa alla classifica mensile',
+    imageUrl: '/awards/bomboclat.webp',
+  },
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'monthly-last',
+    label: 'Scemo del Villaggio',
+    description: 'Ultima posizione nella classifica mensile',
+    imageUrl: '/awards/scemo.webp',
+  },
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'win-streak-3',
+    label: 'Winstreak: 3',
+    description: '3 vittorie consecutive',
+    imageUrl: '/awards/winstreak-3.webp',
+  },
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'win-streak-5',
+    label: 'Winstreak: 5',
+    description: '5 vittorie consecutive',
+    imageUrl: '/awards/winstreak-5.webp',
+  },
+  {
+    playerId: 'demo-player',
+    playerName: 'Mario Rossi',
+    kind: 'win-streak-10',
+    label: 'Winstreak: 10',
+    description: '10 vittorie consecutive',
+    imageUrl: '/awards/winstreak-10.webp',
+  },
+];
 
 @Injectable({ providedIn: 'root' })
 export class AppStore {
@@ -63,15 +132,61 @@ export class AppStore {
   readonly loading = signal(true);
   readonly error = signal<string | null>(null);
   readonly notice = signal<string | null>(null);
+  readonly newRecognitions = signal<NewRecognition[]>([]);
+  readonly currentRecognition = computed(
+    () => this.newRecognitions()[0] ?? null,
+  );
   readonly activePlayers = computed(() =>
     this.players().filter((player) => player.active),
   );
-  readonly monthlyBadges = computed(() =>
-    calculateMonthlyBadgesFromStandings(
+  readonly globalMedals = computed(() => {
+    const medals = new Map<string, PlayerAvatarMedal>();
+    const rankedPlayers = this.statistics()
+      .filter(
+        (statistic) =>
+          statistic.games >= MINIMUM_GAMES_FOR_GLOBAL_RANKING,
+      )
+      .sort((left, right) => {
+        const eloDifference = right.current_elo - left.current_elo;
+        if (eloDifference !== 0) {
+          return eloDifference;
+        }
+
+        if (left.id < right.id) {
+          return -1;
+        }
+
+        if (left.id > right.id) {
+          return 1;
+        }
+
+        return 0;
+      })
+      .slice(0, 3);
+
+    for (const [index, statistic] of rankedPlayers.entries()) {
+      const position = (index + 1) as 1 | 2 | 3;
+      medals.set(statistic.id, GLOBAL_MEDAL_BY_POSITION[position]);
+    }
+
+    return medals;
+  });
+  readonly badges = computed(() => {
+    const badges = calculateMonthlyBadgesFromStandings(
       this.monthlyRankings(),
+    );
+
+    for (const [playerId, streakBadges] of calculateWinStreakBadges(
       this.statistics(),
-    ),
-  );
+    )) {
+      badges.set(playerId, [
+        ...(badges.get(playerId) ?? []),
+        ...streakBadges,
+      ]);
+    }
+
+    return badges;
+  });
   readonly playSelection = signal(new Map<string, SelectionMode>());
   readonly teamPickingMode = signal<TeamPickingMode>('elo-balanced');
   readonly playDraft = signal<TeamDraft | null>(null);
@@ -88,8 +203,12 @@ export class AppStore {
     this.subscribeToChanges();
   }
 
-  monthlyBadgesFor(playerId: string): MonthlyBadge[] {
-    return this.monthlyBadges().get(playerId) ?? [];
+  globalMedalFor(playerId: string): PlayerAvatarMedal | null {
+    return this.globalMedals().get(playerId) ?? null;
+  }
+
+  badgesFor(playerId: string): Badge[] {
+    return this.badges().get(playerId) ?? [];
   }
 
   async refresh(): Promise<void> {
@@ -224,6 +343,10 @@ export class AppStore {
     blueScore: number,
   ): Promise<void> {
     this.assertCompanyUser();
+    const participantIds = [
+      ...new Set([...redPlayers, ...bluePlayers]),
+    ];
+    const before = this.recognitionSnapshots(participantIds);
     const { error } = await this.supabase.client.rpc('record_match', {
       p_red_players: redPlayers,
       p_blue_players: bluePlayers,
@@ -237,6 +360,9 @@ export class AppStore {
 
     this.notice.set('Partita registrata. Classifica aggiornata.');
     await this.refreshMatchData();
+    this.newRecognitions.set(
+      findNewRecognitions(before, this.recognitionSnapshots(participantIds)),
+    );
   }
 
   async deleteMatch(matchId: string): Promise<void> {
@@ -295,6 +421,37 @@ export class AppStore {
     this.notice.set(null);
   }
 
+  dismissRecognition(): void {
+    this.newRecognitions.update((recognitions) => recognitions.slice(1));
+  }
+
+  dismissRecognitions(): void {
+    this.newRecognitions.set([]);
+  }
+
+  showDemoRecognition(): void {
+    const recognition =
+      DEMO_RECOGNITIONS[
+        Math.floor(Math.random() * DEMO_RECOGNITIONS.length)
+      ];
+    this.newRecognitions.set([recognition]);
+  }
+
+  private recognitionSnapshots(
+    playerIds: readonly string[],
+  ): RecognitionSnapshot[] {
+    const requestedIds = new Set(playerIds);
+    return this.statistics()
+      .filter((statistic) => requestedIds.has(statistic.id))
+      .map((statistic) => ({
+        playerId: statistic.id,
+        playerName: statistic.name,
+        currentWinStreak: statistic.current_win_streak,
+        badges: [...this.badgesFor(statistic.id)],
+        globalMedal: this.globalMedalFor(statistic.id),
+      }));
+  }
+
   private async loadPlayers(): Promise<void> {
     const { data, error } = await this.supabase.client
       .from('players')
@@ -339,6 +496,7 @@ export class AppStore {
             row.avatar_color ??
             '#a8e6cf',
           current_elo: Number(row.current_elo ?? 1000),
+          current_win_streak: Number(row.current_win_streak ?? 0),
           games: Number(row.games ?? 0),
           wins: Number(row.wins ?? 0),
           losses: Number(row.losses ?? 0),

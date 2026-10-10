@@ -92,3 +92,42 @@
   </button>
   }
 </div>
+
+<dialog
+  tabindex="-1"
+  #recognitionDialog
+  class="recognition-dialog"
+  aria-labelledby="recognition-dialog-title"
+  (keydown.escape)="store.dismissRecognitions()"
+  (close)="store.dismissRecognitions()"
+>
+  @if (store.currentRecognition(); as recognition) {
+  <h2 id="recognition-dialog-title">
+    {{ recognitionDialogTitle(recognition) }}
+  </h2>
+  <div class="recognition-list">
+    <article class="recognition-item">
+      <img
+        [src]="recognition.imageUrl"
+        alt=""
+        aria-hidden="true"
+        width="96"
+        height="96"
+      />
+      <div class="recognition-copy">
+        <span>{{ recognition.label }}</span>
+        <small>{{ recognition.description }}</small>
+      </div>
+    </article>
+  </div>
+  <div class="recognition-actions">
+    <button
+      class="primary-button recognition-confirm"
+      type="button"
+      (click)="store.dismissRecognition()"
+    >
+      OK
+    </button>
+  </div>
+  }
+</dialog>

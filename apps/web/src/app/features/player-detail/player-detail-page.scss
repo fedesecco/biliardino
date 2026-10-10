@@ -57,6 +57,10 @@
     max-width: 5rem;
     text-align: center;
 
+    &.global-medal-badge span {
+      white-space: nowrap;
+    }
+
     .profile-badge-button {
       display: grid;
       gap: 0.2rem;

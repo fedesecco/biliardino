@@ -1,44 +1,22 @@
 import type { MonthlyEloRanking, PlayerStatistic } from './models';
 
-export type MonthlyBadgeKind =
+export type BadgeKind =
   | 'monthly-champion'
   | 'monthly-last'
-  | 'global-gold'
-  | 'global-silver'
-  | 'global-bronze';
+  | 'win-streak-3'
+  | 'win-streak-5'
+  | 'win-streak-10';
 
-export interface MonthlyBadge {
-  kind: MonthlyBadgeKind;
+export interface Badge {
+  kind: BadgeKind;
   label: string;
+  description?: string;
   elo: number | null;
   imageUrl: string;
 }
 
-const GLOBAL_MEDAL_BY_POSITION: Record<
-  1 | 2 | 3,
-  Pick<MonthlyBadge, 'kind' | 'label' | 'imageUrl'>
-> = {
-  1: {
-    kind: 'global-gold',
-    label: "Medaglia d'oro",
-    imageUrl: '/awards/oro.webp',
-  },
-  2: {
-    kind: 'global-silver',
-    label: "Medaglia d'argento",
-    imageUrl: '/awards/argento.webp',
-  },
-  3: {
-    kind: 'global-bronze',
-    label: 'Medaglia di bronzo',
-    imageUrl: '/awards/bronzo.webp',
-  },
-};
-
-const MINIMUM_GAMES_FOR_GLOBAL_RANKING = 10;
-
 const CHAMPION_BADGE: Pick<
-  MonthlyBadge,
+  Badge,
   'kind' | 'label' | 'imageUrl'
 > = {
   kind: 'monthly-champion',
@@ -46,22 +24,43 @@ const CHAMPION_BADGE: Pick<
   imageUrl: '/awards/bomboclat.webp',
 };
 
-const LAST_BADGE: Pick<MonthlyBadge, 'kind' | 'label' | 'imageUrl'> = {
+const LAST_BADGE: Pick<Badge, 'kind' | 'label' | 'imageUrl'> = {
   kind: 'monthly-last',
   label: 'Scemo del Villaggio',
   imageUrl: '/awards/scemo.webp',
 };
 
+const WIN_STREAK_BADGES: readonly {
+  minimum: number;
+  kind: BadgeKind;
+  imageUrl: string;
+}[] = [
+  {
+    minimum: 3,
+    kind: 'win-streak-3',
+    imageUrl: '/awards/winstreak-3.webp',
+  },
+  {
+    minimum: 5,
+    kind: 'win-streak-5',
+    imageUrl: '/awards/winstreak-5.webp',
+  },
+  {
+    minimum: 10,
+    kind: 'win-streak-10',
+    imageUrl: '/awards/winstreak-10.webp',
+  },
+];
+
 export function calculateMonthlyBadgesFromStandings(
   monthlyStandings: MonthlyEloRanking[],
-  globalStatistics: PlayerStatistic[],
-): Map<string, MonthlyBadge[]> {
-  const badges = new Map<string, MonthlyBadge[]>();
+): Map<string, Badge[]> {
+  const badges = new Map<string, Badge[]>();
 
   const addBadge = (
     playerId: string,
     elo: number | null,
-    badge: Pick<MonthlyBadge, 'kind' | 'label' | 'imageUrl'>,
+    badge: Pick<Badge, 'kind' | 'label' | 'imageUrl'>,
   ): void => {
     const playerBadges = badges.get(playerId) ?? [];
     playerBadges.push({ ...badge, elo });
@@ -107,38 +106,32 @@ export function calculateMonthlyBadgesFromStandings(
     }
   }
 
-  const orderedGlobalStatistics = [
-    ...new Map(
-      globalStatistics
-        .filter(
-          (statistic) =>
-            statistic.games >= MINIMUM_GAMES_FOR_GLOBAL_RANKING,
-        )
-        .sort((left, right) => {
-          const eloDifference = right.current_elo - left.current_elo;
-          if (eloDifference !== 0) {
-            return eloDifference;
-          }
+  return badges;
+}
 
-          if (left.id < right.id) {
-            return -1;
-          }
+export function calculateWinStreakBadges(
+  statistics: PlayerStatistic[],
+): Map<string, Badge[]> {
+  const badges = new Map<string, Badge[]>();
 
-          if (left.id > right.id) {
-            return 1;
-          }
+  for (const statistic of statistics) {
+    const badge = [...WIN_STREAK_BADGES]
+      .reverse()
+      .find(({ minimum }) => statistic.current_win_streak >= minimum);
 
-          return 0;
-        })
-        .map((statistic) => [statistic.id, statistic] as const),
-    ).values(),
-  ].slice(0, 3);
+    if (!badge) {
+      continue;
+    }
 
-  for (const [index, statistic] of orderedGlobalStatistics.entries()) {
-    const medal = GLOBAL_MEDAL_BY_POSITION[
-      (index + 1) as 1 | 2 | 3
-    ];
-    addBadge(statistic.id, null, medal);
+    badges.set(statistic.id, [
+      {
+        kind: badge.kind,
+        label: `Winstreak: ${statistic.current_win_streak}`,
+        description: `${statistic.current_win_streak} vittorie consecutive`,
+        elo: null,
+        imageUrl: badge.imageUrl,
+      },
+    ]);
   }
 
   return badges;

@@ -26,7 +26,7 @@ describe('PlayerAvatar', () => {
     expect(getComputedStyle(avatar).color).toBe('rgb(32, 35, 47)');
   });
 
-  it('exposes all current monthly badges through one accessible label', () => {
+  it('exposes all current badges through one accessible label', () => {
     fixture.componentRef.setInput('badges', [
       {
         kind: 'monthly-champion',
@@ -35,24 +35,38 @@ describe('PlayerAvatar', () => {
         imageUrl: '/awards/bomboclat.webp',
       },
       {
-        kind: 'global-gold',
-        label: "Medaglia d'oro",
-        elo: 12.5,
-        imageUrl: '/awards/oro.webp',
+        kind: 'win-streak-5',
+        label: 'Winstreak: 5',
+        description: '5 vittorie consecutive',
+        elo: null,
+        imageUrl: '/awards/winstreak-5.webp',
       },
     ]);
     fixture.detectChanges();
 
     const badges = fixture.nativeElement.querySelector(
-      '.monthly-badges',
+      '.badges',
     ) as HTMLElement;
     expect(badges.getAttribute('aria-label')).toBe(
-      "Bomboclat, Medaglia d'oro",
+      'Bomboclat, Winstreak: 5',
     );
     expect(
       [...badges.querySelectorAll<HTMLImageElement>('img')].map((image) =>
         image.getAttribute('src'),
       ),
-    ).toEqual(['/awards/bomboclat.webp', '/awards/oro.webp']);
+    ).toEqual(['/awards/bomboclat.webp', '/awards/winstreak-5.webp']);
+  });
+
+  it('uses the global ranking medal only as a colored border', () => {
+    fixture.componentRef.setInput('medal', 'gold');
+    fixture.detectChanges();
+
+    const avatar = fixture.nativeElement as HTMLElement;
+    expect(avatar.classList.contains('avatar-medal-gold')).toBe(true);
+    expect(getComputedStyle(avatar).borderTopColor).toBe('rgb(178, 122, 0)');
+    expect(getComputedStyle(avatar).backgroundImage).not.toContain(
+      'linear-gradient',
+    );
+    expect(getComputedStyle(avatar).color).toBe('rgb(32, 35, 47)');
   });
 });

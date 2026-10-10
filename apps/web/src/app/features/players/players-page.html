@@ -106,11 +106,17 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
-          [badges]="store.monthlyBadgesFor(player.id)"
+          [medal]="store.globalMedalFor(player.id)"
+          [badges]="store.badgesFor(player.id)"
           size="large"
         />
         <div>
-          <strong>{{ player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+            >{{ player.name }}</strong
+          >
           <span>
             {{ player.current_elo }} ELO · {{ player.active ? 'Attivo' : 'Fuori
             rosa' }}

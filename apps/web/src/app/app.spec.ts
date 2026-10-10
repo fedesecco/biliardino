@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
 import { AppStore } from './core/app-store.service';
+import type { NewRecognition } from './core/recognitions';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -32,9 +33,62 @@ describe('App', () => {
     );
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.version-link');
-    expect(versionLink?.textContent?.trim()).toBe('v1.4.1');
+    expect(versionLink?.textContent?.trim()).toBe('v1.5.0');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
     expect(compiled.querySelector('.app-footer')).toBeNull();
+  });
+
+  it('shows queued recognitions one dialog at a time', () => {
+    const fixture = TestBed.createComponent(App);
+    const store = TestBed.inject(AppStore);
+    const recognitions: NewRecognition[] = [
+      {
+        playerId: 'player-one',
+        playerName: 'Mario Rossi',
+        kind: 'monthly-champion',
+        label: 'Bomboclat',
+        description: 'In testa alla classifica mensile',
+        imageUrl: '/awards/bomboclat.webp',
+      },
+      {
+        playerId: 'player-two',
+        playerName: 'Luigi Bianchi',
+        kind: 'global-medal',
+        label: 'Oro in classifica',
+        description: 'Medaglia di classifica: primo posto globale',
+        imageUrl: '/awards/oro.webp',
+      },
+    ];
+    store.newRecognitions.set(recognitions);
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('h2')?.textContent?.trim(),
+    ).toBe('Nuovo badge Bomboclat per Mario Rossi!');
+    expect(
+      fixture.nativeElement.querySelector('.recognition-item strong'),
+    ).toBeNull();
+
+    (
+      fixture.nativeElement.querySelector(
+        '.recognition-confirm',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('h2')?.textContent?.trim(),
+    ).toBe('Nuova medaglia di classifica per Luigi Bianchi!');
+
+    (
+      fixture.nativeElement.querySelector(
+        '.recognition-confirm',
+      ) as HTMLButtonElement
+    ).click();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('h2')).toBeNull();
+    fixture.destroy();
   });
 
   it('dismisses notices automatically after two seconds', () => {

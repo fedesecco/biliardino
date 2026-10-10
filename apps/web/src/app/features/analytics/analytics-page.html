@@ -34,10 +34,16 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
-            [badges]="store.monthlyBadgesFor(player.id)"
+            [medal]="store.globalMedalFor(player.id)"
+            [badges]="store.badgesFor(player.id)"
             size="small"
           />
-          <strong>{{ player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(player.id) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(player.id) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(player.id) === 'bronze'"
+            >{{ player.name }}</strong
+          >
           <b>{{ player.current_elo | number: '1.0-0' }}</b>
         </div>
         }
@@ -74,11 +80,17 @@
             <app-player-avatar
               [name]="leader.player.name"
               [color]="leader.player.avatar_color"
-              [badges]="store.monthlyBadgesFor(leader.playerId)"
+              [medal]="store.globalMedalFor(leader.playerId)"
+              [badges]="store.badgesFor(leader.playerId)"
             />
             <span>
               <small>In testa</small>
-              <strong>{{ leader.player.name }}</strong>
+              <strong
+                [class.medal-name-gold]="store.globalMedalFor(leader.playerId) === 'gold'"
+                [class.medal-name-silver]="store.globalMedalFor(leader.playerId) === 'silver'"
+                [class.medal-name-bronze]="store.globalMedalFor(leader.playerId) === 'bronze'"
+                >{{ leader.player.name }}</strong
+              >
             </span>
             <b
               >{{ leader.elo > 0 ? '+' : '' }}{{ leader.elo | number: '1.0-2' }}
@@ -108,10 +120,16 @@
           <app-player-avatar
             [name]="standing.player.name"
             [color]="standing.player.avatar_color"
-            [badges]="store.monthlyBadgesFor(standing.playerId)"
+            [medal]="store.globalMedalFor(standing.playerId)"
+            [badges]="store.badgesFor(standing.playerId)"
             size="small"
           />
-          <strong>{{ standing.player.name }}</strong>
+          <strong
+            [class.medal-name-gold]="store.globalMedalFor(standing.playerId) === 'gold'"
+            [class.medal-name-silver]="store.globalMedalFor(standing.playerId) === 'silver'"
+            [class.medal-name-bronze]="store.globalMedalFor(standing.playerId) === 'bronze'"
+            >{{ standing.player.name }}</strong
+          >
           <b
             [class.positive]="standing.elo > 0"
             [class.negative]="standing.elo < 0"

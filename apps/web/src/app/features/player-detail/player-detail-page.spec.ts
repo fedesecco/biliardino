@@ -25,6 +25,7 @@ const player: PlayerStatistic = {
   name: 'Mario Rossi',
   avatar_color: '#a8e6cf',
   current_elo: 1120,
+  current_win_streak: 5,
   games: 12,
   wins: 8,
   losses: 4,
@@ -123,13 +124,15 @@ const profileBadges = [
     imageUrl: '/awards/bomboclat.webp',
   },
   {
-    kind: 'global-gold' as const,
-    label: "Medaglia d'oro",
+    kind: 'win-streak-5' as const,
+    label: 'Winstreak: 5',
+    description: '5 vittorie consecutive',
     elo: null,
-    imageUrl: '/awards/oro.webp',
+    imageUrl: '/awards/winstreak-5.webp',
   },
 ];
-const monthlyBadgesFor = vi.fn().mockReturnValue(profileBadges);
+const badgesFor = vi.fn().mockReturnValue(profileBadges);
+const globalMedalFor = vi.fn().mockReturnValue('gold' as const);
 
 describe('PlayerDetailPage', () => {
   let routeParamMap: BehaviorSubject<ParamMap>;
@@ -137,7 +140,8 @@ describe('PlayerDetailPage', () => {
     routeParamMap = new BehaviorSubject(convertToParamMap({ id: player.id }));
     loadPlayerRecentMatches.mockReset().mockResolvedValue([recentMatch]);
     loadPlayerRivalry.mockReset().mockResolvedValue(rivalry);
-    monthlyBadgesFor.mockClear().mockReturnValue(profileBadges);
+    badgesFor.mockClear().mockReturnValue(profileBadges);
+    globalMedalFor.mockClear().mockReturnValue('gold');
     await TestBed.configureTestingModule({
       imports: [PlayerDetailPage],
       providers: [
@@ -155,7 +159,8 @@ describe('PlayerDetailPage', () => {
             loading: signal(false),
             statistics: signal([player, secondPlayer]),
             monthlyChampions: signal([octoberTrophy, exclusiveTrophy, trophy]),
-            monthlyBadgesFor,
+            badgesFor,
+            globalMedalFor,
             loadPlayerRecentMatches,
             loadPlayerRivalry,
           },
@@ -208,7 +213,7 @@ describe('PlayerDetailPage', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(
-      element.querySelector('.player-hero app-player-avatar .monthly-badges'),
+      element.querySelector('.player-hero app-player-avatar .badges'),
     ).toBeNull();
     expect(
       [...element.querySelectorAll<HTMLImageElement>('.profile-badge img')].map(
@@ -218,19 +223,39 @@ describe('PlayerDetailPage', () => {
         }),
       ),
     ).toEqual([
-      { src: '/awards/bomboclat.webp', width: '128' },
       { src: '/awards/oro.webp', width: '128' },
+      { src: '/awards/bomboclat.webp', width: '128' },
+      { src: '/awards/winstreak-5.webp', width: '128' },
     ]);
     expect(
       [...element.querySelectorAll('.profile-badge span')].map((label) =>
         label.textContent?.trim(),
       ),
-    ).toEqual(['Bomboclat', "Medaglia d'oro"]);
+    ).toEqual(['Oro in classifica', 'Bomboclat', 'Winstreak: 5']);
     expect(element.querySelector('.player-hero > div > small')).toBeNull();
 
     fixture.destroy();
   });
+  it('renders the global ranking medal as the first profile badge', () => {
+    const fixture = TestBed.createComponent(PlayerDetailPage);
+    fixture.detectChanges();
 
+    const medal = fixture.nativeElement.querySelector(
+      '.global-medal-badge',
+    ) as HTMLElement | null;
+    const image = medal?.querySelector('img');
+
+    expect(medal?.getAttribute('aria-label')).toBe(
+      'Medaglia di classifica oro per il primo posto nella classifica globale',
+    );
+    expect(image?.getAttribute('src')).toBe('/awards/oro.webp');
+    expect(image?.getAttribute('width')).toBe('128');
+    expect(
+      medal?.parentElement?.querySelector('.profile-badge') === medal,
+    ).toBe(true);
+
+    fixture.destroy();
+  });
   it('opens a current badge in the shared award dialog', async () => {
     const fixture = TestBed.createComponent(PlayerDetailPage);
     fixture.detectChanges();
@@ -256,6 +281,37 @@ describe('PlayerDetailPage', () => {
     expect(dialog?.querySelector('h2')?.textContent?.trim()).toBe('Bomboclat');
     expect(dialog?.querySelector('p')?.textContent).toContain(
       '+24 ELO questo mese',
+    );
+
+    fixture.destroy();
+  });
+
+  it('describes the win streak in the shared award dialog', async () => {
+    const fixture = TestBed.createComponent(PlayerDetailPage);
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const badgeButtons = element.querySelectorAll<HTMLButtonElement>(
+      '.profile-badge-button',
+    );
+    badgeButtons[1].click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const dialog = fixture.nativeElement.querySelector(
+      '.award-dialog',
+    ) as HTMLElement | null;
+    expect(
+      dialog?.querySelector<HTMLImageElement>('.badge-dialog-image')?.getAttribute(
+        'src',
+      ),
+    ).toBe('/awards/winstreak-5.webp');
+    expect(dialog?.querySelector('h2')?.textContent?.trim()).toBe(
+      'Winstreak: 5',
+    );
+    expect(dialog?.querySelector('p')?.textContent?.trim()).toBe(
+      '5 vittorie consecutive',
     );
 
     fixture.destroy();

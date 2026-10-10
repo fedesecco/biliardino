@@ -158,6 +158,7 @@ export type Database = {
           avatar_color: string;
           created_at: string;
           current_elo: number;
+          current_win_streak: number;
           id: string;
           name: string;
           updated_at: string;
@@ -167,6 +168,7 @@ export type Database = {
           avatar_color?: string;
           created_at?: string;
           current_elo?: number;
+          current_win_streak?: number;
           id?: string;
           name: string;
           updated_at?: string;
@@ -177,6 +179,7 @@ export type Database = {
           created_at?: string;
           current_elo?: number;
           id?: string;
+          current_win_streak?: number;
           name?: string;
           updated_at?: string;
         };
@@ -343,6 +346,7 @@ export type Database = {
         Row: {
           avatar_color: string | null;
           current_elo: number | null;
+          current_win_streak: number | null;
           games: number | null;
           goal_diff: number | null;
           goals_against: number | null;
@@ -375,6 +379,10 @@ export type Database = {
         }[];
       };
       recalculate_elo: { Args: never; Returns: undefined };
+      recalculate_win_streaks: {
+        Args: { p_player_ids: string[] };
+        Returns: undefined;
+      };
       record_match: {
         Args: {
           p_blue_players: string[];

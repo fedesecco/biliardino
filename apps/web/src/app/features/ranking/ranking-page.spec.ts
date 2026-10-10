@@ -10,6 +10,7 @@ const statistic: PlayerStatistic = {
   name: 'Mario Rossi',
   avatar_color: '#a8e6cf',
   current_elo: 1120,
+  current_win_streak: 0,
   games: 12,
   wins: 8,
   losses: 4,
@@ -37,6 +38,16 @@ const statistics: PlayerStatistic[] = [
   },
 ];
 
+const globalMedalFor = vi.fn((playerId: string) => {
+  if (playerId === 'leader-id') {
+    return 'gold';
+  }
+  if (playerId === 'qualified-id') {
+    return 'silver';
+  }
+  return null;
+});
+
 describe('RankingPage', () => {
   it('keeps ELO order but numbers only classified players', async () => {
     await TestBed.configureTestingModule({
@@ -49,7 +60,8 @@ describe('RankingPage', () => {
             error: signal<string | null>(null),
             loading: signal(false),
             statistics: signal(statistics),
-            monthlyBadgesFor: vi.fn().mockReturnValue([]),
+            badgesFor: vi.fn().mockReturnValue([]),
+            globalMedalFor,
           },
         },
       ],
@@ -72,6 +84,24 @@ describe('RankingPage', () => {
       rows[1].querySelector('.classification-progress')?.textContent,
     ).toMatch(/Manca\s+1\s+partita/);
     expect(rows[2].querySelector('.rank')?.textContent?.trim()).toBe('2');
+    expect(
+      rows[0].querySelector('app-player-avatar')?.classList,
+    ).toContain('avatar-medal-gold');
+    expect(
+      rows[1].querySelector('app-player-avatar')?.classList,
+    ).not.toContain('avatar-medal-gold');
+    expect(
+      rows[2].querySelector('app-player-avatar')?.classList,
+    ).toContain('avatar-medal-silver');
+    expect(
+      rows[0].querySelector('.player-name strong')?.classList,
+    ).toContain('medal-name-gold');
+    expect(
+      rows[1].querySelector('.player-name strong')?.classList,
+    ).not.toContain('medal-name-gold');
+    expect(
+      rows[2].querySelector('.player-name strong')?.classList,
+    ).toContain('medal-name-silver');
   });
 
   it('links every ranking row to the player detail', async () => {
@@ -85,7 +115,8 @@ describe('RankingPage', () => {
             error: signal<string | null>(null),
             loading: signal(false),
             statistics: signal([statistic]),
-            monthlyBadgesFor: vi.fn().mockReturnValue([]),
+            badgesFor: vi.fn().mockReturnValue([]),
+            globalMedalFor,
           },
         },
       ],

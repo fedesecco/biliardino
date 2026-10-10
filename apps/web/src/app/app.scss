@@ -203,6 +203,93 @@ main {
   }
 }
 
+.recognition-dialog {
+  width: min(calc(100% - 2rem), 24rem);
+  min-height: 20rem;
+  max-height: calc(100dvh - 2rem);
+  padding: 1.35rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid rgb(255 255 255 / 80%);
+  border-radius: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  animation: recognition-in 220ms ease-out;
+
+  &::backdrop {
+    background: rgb(25 28 38 / 70%);
+    backdrop-filter: blur(0.7rem);
+  }
+
+  h2 {
+    margin: 0.35rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.65rem;
+    letter-spacing: -0.04em;
+  }
+}
+
+.recognition-list {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.recognition-item {
+  display: grid;
+  grid-template-columns: 6rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.65rem;
+  background: rgb(255 255 255 / 68%);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+
+  img {
+    width: 6rem;
+    height: 6rem;
+    object-fit: contain;
+  }
+}
+
+.recognition-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.1rem;
+
+  span {
+    color: var(--ink-soft);
+    font-size: 1rem;
+    font-weight: 850;
+  }
+
+  small {
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+}
+
+.recognition-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.35rem;
+}
+
+.recognition-confirm {
+  min-width: 5rem;
+  min-height: 2.75rem;
+  background: var(--green);
+  border-color: var(--green);
+  box-shadow: 0 0.5rem 1.2rem rgb(31 157 112 / 24%);
+}
+
+@keyframes recognition-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
 @media (min-width: 48rem) {
   .app-shell {
     padding-inline: 2rem;

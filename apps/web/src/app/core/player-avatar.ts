@@ -1,8 +1,14 @@
 import { Component, computed, input } from '@angular/core';
+import type { PlayerAvatarMedal } from './models';
 import { PlayerInitialsPipe } from './player-initials.pipe';
-import type { MonthlyBadge } from './monthly-badges';
+import type { Badge } from './monthly-badges';
 
 export type PlayerAvatarSize = 'small' | 'medium' | 'large';
+const MEDAL_BORDER_COLORS: Record<PlayerAvatarMedal, string> = {
+  gold: '#b27a00',
+  silver: '#66727e',
+  bronze: '#a6532e',
+};
 
 @Component({
   selector: 'app-player-avatar',
@@ -13,12 +19,12 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
     </span>
     @if (badges().length > 0) {
       <span
-        class="monthly-badges"
+        class="badges"
         role="group"
         [attr.aria-label]="badgeSummary()"
       >
         @for (badge of badges(); track badge.kind) {
-          <span class="monthly-badge" [attr.title]="badge.label">
+          <span class="badge" [attr.title]="badge.label">
             <img
               [src]="badge.imageUrl"
               alt=""
@@ -45,6 +51,7 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
       place-items: center;
     }
 
+
     :host(.small) {
       width: 1.55rem;
       height: 1.55rem;
@@ -70,7 +77,7 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
       line-height: 1;
     }
 
-    .monthly-badges {
+    .badges {
       position: absolute;
       top: -0.42rem;
       right: -0.42rem;
@@ -80,7 +87,7 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
       align-items: center;
     }
 
-    .monthly-badge {
+    .badge {
       display: grid;
       width: 1.2rem;
       height: 1.2rem;
@@ -99,29 +106,38 @@ export type PlayerAvatarSize = 'small' | 'medium' | 'large';
       }
     }
 
-    :host(.small) .monthly-badges {
+    :host(.small) .badges {
       top: -0.34rem;
       right: -0.34rem;
     }
 
-    :host(.small) .monthly-badge {
+    :host(.small) .badge {
       width: 1rem;
       height: 1rem;
     }
   `,
   host: {
     '[class]': 'size()',
+    '[class.avatar-medal-gold]': 'medal() === "gold"',
+    '[class.avatar-medal-silver]': 'medal() === "silver"',
+    '[class.avatar-medal-bronze]': 'medal() === "bronze"',
     '[style.background-color]': 'color()',
+    '[style.border-color]': 'medalBorderColor()',
   },
 })
 export class PlayerAvatar {
   readonly name = input.required<string>();
   readonly color = input.required<string>();
   readonly size = input<PlayerAvatarSize>('medium');
-  readonly badges = input<MonthlyBadge[]>([]);
+  readonly medal = input<PlayerAvatarMedal | null>(null);
+  readonly badges = input<Badge[]>([]);
   protected readonly badgeSummary = computed(() =>
     this.badges()
       .map(({ label }) => label)
       .join(', '),
   );
+  protected readonly medalBorderColor = computed(() => {
+    const medal = this.medal();
+    return medal ? MEDAL_BORDER_COLORS[medal] : null;
+  });
 }

@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0]
+
+### Features
+
+- **Winstreak:** aggiunti badge correnti per 3+, 5+ e 10+ vittorie consecutive. Visibili anche nel dettaglio giocatore.
+- **Profilo giocatore:** la medaglia di classifica è mostrata fra i badge
+- **Riconoscimenti post-partita:** una dialog separata mostra ogni nuovo badge o la nuova medaglia di classifica ottenuti dai quattro partecipanti, in sequenza.
+
+### Changes
+
+- **Classifica globale:** rimosse le medaglie per le prime 3 posizioni Al loro posto, bordo avatar e nome colorato (oro/argento/bronzo)
+
 ## [1.4.1]
 
 ### Bugfixes

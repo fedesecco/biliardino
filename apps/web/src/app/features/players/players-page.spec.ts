@@ -12,7 +12,8 @@ const players = signal<Player[]>([
 
 const store = {
   players,
-  monthlyBadgesFor: vi.fn().mockReturnValue([]),
+  badgesFor: vi.fn().mockReturnValue([]),
+  globalMedalFor: vi.fn().mockReturnValue(null),
   createPlayer: vi.fn(),
   updatePlayer: vi.fn(),
 };
@@ -68,6 +69,7 @@ function player(id: string, name: string, avatarColor: string): Player {
     name,
     avatar_color: avatarColor,
     current_elo: 1000,
+    current_win_streak: 0,
     active: true,
     created_at: '2026-07-29T00:00:00.000Z',
     updated_at: '2026-07-29T00:00:00.000Z',
