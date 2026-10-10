@@ -451,6 +451,7 @@
   background: rgb(255 255 255 / 42%);
   border: 1px solid rgb(255 255 255 / 55%);
   border-radius: 999px;
+  touch-action: manipulation;
 }
 
 .score-divider {

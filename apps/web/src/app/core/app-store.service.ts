@@ -28,7 +28,6 @@ import {
 } from './monthly-badges';
 import {
   findNewRecognitions,
-  GLOBAL_MEDAL_ARTWORK,
   type NewRecognition,
   type RecognitionSnapshot,
 } from './recognitions';
@@ -55,57 +54,6 @@ const GLOBAL_MEDAL_BY_POSITION: Record<
   2: 'silver',
   3: 'bronze',
 };
-
-const DEMO_RECOGNITIONS: readonly NewRecognition[] = [
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'global-medal',
-    label: GLOBAL_MEDAL_ARTWORK.gold.label,
-    description: GLOBAL_MEDAL_ARTWORK.gold.description,
-    imageUrl: GLOBAL_MEDAL_ARTWORK.gold.imageUrl,
-  },
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'monthly-champion',
-    label: 'Bomboclat',
-    description: 'In testa alla classifica mensile',
-    imageUrl: '/awards/bomboclat.webp',
-  },
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'monthly-last',
-    label: 'Scemo del Villaggio',
-    description: 'Ultima posizione nella classifica mensile',
-    imageUrl: '/awards/scemo.webp',
-  },
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'win-streak-3',
-    label: 'Winstreak: 3',
-    description: '3 vittorie consecutive',
-    imageUrl: '/awards/winstreak-3.webp',
-  },
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'win-streak-5',
-    label: 'Winstreak: 5',
-    description: '5 vittorie consecutive',
-    imageUrl: '/awards/winstreak-5.webp',
-  },
-  {
-    playerId: 'demo-player',
-    playerName: 'Mario Rossi',
-    kind: 'win-streak-10',
-    label: 'Winstreak: 10',
-    description: '10 vittorie consecutive',
-    imageUrl: '/awards/winstreak-10.webp',
-  },
-];
 
 @Injectable({ providedIn: 'root' })
 export class AppStore {
@@ -427,14 +375,6 @@ export class AppStore {
 
   dismissRecognitions(): void {
     this.newRecognitions.set([]);
-  }
-
-  showDemoRecognition(): void {
-    const recognition =
-      DEMO_RECOGNITIONS[
-        Math.floor(Math.random() * DEMO_RECOGNITIONS.length)
-      ];
-    this.newRecognitions.set([recognition]);
   }
 
   private recognitionSnapshots(

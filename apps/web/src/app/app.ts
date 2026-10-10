@@ -13,8 +13,6 @@ import { AppStore } from './core/app-store.service';
 import { recognitionDialogTitle } from './core/recognitions';
 import { SupabaseService } from './core/supabase.service';
 
-const RECOGNITION_DEMO_ENABLED = true; // TEMPORANEO: rimuovere dopo l'approvazione visuale.
-
 @Component({
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   selector: 'app-root',
@@ -30,9 +28,6 @@ export class App {
   private readonly recognitionDialog =
     viewChild<ElementRef<HTMLDialogElement>>('recognitionDialog');
   constructor() {
-    if (RECOGNITION_DEMO_ENABLED) {
-      this.store.showDemoRecognition();
-    }
     effect(() => {
       const dialog = this.recognitionDialog()?.nativeElement;
       const recognition = this.store.currentRecognition();

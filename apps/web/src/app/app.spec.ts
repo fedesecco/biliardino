@@ -31,6 +31,7 @@ describe('App', () => {
     expect(compiled.querySelector('.config-alert')?.textContent).toContain(
       'Configurazione server mancante.',
     );
+    expect(compiled.querySelector('.recognition-item')).toBeNull();
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.version-link');
     expect(versionLink?.textContent?.trim()).toBe('v1.5.0');

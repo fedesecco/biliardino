@@ -12,16 +12,16 @@
 
 - **Classifica globale:** rimosse le medaglie per le prime 3 posizioni Al loro posto, bordo avatar e nome colorato (oro/argento/bronzo)
 
+### Bugfixes
+
+- **Partita:** sui dispositivi iOS il doppio tap sui pulsanti annulla goal non attiva più lo zoom della pagina.
+
 ## [1.4.1]
 
 ### Bugfixes
 
 - **Notifiche:** il toast dopo la registrazione di una partita ora scompare dopo 2 secondi.
 - **Partita:** sui dispositivi iOS il doppio tap sui pulsanti goal non attiva più lo zoom della pagina.
-
-### Chores
-
-- **Versione:** ora viene letta direttamente da `package.json`, evitando duplicazioni.
 
 ## [1.4.0]
 
