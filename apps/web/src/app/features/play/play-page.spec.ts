@@ -51,6 +51,8 @@ describe('PlayPage', () => {
     playDraft.set(null);
     playScore.set({ red: 0, blue: 0 });
     playConfirming.set(false);
+    store.badgesFor.mockReset();
+    store.badgesFor.mockReturnValue([]);
     pickTeams.mockClear();
 
     await TestBed.configureTestingModule({
@@ -64,6 +66,33 @@ describe('PlayPage', () => {
         },
       ],
     }).compileComponents();
+  });
+
+  it('lets winstreak effects escape the player card boundary', () => {
+    store.badgesFor.mockImplementation((playerId: string) =>
+      playerId === 'p1'
+        ? [
+            {
+              kind: 'win-streak-5',
+              label: 'Winstreak: 5',
+              description: '5 vittorie consecutive',
+              elo: null,
+              imageUrl: '/awards/winstreak-5.webp',
+            },
+          ]
+        : [],
+    );
+
+    const fixture = TestBed.createComponent(PlayPage);
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector(
+      '.player-card',
+    ) as HTMLElement;
+    expect(card.querySelector('.streak-effect')).not.toBeNull();
+    expect(getComputedStyle(card).overflow).toBe('visible');
+
+    fixture.destroy();
   });
 
   it('passes the selected team mode and keeps the selection across navigation', async () => {
