@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { App } from './app';
 import { AppStore } from './core/app-store.service';
-import type { NewRecognition } from './core/recognitions';
+import type { NewRecognition } from './core/recognitions/recognitions';
 
 describe('App', () => {
   beforeEach(async () => {
@@ -34,7 +34,7 @@ describe('App', () => {
     expect(compiled.querySelector('.recognition-item')).toBeNull();
     const versionLink =
       compiled.querySelector<HTMLAnchorElement>('.version-link');
-    expect(versionLink?.textContent?.trim()).toBe('v1.5.1');
+    expect(versionLink?.textContent?.trim()).toBe('v1.6.0');
     expect(versionLink?.getAttribute('href')).toBe('/changelog');
     expect(compiled.querySelector('.app-footer')).toBeNull();
   });
@@ -49,7 +49,7 @@ describe('App', () => {
         kind: 'monthly-champion',
         label: 'Bomboclat',
         description: 'In testa alla classifica mensile',
-        imageUrl: '/awards/bomboclat.webp',
+        imageUrl: '/avatars/face/bomboclat.webp',
       },
       {
         playerId: 'player-two',
@@ -57,7 +57,7 @@ describe('App', () => {
         kind: 'global-medal',
         label: 'Oro in classifica',
         description: 'Medaglia di classifica: primo posto globale',
-        imageUrl: '/awards/oro.webp',
+        imageUrl: '/avatars/head/gold.webp',
       },
     ];
     store.newRecognitions.set(recognitions);

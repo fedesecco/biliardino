@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import { PlayerAvatar } from '../../core/player-avatar';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 import type {
   MatchParticipant,
   MatchRecord,

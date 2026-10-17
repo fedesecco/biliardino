@@ -20,6 +20,7 @@ const playerRows = players.map(([name, avatarColor, currentElo], index) => ({
 
 test('creates teams and records a first-to-six match', async ({ page }) => {
   const userId = '11111111-1111-1111-1111-111111111111';
+  let recordMatchPayload: Record<string, unknown> | null = null;
   await page.addInitScript(
     ({ id }) => {
       const encode = (value: object) =>
@@ -91,12 +92,16 @@ test('creates teams and records a first-to-six match', async ({ page }) => {
       body = playerRows;
     } else if (url.includes('/rest/v1/rpc/pick_teams')) {
       body = [
-        { player_id: playerRows[0].id, team: 'red', daily_games: 0 },
-        { player_id: playerRows[2].id, team: 'red', daily_games: 0 },
-        { player_id: playerRows[1].id, team: 'blue', daily_games: 0 },
-        { player_id: playerRows[3].id, team: 'blue', daily_games: 0 },
+        { player_id: playerRows[0].id, team: 'red', excluded_count: 0 },
+        { player_id: playerRows[2].id, team: 'red', excluded_count: 0 },
+        { player_id: playerRows[1].id, team: 'blue', excluded_count: 0 },
+        { player_id: playerRows[3].id, team: 'blue', excluded_count: 0 },
       ];
     } else if (url.includes('/rest/v1/rpc/record_match')) {
+      recordMatchPayload = route.request().postDataJSON() as Record<
+        string,
+        unknown
+      >;
       body = '22222222-2222-2222-2222-222222222222';
     }
 
@@ -124,6 +129,7 @@ test('creates teams and records a first-to-six match', async ({ page }) => {
   await page.getByRole('button', { name: 'ELO balanced' }).click();
   await expect(page.locator('.team-panel')).toHaveCount(2);
   await expect(page.locator('.bench')).toContainText('Andrea');
+  await expect(page.locator('.bench')).toContainText('In panchina');
 
   const redGoal = page.getByRole('button', {
     name: 'Aggiungi goal alla squadra rossa',
@@ -138,6 +144,10 @@ test('creates teams and records a first-to-six match', async ({ page }) => {
   await expect(
     page.getByText('Partita registrata. Classifica aggiornata.'),
   ).toBeVisible();
+  expect(recordMatchPayload?.p_candidates).toEqual(
+    expect.arrayContaining(playerRows.map((player) => player.id)),
+  );
+  expect(recordMatchPayload?.p_candidates).toHaveLength(playerRows.length);
   await expect(page.locator('.red-team .score-tap span')).toHaveText('0');
 });
 

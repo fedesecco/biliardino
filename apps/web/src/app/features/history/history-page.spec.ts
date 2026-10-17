@@ -3,6 +3,7 @@ import localeIt from '@angular/common/locales/it';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
+import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
 import { AppStore } from '../../core/app-store.service';
 import type { MatchRecord } from '../../core/models';
 import { SupabaseService } from '../../core/supabase.service';
@@ -84,14 +85,14 @@ describe('HistoryPage', () => {
     fixture.destroy();
   });
 
-  it('renders clickable player profiles with their current badges', () => {
+  it('renders clickable player profiles with their current avatar status', () => {
     badgesFor.mockReturnValue([
       {
         kind: 'win-streak-5',
         label: 'Winstreak: 5',
         description: '5 vittorie consecutive',
         elo: null,
-        imageUrl: '/awards/winstreak-5.webp',
+        imageUrl: '/avatars/hair/winstreak-5.webp',
       },
     ]);
     const fixture = TestBed.createComponent(HistoryPage);
@@ -107,9 +108,9 @@ describe('HistoryPage', () => {
     expect(redPlayerLink.querySelector('app-player-avatar')).not.toBeNull();
     expect(
       redPlayerLink
-        .querySelector<HTMLImageElement>('.streak-effect img')
+        .querySelector<HTMLImageElement>('.avatar-layer-hair')
         ?.getAttribute('src'),
-    ).toBe('/effects/winstreak-5.png');
+    ).toBe(AVATAR_ASSETS.hair['winstreak-5']);
 
     fixture.destroy();
   });

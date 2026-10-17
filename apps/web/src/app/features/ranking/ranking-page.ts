@@ -2,7 +2,7 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import { PlayerAvatar } from '../../core/player-avatar';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 import type {
   PlayerAvatarMedal,
   PlayerStatistic,

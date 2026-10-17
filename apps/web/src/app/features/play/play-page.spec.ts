@@ -16,6 +16,7 @@ const players: Player[] = [
   player('p2', 'Player 2', 1050),
   player('p3', 'Player 3', 1000),
   player('p4', 'Player 4', 950),
+  player('p5', 'Player 5', 900),
 ];
 const playSelection = signal(new Map<string, SelectionMode>());
 const teamPickingMode = signal<TeamPickingMode>('elo-balanced');
@@ -23,10 +24,10 @@ const playDraft = signal<TeamDraft | null>(null);
 const playScore = signal({ red: 0, blue: 0 });
 const playConfirming = signal(false);
 const pickTeams = vi.fn().mockResolvedValue([
-  { player_id: 'p1', team: 'red', daily_games: 0 },
-  { player_id: 'p4', team: 'red', daily_games: 0 },
-  { player_id: 'p2', team: 'blue', daily_games: 0 },
-  { player_id: 'p3', team: 'blue', daily_games: 0 },
+  { player_id: 'p1', team: 'red', excluded_count: 0 },
+  { player_id: 'p4', team: 'red', excluded_count: 0 },
+  { player_id: 'p2', team: 'blue', excluded_count: 0 },
+  { player_id: 'p3', team: 'blue', excluded_count: 0 },
 ]);
 
 const store = {
@@ -68,7 +69,7 @@ describe('PlayPage', () => {
     }).compileComponents();
   });
 
-  it('lets winstreak effects escape the player card boundary', () => {
+  it('renders winstreak hair without clipping the player card', () => {
     store.badgesFor.mockImplementation((playerId: string) =>
       playerId === 'p1'
         ? [
@@ -77,7 +78,7 @@ describe('PlayPage', () => {
               label: 'Winstreak: 5',
               description: '5 vittorie consecutive',
               elo: null,
-              imageUrl: '/awards/winstreak-5.webp',
+              imageUrl: '/avatars/hair/winstreak-5.webp',
             },
           ]
         : [],
@@ -89,7 +90,7 @@ describe('PlayPage', () => {
     const card = fixture.nativeElement.querySelector(
       '.player-card',
     ) as HTMLElement;
-    expect(card.querySelector('.streak-effect')).not.toBeNull();
+    expect(card.querySelector('.avatar-layer-hair')).not.toBeNull();
     expect(getComputedStyle(card).overflow).toBe('visible');
 
     fixture.destroy();
@@ -119,7 +120,7 @@ describe('PlayPage', () => {
     await fixture.whenStable();
 
     expect(pickTeams).toHaveBeenCalledExactlyOnceWith(
-      ['p1', 'p2', 'p3', 'p4'],
+      ['p1', 'p2', 'p3', 'p4', 'p5'],
       [],
       [],
       'random',
@@ -131,7 +132,41 @@ describe('PlayPage', () => {
 
     expect(fixture.nativeElement.querySelector('.match-view')).not.toBeNull();
     expect(teamPickingMode()).toBe('random');
-    expect(playSelection().size).toBe(4);
+    expect(playSelection().size).toBe(5);
+  });
+
+  it('allows more than two color preferences and forwards them to the picker', async () => {
+    const fixture = TestBed.createComponent(PlayPage);
+    fixture.detectChanges();
+
+    for (const player of players.slice(0, 3)) {
+      (
+        fixture.nativeElement.querySelector(
+          `[aria-label="Assegna ${player.name} ai rossi"]`,
+        ) as HTMLButtonElement
+      ).click();
+    }
+    for (const player of players.slice(3)) {
+      (
+        fixture.nativeElement.querySelector(
+          `[aria-label="Seleziona ${player.name}"]`,
+        ) as HTMLButtonElement
+      ).click();
+    }
+    fixture.detectChanges();
+
+    const createButtons = fixture.nativeElement.querySelectorAll(
+      '.team-create-actions .primary-button',
+    ) as NodeListOf<HTMLButtonElement>;
+    createButtons[1].click();
+    await fixture.whenStable();
+
+    expect(pickTeams).toHaveBeenCalledExactlyOnceWith(
+      ['p1', 'p2', 'p3', 'p4', 'p5'],
+      ['p1', 'p2', 'p3'],
+      [],
+      'elo-balanced',
+    );
   });
 
   it('previews ELO ranges for the possible winning margins', () => {

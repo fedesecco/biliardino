@@ -17,7 +17,7 @@ export interface Player {
 export interface PickedPlayer {
   player_id: string;
   team: TeamColor;
-  daily_games: number;
+  excluded_count: number;
 }
 
 export interface MatchParticipant {

@@ -1,4 +1,5 @@
-import type { Badge, BadgeKind } from './monthly-badges';
+import type { Badge, BadgeKind } from '../monthly-badges/monthly-badges';
+import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
 import {
   findNewRecognitions,
   recognitionDialogTitle,
@@ -24,6 +25,8 @@ describe('recognitions', () => {
       { kind: 'global-medal', label: 'Oro in classifica' },
       { kind: 'win-streak-10', label: 'Winstreak: 10' },
     ]);
+    expect(recognitions[0].imageUrl).toBe(AVATAR_ASSETS.head.gold);
+    expect(recognitions[1].imageUrl).toBe('/avatars/hair/winstreak-10.webp');
   });
 
   it('ignores streak progress inside the same tier and downgrades', () => {
@@ -104,6 +107,8 @@ function badge(kind: BadgeKind, label: string = kind): Badge {
     kind,
     label,
     elo: null,
-    imageUrl: `/awards/${kind}.webp`,
+    imageUrl: kind.startsWith('monthly-')
+      ? `/avatars/face/${kind === 'monthly-champion' ? 'bomboclat' : 'scemo'}.webp`
+      : `/avatars/hair/${kind.replace('win-streak-', 'winstreak-')}.webp`,
   };
 }

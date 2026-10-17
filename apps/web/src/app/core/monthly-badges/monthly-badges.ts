@@ -1,4 +1,5 @@
-import type { MonthlyEloRanking, PlayerStatistic } from './models';
+import type { MonthlyEloRanking, PlayerStatistic } from '../models';
+import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
 
 export type BadgeKind =
   | 'monthly-champion'
@@ -21,13 +22,13 @@ const CHAMPION_BADGE: Pick<
 > = {
   kind: 'monthly-champion',
   label: 'Bomboclat',
-  imageUrl: '/awards/bomboclat.webp',
+  imageUrl: AVATAR_ASSETS.face.bomboclat,
 };
 
 const LAST_BADGE: Pick<Badge, 'kind' | 'label' | 'imageUrl'> = {
   kind: 'monthly-last',
   label: 'Scemo del Villaggio',
-  imageUrl: '/awards/scemo.webp',
+  imageUrl: AVATAR_ASSETS.face.scemo,
 };
 
 const WIN_STREAK_BADGES: readonly {
@@ -38,17 +39,17 @@ const WIN_STREAK_BADGES: readonly {
   {
     minimum: 3,
     kind: 'win-streak-3',
-    imageUrl: '/awards/winstreak-3.webp',
+    imageUrl: AVATAR_ASSETS.hair['winstreak-3'],
   },
   {
     minimum: 5,
     kind: 'win-streak-5',
-    imageUrl: '/awards/winstreak-5.webp',
+    imageUrl: AVATAR_ASSETS.hair['winstreak-5'],
   },
   {
     minimum: 10,
     kind: 'win-streak-10',
-    imageUrl: '/awards/winstreak-10.webp',
+    imageUrl: AVATAR_ASSETS.hair['winstreak-10'],
   },
 ];
 

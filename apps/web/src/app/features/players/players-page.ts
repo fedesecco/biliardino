@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import type { Player } from '../../core/models';
-import { PlayerAvatar } from '../../core/player-avatar';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 
 @Component({
   selector: 'app-players-page',

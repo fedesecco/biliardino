@@ -3,8 +3,8 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import type { MonthlyEloRanking, PlayerStatistic } from '../../core/models';
-import { PlayerAvatar } from '../../core/player-avatar';
-import { italianMonthLabel, romeMonthKey } from '../../core/rome-calendar';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
+import { italianMonthLabel, romeMonthKey } from '../../core/rome-calendar/rome-calendar';
 import {
   hasExclusiveTrophyArtwork,
   TrophyArtwork,

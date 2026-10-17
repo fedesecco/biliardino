@@ -8,7 +8,7 @@ import type {
   TeamColor,
   TeamPickingMode,
 } from '../../core/models';
-import { PlayerAvatar } from '../../core/player-avatar';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 import { SupabaseService } from '../../core/supabase.service';
 
 interface EloPreviewRange {
@@ -48,21 +48,11 @@ export class PlayPage {
     () =>
       [...this.selection().values()].filter((mode) => mode !== 'off').length,
   );
-  protected readonly redPreferenceCount = computed(
-    () =>
-      [...this.selection().values()].filter((mode) => mode === 'red').length,
-  );
-  protected readonly bluePreferenceCount = computed(
-    () =>
-      [...this.selection().values()].filter((mode) => mode === 'blue').length,
-  );
   protected readonly canCreateTeams = computed(
     () =>
       this.auth.companyUser() &&
       this.selectedCount() >= 4 &&
-      !this.busy() &&
-      this.redPreferenceCount() <= 2 &&
-      this.bluePreferenceCount() <= 2,
+      !this.busy(),
   );
   protected readonly eloPreview = computed(() => {
     const teams = this.draft();
@@ -112,19 +102,6 @@ export class PlayPage {
     }
 
     const current = this.selection().get(playerId) ?? 'off';
-    if (mode === 'red' && current !== 'red' && this.redPreferenceCount() >= 2) {
-      this.localError.set('La squadra rossa ha già due posti assegnati.');
-      return;
-    }
-    if (
-      mode === 'blue' &&
-      current !== 'blue' &&
-      this.bluePreferenceCount() >= 2
-    ) {
-      this.localError.set('La squadra blu ha già due posti assegnati.');
-      return;
-    }
-
     this.updateSelection(playerId, current === mode ? 'off' : mode);
   }
 
@@ -217,7 +194,13 @@ export class PlayPage {
     this.busy.set(true);
     this.localError.set(null);
     try {
+      const candidateIds = [
+        ...draft.red,
+        ...draft.blue,
+        ...draft.benched,
+      ].map((player) => player.id);
       await this.store.recordMatch(
+        candidateIds,
         draft.red.map((player) => player.id),
         draft.blue.map((player) => player.id),
         score.red,

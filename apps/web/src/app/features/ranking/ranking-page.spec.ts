@@ -2,6 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
+import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
 import type { PlayerStatistic } from '../../core/models';
 import { RankingPage } from './ranking-page';
 
@@ -95,14 +96,14 @@ describe('RankingPage', () => {
     ).toContain('avatar-medal-silver');
     expect(
       rows[0]
-        .querySelector<HTMLImageElement>('.avatar-content')
+        .querySelector<HTMLImageElement>('.avatar-layer-head')
         ?.getAttribute('src'),
-    ).toBe('/awards/oro.webp');
+    ).toBe(AVATAR_ASSETS.head.gold);
     expect(
       rows[2]
-        .querySelector<HTMLImageElement>('.avatar-content')
+        .querySelector<HTMLImageElement>('.avatar-layer-head')
         ?.getAttribute('src'),
-    ).toBe('/awards/argento.webp');
+    ).toBe(AVATAR_ASSETS.head.silver);
     expect(
       rows[0].querySelector('.player-name strong')?.classList,
     ).toContain('medal-name-gold');

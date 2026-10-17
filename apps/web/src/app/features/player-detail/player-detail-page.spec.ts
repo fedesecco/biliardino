@@ -10,6 +10,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import type { ParamMap } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
+import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
 import type {
   MatchRecord,
   MonthlyChampion,
@@ -121,14 +122,14 @@ const profileBadges = [
     kind: 'monthly-champion' as const,
     label: 'Bomboclat',
     elo: 24,
-    imageUrl: '/awards/bomboclat.webp',
+    imageUrl: '/avatars/face/bomboclat.webp',
   },
   {
     kind: 'win-streak-5' as const,
     label: 'Winstreak: 5',
     description: '5 vittorie consecutive',
     elo: null,
-    imageUrl: '/awards/winstreak-5.webp',
+    imageUrl: '/avatars/hair/winstreak-5.webp',
   },
 ];
 const badgesFor = vi.fn().mockReturnValue(profileBadges);
@@ -207,115 +208,43 @@ describe('PlayerDetailPage', () => {
     ).toBe('/trophies/legacy-paper-256.webp');
   });
 
-  it('renders current badges larger beside the profile instead of on the avatar', () => {
+  it('shows current status through the composed avatar and its distinctive parts', () => {
     const fixture = TestBed.createComponent(PlayerDetailPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
 
+    expect(element.querySelector('app-player-avatar.hero')).not.toBeNull();
     expect(
-      element.querySelector('.player-hero app-player-avatar .badges'),
-    ).toBeNull();
-    expect(
-      [...element.querySelectorAll<HTMLImageElement>('.profile-badge img')].map(
-        (image) => ({
-          src: image.getAttribute('src'),
-          width: image.getAttribute('width'),
-        }),
+      [...element.querySelectorAll<HTMLImageElement>('.player-hero .avatar-layer')].map(
+        (image) => image.getAttribute('src'),
       ),
     ).toEqual([
-      { src: '/awards/oro.webp', width: '128' },
-      { src: '/awards/bomboclat.webp', width: '128' },
-      { src: '/awards/winstreak-5.webp', width: '128' },
+      AVATAR_ASSETS.head.gold,
+      AVATAR_ASSETS.face.bomboclat,
+      AVATAR_ASSETS.hair['winstreak-5'],
     ]);
     expect(
-      [...element.querySelectorAll('.profile-badge span')].map((label) =>
-        label.textContent?.trim(),
+      [...element.querySelectorAll<HTMLImageElement>('.avatar-part img')].map(
+        (image) => image.getAttribute('src'),
+      ),
+    ).toEqual([
+      AVATAR_ASSETS.head.gold,
+      '/avatars/face/bomboclat.webp',
+      '/avatars/hair/winstreak-5.webp',
+    ]);
+    expect(
+      [...element.querySelectorAll<HTMLElement>('.avatar-part strong')].map(
+        (label) => label.textContent?.trim(),
       ),
     ).toEqual(['Oro in classifica', 'Bomboclat', 'Winstreak: 5']);
+    expect(
+      element.querySelector('#avatar-parts-title')?.textContent?.trim(),
+    ).toBe("Parti distintive dell'avatar");
     expect(element.querySelector('.player-hero > div > small')).toBeNull();
 
     fixture.destroy();
   });
-  it('renders the global ranking medal as the first profile badge', () => {
-    const fixture = TestBed.createComponent(PlayerDetailPage);
-    fixture.detectChanges();
 
-    const medal = fixture.nativeElement.querySelector(
-      '.global-medal-badge',
-    ) as HTMLElement | null;
-    const image = medal?.querySelector('img');
-
-    expect(medal?.getAttribute('aria-label')).toBe(
-      'Medaglia di classifica oro per il primo posto nella classifica globale',
-    );
-    expect(image?.getAttribute('src')).toBe('/awards/oro.webp');
-    expect(image?.getAttribute('width')).toBe('128');
-    expect(
-      medal?.parentElement?.querySelector('.profile-badge') === medal,
-    ).toBe(true);
-
-    fixture.destroy();
-  });
-  it('opens a current badge in the shared award dialog', async () => {
-    const fixture = TestBed.createComponent(PlayerDetailPage);
-    fixture.detectChanges();
-
-    const element = fixture.nativeElement as HTMLElement;
-    const badgeButton = element.querySelector<HTMLButtonElement>(
-      '.profile-badge-button',
-    );
-    badgeButton?.click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const dialog = fixture.nativeElement.querySelector(
-      '.award-dialog',
-    ) as HTMLElement | null;
-    expect(dialog).not.toBeNull();
-    expect(
-      dialog?.querySelector<HTMLImageElement>('.badge-dialog-image')?.getAttribute(
-        'src',
-      ),
-    ).toBe('/awards/bomboclat.webp');
-    expect(dialog?.querySelector('h2')?.textContent?.trim()).toBe('Bomboclat');
-    expect(dialog?.querySelector('p')?.textContent).toContain(
-      '+24 ELO questo mese',
-    );
-
-    fixture.destroy();
-  });
-
-  it('describes the win streak in the shared award dialog', async () => {
-    const fixture = TestBed.createComponent(PlayerDetailPage);
-    fixture.detectChanges();
-
-    const element = fixture.nativeElement as HTMLElement;
-    const badgeButtons = element.querySelectorAll<HTMLButtonElement>(
-      '.profile-badge-button',
-    );
-    badgeButtons[1].click();
-    fixture.detectChanges();
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const dialog = fixture.nativeElement.querySelector(
-      '.award-dialog',
-    ) as HTMLElement | null;
-    expect(
-      dialog?.querySelector<HTMLImageElement>('.badge-dialog-image')?.getAttribute(
-        'src',
-      ),
-    ).toBe('/awards/winstreak-5.webp');
-    expect(dialog?.querySelector('h2')?.textContent?.trim()).toBe(
-      'Winstreak: 5',
-    );
-    expect(dialog?.querySelector('p')?.textContent?.trim()).toBe(
-      '5 vittorie consecutive',
-    );
-
-    fixture.destroy();
-  });
 
   it('shows the latest personal results with a link to the filtered history', async () => {
     const fixture = TestBed.createComponent(PlayerDetailPage);

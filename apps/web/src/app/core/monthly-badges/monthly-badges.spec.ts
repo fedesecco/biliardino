@@ -1,4 +1,5 @@
-import type { MonthlyEloRanking, PlayerStatistic } from './models';
+import type { MonthlyEloRanking, PlayerStatistic } from '../models';
+import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
 import {
   calculateMonthlyBadgesFromStandings,
   calculateWinStreakBadges,
@@ -15,10 +16,16 @@ describe('badges', () => {
     expect(badges.get('monthly-leader')?.map(({ kind }) => kind)).toEqual([
       'monthly-champion',
     ]);
+    expect(badges.get('monthly-leader')?.[0].imageUrl).toBe(
+      AVATAR_ASSETS.face.bomboclat,
+    );
     expect(badges.get('monthly-runner')).toBeUndefined();
     expect(badges.get('monthly-last')?.map(({ kind }) => kind)).toEqual([
       'monthly-last',
     ]);
+    expect(badges.get('monthly-last')?.[0].imageUrl).toBe(
+      AVATAR_ASSETS.face.scemo,
+    );
   });
 
   it('resolves tied source ranks to one monthly award per position', () => {
@@ -86,9 +93,15 @@ describe('badges', () => {
     expect(badges.get('streak-five')?.map(({ kind }) => kind)).toEqual([
       'win-streak-5',
     ]);
+    expect(badges.get('streak-five')?.[0].imageUrl).toBe(
+      AVATAR_ASSETS.hair['winstreak-5'],
+    );
     expect(badges.get('streak-ten')?.map(({ kind }) => kind)).toEqual([
       'win-streak-10',
     ]);
+    expect(badges.get('streak-ten')?.[0].imageUrl).toBe(
+      AVATAR_ASSETS.hair['winstreak-10'],
+    );
     expect(badges.get('streak-longer')?.map(({ kind }) => kind)).toEqual([
       'win-streak-10',
     ]);

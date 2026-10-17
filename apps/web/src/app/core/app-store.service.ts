@@ -25,13 +25,13 @@ import {
   calculateMonthlyBadgesFromStandings,
   calculateWinStreakBadges,
   type Badge,
-} from './monthly-badges';
+} from './monthly-badges/monthly-badges';
 import {
   findNewRecognitions,
   type NewRecognition,
   type RecognitionSnapshot,
-} from './recognitions';
-import { romeMonthKey } from './rome-calendar';
+} from './recognitions/recognitions';
+import { romeMonthKey } from './rome-calendar/rome-calendar';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
 type MatchParticipantRow = Database['public']['Tables']['match_players']['Row'];
@@ -285,6 +285,7 @@ export class AppStore {
   }
 
   async recordMatch(
+    candidates: string[],
     redPlayers: string[],
     bluePlayers: string[],
     redScore: number,
@@ -296,6 +297,7 @@ export class AppStore {
     ];
     const before = this.recognitionSnapshots(participantIds);
     const { error } = await this.supabase.client.rpc('record_match', {
+      p_candidates: candidates,
       p_red_players: redPlayers,
       p_blue_players: bluePlayers,
       p_red_score: redScore,

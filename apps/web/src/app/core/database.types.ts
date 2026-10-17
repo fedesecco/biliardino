@@ -14,6 +14,36 @@ export type Database = {
   };
   public: {
     Tables: {
+      match_pick_candidates: {
+        Row: {
+          match_id: string;
+          player_id: string;
+        };
+        Insert: {
+          match_id: string;
+          player_id: string;
+        };
+        Update: {
+          match_id?: string;
+          player_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'match_pick_candidates_match_id_fkey';
+            columns: ['match_id'];
+            isOneToOne: false;
+            referencedRelation: 'matches';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'match_pick_candidates_player_id_fkey';
+            columns: ['player_id'];
+            isOneToOne: false;
+            referencedRelation: 'players';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       match_players: {
         Row: {
           elo_before: number;
@@ -147,6 +177,32 @@ export type Database = {
             foreignKeyName: 'monthly_champions_player_id_fkey';
             columns: ['player_id'];
             isOneToOne: false;
+            referencedRelation: 'players';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
+      player_exclusion_counts: {
+        Row: {
+          excluded_count: number;
+          player_id: string;
+          updated_at: string;
+        };
+        Insert: {
+          excluded_count?: number;
+          player_id: string;
+          updated_at?: string;
+        };
+        Update: {
+          excluded_count?: number;
+          player_id?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'player_exclusion_counts_player_id_fkey';
+            columns: ['player_id'];
+            isOneToOne: true;
             referencedRelation: 'players';
             referencedColumns: ['id'];
           },
@@ -373,12 +429,12 @@ export type Database = {
           p_red_preferences?: string[];
         };
         Returns: {
-          daily_games: number;
+          excluded_count: number;
           player_id: string;
           team: Database['public']['Enums']['team_color'];
         }[];
       };
-      recalculate_elo: { Args: never; Returns: undefined };
+      recalculate_excluded_counts: { Args: never; Returns: undefined };
       recalculate_win_streaks: {
         Args: { p_player_ids: string[] };
         Returns: undefined;
@@ -387,6 +443,7 @@ export type Database = {
         Args: {
           p_blue_players: string[];
           p_blue_score: number;
+          p_candidates: string[];
           p_played_at?: string;
           p_red_players: string[];
           p_red_score: number;

@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.6.0]
+
+### Features
+
+- **Avatar:** Nuovi avatar per tutti i giocatori
+- **Badge:** rimossi tutti i badge. Al loro posto, ci sono modifiche alla pelle, viso o capelli dell'avatar:
+  - Prime posizioni in classifica cambiano colore della pelle
+  - Prima ed ultima posizione in classifica mensile cambiano il viso
+  - Winstreaks cambiano i capelli
+
+### Changes
+
+- **Selezione giocatori:** la priorità passa dal numero di partite giocate al conteggio delle esclusioni; il conteggio cambia solo quando viene salvata una partita.
+
 ## [1.5.1]
 
 ### Changes

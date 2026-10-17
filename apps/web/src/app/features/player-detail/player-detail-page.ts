@@ -18,14 +18,11 @@ import type {
   PlayerRivalry,
   TeamColor,
 } from '../../core/models';
-import type { Badge } from '../../core/monthly-badges';
-import { PlayerAvatar } from '../../core/player-avatar';
-import { italianMonthLabel } from '../../core/rome-calendar';
+import type { Badge } from '../../core/monthly-badges/monthly-badges';
+import { GLOBAL_MEDAL_ARTWORK } from '../../core/recognitions/recognitions';
+import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
+import { italianMonthLabel } from '../../core/rome-calendar/rome-calendar';
 import { TrophyArtwork } from '../../core/trophy-artwork';
-import {
-  GLOBAL_MEDAL_ARTWORK,
-  type GlobalMedalArtwork,
-} from '../../core/recognitions';
 
 interface PlayerAward extends MonthlyChampion {
   exclusive: boolean;
@@ -34,16 +31,15 @@ interface PlayerAward extends MonthlyChampion {
 }
 
 
-type SelectedAward =
-  | { type: 'trophy'; value: PlayerAward }
-  | { type: 'badge'; value: Badge };
+type ProfileAvatarPart = Pick<Badge, 'imageUrl' | 'label' | 'description'>;
+type SelectedAward = { type: 'trophy'; value: PlayerAward };
 
 function capitalize(value: string): string {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-const RECENT_MATCH_LIMIT = 5;
 
+const RECENT_MATCH_LIMIT = 5;
 @Component({
   selector: 'app-player-detail-page',
   imports: [DatePipe, DecimalPipe, PlayerAvatar, RouterLink, TrophyArtwork],
@@ -65,16 +61,31 @@ export class PlayerDetailPage {
         .statistics()
         .find((statistic) => statistic.id === this.playerId()) ?? null,
   );
-  protected readonly globalMedalArtwork = computed<GlobalMedalArtwork | null>(
-    () => {
-      const player = this.statistic();
-      const medal = player ? this.store.globalMedalFor(player.id) : null;
-      return medal ? GLOBAL_MEDAL_ARTWORK[medal] : null;
-    },
-  );
   protected readonly playerBadges = computed(() =>
     this.store.badgesFor(this.playerId()),
   );
+
+  protected readonly avatarParts = computed<ProfileAvatarPart[]>(() => {
+    const medal = this.store.globalMedalFor(this.playerId());
+    const medalArtwork = medal ? GLOBAL_MEDAL_ARTWORK[medal] : null;
+
+    return [
+      ...(medalArtwork
+        ? [
+            {
+              imageUrl: medalArtwork.imageUrl,
+              label: medalArtwork.label,
+              description: medalArtwork.description,
+            },
+          ]
+        : []),
+      ...this.playerBadges().map(({ imageUrl, label, description }) => ({
+        imageUrl,
+        label,
+        description,
+      })),
+    ];
+  });
   protected readonly recentMatches = signal<MatchRecord[]>([]);
   protected readonly recentMatchesLoading = signal(true);
   protected readonly recentMatchesError = signal<string | null>(null);
@@ -215,10 +226,6 @@ export class PlayerDetailPage {
 
   protected openTrophy(trophy: PlayerAward): void {
     this.selectedAward.set({ type: 'trophy', value: trophy });
-  }
-
-  protected openBadge(badge: Badge): void {
-    this.selectedAward.set({ type: 'badge', value: badge });
   }
 
   protected closeAward(): void {

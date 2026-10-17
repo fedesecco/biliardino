@@ -3,6 +3,7 @@
     ← Torna alla classifica globale
   </a>
 
+
   @if (store.loading()) {
   <div
     class="player-hero surface skeleton"
@@ -15,7 +16,7 @@
       [color]="player.avatar_color"
       [medal]="store.globalMedalFor(player.id)"
       [badges]="playerBadges()"
-      size="large"
+      size="hero"
     />
     <div>
       <span>Giocatore</span>
@@ -27,51 +28,6 @@
       >
         {{ player.name }}
       </h1>
-      @if (globalMedalArtwork() || playerBadges().length > 0) {
-      <div
-        class="profile-badges"
-        role="list"
-        aria-label="Riconoscimenti correnti del giocatore"
-      >
-        @if (globalMedalArtwork(); as medal) {
-        <div
-          class="profile-badge global-medal-badge"
-          role="listitem"
-          [attr.aria-label]="medal.alt"
-        >
-          <img
-            [src]="medal.imageUrl"
-            alt=""
-            aria-hidden="true"
-            width="128"
-            height="128"
-          />
-          <span>{{ medal.label }}</span>
-        </div>
-        }
-        @if (playerBadges(); as badges) {
-        @for (badge of badges; track badge.kind) {
-        <div class="profile-badge" role="listitem">
-          <button
-            class="profile-badge-button"
-            type="button"
-            (click)="openBadge(badge)"
-            [attr.aria-label]="'Apri ' + badge.label"
-          >
-            <img
-              [src]="badge.imageUrl"
-              alt=""
-              aria-hidden="true"
-              width="128"
-              height="128"
-            />
-            <span>{{ badge.label }}</span>
-          </button>
-        </div>
-        }
-        }
-      </div>
-      }
     </div>
     <strong
       >{{ player.current_elo | number: '1.0-0' }} <small>ELO</small></strong
@@ -96,6 +52,38 @@
       >
     </article>
   </div>
+
+  @if (avatarParts().length > 0) {
+  <section
+    class="avatar-parts surface"
+    aria-labelledby="avatar-parts-title"
+  >
+    <header>
+      <div>
+        <h2 id="avatar-parts-title">Parti distintive dell'avatar</h2>
+        <p>Riconoscimenti attivi mostrati direttamente nell'avatar.</p>
+      </div>
+    </header>
+    <div class="avatar-parts-grid">
+      @for (part of avatarParts(); track part.label) {
+      <article class="avatar-part">
+        <div class="avatar-part-artwork">
+          <img
+            [src]="part.imageUrl"
+            [alt]="part.label"
+            width="512"
+            height="512"
+          />
+        </div>
+        <strong>{{ part.label }}</strong>
+        @if (part.description; as description) {
+        <span>{{ description }}</span>
+        }
+      </article>
+      }
+    </div>
+  </section>
+  }
 
   <section class="trophy-cabinet surface" aria-labelledby="trophy-title">
     <header>
@@ -319,7 +307,6 @@
     >
       ×
     </button>
-    @if (award.type === 'trophy') {
     <app-trophy-artwork
       [monthStart]="award.value.month_start"
       size="hero"
@@ -334,31 +321,6 @@
     <p>
       +{{ award.value.elo_gained | number: '1.0-2' }} ELO conquistati nel mese
     </p>
-    } @else {
-    <img
-      class="badge-dialog-image"
-      [src]="award.value.imageUrl"
-      alt=""
-      aria-hidden="true"
-      width="256"
-      height="256"
-    />
-    <span>Badge corrente</span>
-    <h2 id="award-dialog-title">{{ award.value.label }}</h2>
-    @if (statistic(); as player) {
-    <strong>{{ player.name }}</strong>
-    }
-    @if (award.value.description; as description) {
-    <p>{{ description }}</p>
-    } @else if (award.value.elo !== null) {
-    <p>
-      {{ award.value.elo > 0 ? '+' : '' }}{{ award.value.elo | number: '1.0-2'
-      }} ELO questo mese
-    </p>
-    } @else {
-    <p>Riconoscimento corrente</p>
-    }
-    }
   </article>
 </dialog>
 }

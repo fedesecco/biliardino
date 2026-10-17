@@ -1,5 +1,5 @@
 import type { Route } from '@angular/router';
-import { companyUserGuard } from './core/company-user.guard';
+import { companyUserGuard } from './core/auth/company-user.guard';
 
 export const appRoutes: Route[] = [
   {

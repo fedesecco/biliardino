@@ -5,7 +5,7 @@ import {
   type SupabaseClient,
 } from '@supabase/supabase-js';
 import type { Database } from './database.types';
-import { isSharedAccount, SHARED_ACCOUNT_EMAIL } from './company-access';
+import { isSharedAccount, SHARED_ACCOUNT_EMAIL } from './auth/company-access';
 import { readRuntimeEnvironment } from './runtime-env';
 
 @Injectable({ providedIn: 'root' })

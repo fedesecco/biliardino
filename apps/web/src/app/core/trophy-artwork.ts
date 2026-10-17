@@ -1,6 +1,6 @@
 import { NgOptimizedImage } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
-import { italianMonthLabel } from './rome-calendar';
+import { italianMonthLabel } from './rome-calendar/rome-calendar';
 
 export type TrophyArtworkSize = 'thumbnail' | 'hero';
 

@@ -10,7 +10,7 @@ import {
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { APP_VERSION } from './app-version';
 import { AppStore } from './core/app-store.service';
-import { recognitionDialogTitle } from './core/recognitions';
+import { recognitionDialogTitle } from './core/recognitions/recognitions';
 import { SupabaseService } from './core/supabase.service';
 
 @Component({

@@ -3,7 +3,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import type { CanActivateFn } from '@angular/router';
 import { filter, map, take } from 'rxjs';
-import { SupabaseService } from './supabase.service';
+import { SupabaseService } from '../supabase.service';
 
 export const companyUserGuard: CanActivateFn = () => {
   const supabase = inject(SupabaseService);

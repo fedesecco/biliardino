@@ -141,7 +141,7 @@
 
   @if (teams.benched.length) {
   <div class="bench">
-    <span>Prossimo giro</span>
+    <span>In panchina</span>
     @for (player of teams.benched; track player.id) {
     <strong>{{ player.name }}</strong>
     }
@@ -282,7 +282,7 @@
         @if (selectedCount() < 4) { Ancora {{ 4 - selectedCount() }} } @else {
         Squadre pronte }
       </strong>
-      <span>Priorità a chi ha giocato meno oggi</span>
+      <span>Priorità a chi è stato escluso più volte</span>
     </div>
     <div class="team-create-actions">
       <button

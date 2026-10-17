@@ -1,5 +1,6 @@
-import type { Badge, BadgeKind } from './monthly-badges';
-import type { PlayerAvatarMedal } from './models';
+import type { Badge, BadgeKind } from '../monthly-badges/monthly-badges';
+import type { PlayerAvatarMedal } from '../models';
+import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
 
 export interface GlobalMedalArtwork {
   imageUrl: string;
@@ -13,19 +14,19 @@ export const GLOBAL_MEDAL_ARTWORK: Record<
   GlobalMedalArtwork
 > = {
   gold: {
-    imageUrl: '/awards/oro.webp',
+    imageUrl: AVATAR_ASSETS.head.gold,
     label: 'Oro in classifica',
     alt: 'Medaglia di classifica oro per il primo posto nella classifica globale',
     description: 'Medaglia di classifica: primo posto globale',
   },
   silver: {
-    imageUrl: '/awards/argento.webp',
+    imageUrl: AVATAR_ASSETS.head.silver,
     label: 'Argento in classifica',
     alt: 'Medaglia di classifica argento per il secondo posto nella classifica globale',
     description: 'Medaglia di classifica: secondo posto globale',
   },
   bronze: {
-    imageUrl: '/awards/bronzo.webp',
+    imageUrl: AVATAR_ASSETS.head.bronze,
     label: 'Bronzo in classifica',
     alt: 'Medaglia di classifica bronzo per il terzo posto nella classifica globale',
     description: 'Medaglia di classifica: terzo posto globale',

@@ -1,0 +1,78 @@
+:host {
+  position: relative;
+  display: grid;
+  flex: 0 0 auto;
+  overflow: visible;
+  color: #20232f;
+  font-weight: 950;
+  letter-spacing: 0.04em;
+  border: 2px solid rgb(255 255 255 / 78%);
+  border-radius: 50%;
+  box-shadow: 0 0.2rem 0.6rem rgb(32 35 47 / 14%);
+  isolation: isolate;
+  place-items: center;
+}
+
+:host(.small) {
+  width: 1.55rem;
+  height: 1.55rem;
+  font-size: 0.47rem;
+}
+
+:host(.medium) {
+  width: 2.15rem;
+  height: 2.15rem;
+  font-size: 0.62rem;
+}
+
+:host(.large) {
+  width: 2.7rem;
+  height: 2.7rem;
+  font-size: 0.72rem;
+}
+
+:host(.hero) {
+  width: clamp(5.5rem, 22vw, 8rem);
+  height: clamp(5.5rem, 22vw, 8rem);
+  font-size: 0.9rem;
+}
+
+.avatar-layers {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+}
+
+.avatar-layer {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: block;
+  width: calc(100% + 4px);
+  height: auto;
+  --avatar-layer-scale-x: 1;
+  --avatar-layer-scale-y: 1;
+  --avatar-layer-offset-x: 0%;
+  --avatar-layer-offset-y: 0%;
+  object-fit: contain;
+  pointer-events: none;
+  transform:
+    translate(-50%, -50%)
+    translate(var(--avatar-layer-offset-x), var(--avatar-layer-offset-y))
+    scale(var(--avatar-layer-scale-x), var(--avatar-layer-scale-y));
+  transform-origin: center;
+}
+
+.avatar-layer-head {
+  z-index: 1;
+}
+
+.avatar-layer-face {
+  z-index: 2;
+}
+
+.avatar-layer-hair {
+  z-index: 3;
+}
