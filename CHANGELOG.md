@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.0]
+
+### Features
+
+- **Avatar:** aggiunto il tipo selezionabile **Maschio/Femmina** per ogni giocatore. Cambia viso e capelli. Aggiunto quindi viso base, capelli base e nuovi capelli per serie di 3, 5 e 10 vittorie versione femminile.
+- **Premio mensile:** aggiunta l'illustrazione del premio esclusivo di novembre 2026, disponibile nella classifica mensile da novembre.
+
 ## [1.6.0]
 
 ### Features

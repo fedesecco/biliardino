@@ -34,6 +34,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
+            [type]="player.type"
             [medal]="store.globalMedalFor(player.id)"
             [badges]="store.badgesFor(player.id)"
             size="small"
@@ -80,6 +81,7 @@
             <app-player-avatar
               [name]="leader.player.name"
               [color]="leader.player.avatar_color"
+              [type]="leader.player.type"
               [medal]="store.globalMedalFor(leader.playerId)"
               [badges]="store.badgesFor(leader.playerId)"
             />
@@ -120,6 +122,7 @@
           <app-player-avatar
             [name]="standing.player.name"
             [color]="standing.player.avatar_color"
+            [type]="standing.player.type"
             [medal]="store.globalMedalFor(standing.playerId)"
             [badges]="store.badgesFor(standing.playerId)"
             size="small"

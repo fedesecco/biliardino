@@ -1,7 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import type { Badge, BadgeKind } from '../monthly-badges/monthly-badges';
-import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
+import {
+  AVATAR_SETS,
+  type AvatarComposition,
+} from '../avatar-assets/avatar-assets';
 import { PlayerAvatar } from './player-avatar';
+
+const BADGE_ARTWORK: Record<BadgeKind, string> = {
+  'monthly-champion': AVATAR_SETS.male.face.bomboclat.imageUrl,
+  'monthly-last': AVATAR_SETS.male.face.scemo.imageUrl,
+  'win-streak-3': AVATAR_SETS.male.hair['winstreak-3'].imageUrl,
+  'win-streak-5': AVATAR_SETS.male.hair['winstreak-5'].imageUrl,
+  'win-streak-10': AVATAR_SETS.male.hair['winstreak-10'].imageUrl,
+};
 
 describe('PlayerAvatar', () => {
   let fixture: ComponentFixture<PlayerAvatar>;
@@ -31,9 +42,9 @@ describe('PlayerAvatar', () => {
       ...avatar.querySelectorAll<HTMLImageElement>('.avatar-layer'),
     ];
     expect(layers.map((layer) => layer.getAttribute('src'))).toEqual([
-      AVATAR_ASSETS.head.base,
-      AVATAR_ASSETS.face.base,
-      AVATAR_ASSETS.hair.base,
+      AVATAR_SETS.male.head.base.imageUrl,
+      AVATAR_SETS.male.face.base.imageUrl,
+      AVATAR_SETS.male.hair.base.imageUrl,
     ]);
     expect(
       layers.every(
@@ -49,6 +60,23 @@ describe('PlayerAvatar', () => {
     expect(avatar.querySelector('.avatar-layers')?.getAttribute('aria-label')).toBe(
       'Avatar di Mario Rossi',
     );
+  });
+
+  it('uses the female base face and hair for female avatars', () => {
+    fixture.componentRef.setInput('type', 'female');
+    fixture.detectChanges();
+
+    const layers = [
+      ...(fixture.nativeElement as HTMLElement).querySelectorAll<HTMLImageElement>(
+        '.avatar-layer',
+      ),
+    ];
+
+    expect(layers.map((layer) => layer.getAttribute('src'))).toEqual([
+      AVATAR_SETS.female.head.base.imageUrl,
+      AVATAR_SETS.female.face.base.imageUrl,
+      AVATAR_SETS.female.hair.base.imageUrl,
+    ]);
   });
 
   it('keeps hero avatars on the canonical artwork canvas', () => {
@@ -83,41 +111,17 @@ describe('PlayerAvatar', () => {
       avatar.querySelector<HTMLImageElement>('.avatar-layer-head')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.head.gold);
+    ).toBe(AVATAR_SETS.male.head.gold.imageUrl);
     expect(
       avatar.querySelector<HTMLImageElement>('.avatar-layer-face')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.face.bomboclat);
+    ).toBe(AVATAR_SETS.male.face.bomboclat.imageUrl);
     expect(
       avatar.querySelector<HTMLImageElement>('.avatar-layer-hair')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.hair['winstreak-5']);
-    const faceLayer = avatar.querySelector<HTMLImageElement>(
-      '.avatar-layer-face',
-    );
-    const hairLayer = avatar.querySelector<HTMLImageElement>(
-      '.avatar-layer-hair',
-    );
-    expect(faceLayer?.style.getPropertyValue('--avatar-layer-scale-x')).toBe(
-      '0.86',
-    );
-    expect(faceLayer?.style.getPropertyValue('--avatar-layer-offset-y')).toBe(
-      '-2.7%',
-    );
-    expect(hairLayer?.style.getPropertyValue('--avatar-layer-scale-x')).toBe(
-      '0.98',
-    );
-    expect(hairLayer?.style.getPropertyValue('--avatar-layer-scale-y')).toBe(
-      '0.98',
-    );
-    expect(hairLayer?.style.getPropertyValue('--avatar-layer-offset-x')).toBe(
-      '-1.5%',
-    );
-    expect(hairLayer?.style.getPropertyValue('--avatar-layer-offset-y')).toBe(
-      '-34%',
-    );
+    ).toBe(AVATAR_SETS.male.hair['winstreak-5'].imageUrl);
     expect(avatar.querySelector('.avatar-content')).toBeNull();
     expect(avatar.querySelector('.streak-effect')).toBeNull();
     expect(avatar.querySelector('.avatar-layers')?.getAttribute('aria-label')).toBe(
@@ -125,81 +129,85 @@ describe('PlayerAvatar', () => {
     );
   });
 
-  it('uses the highest available winstreak hair tier', () => {
+  it('keeps the streak tier while switching between complete avatar types', () => {
     const tiers = [
-      ['win-streak-3', AVATAR_ASSETS.hair['winstreak-3']],
-      ['win-streak-5', AVATAR_ASSETS.hair['winstreak-5']],
-      ['win-streak-10', AVATAR_ASSETS.hair['winstreak-10']],
+      ['win-streak-3', 'winstreak-3'],
+      ['win-streak-5', 'winstreak-5'],
+      ['win-streak-10', 'winstreak-10'],
     ] as const;
-    for (const [kind, expectedSrc] of tiers) {
+
+    for (const [kind, hairVariant] of tiers) {
       fixture.componentRef.setInput('badges', [badge(kind, kind)]);
-      fixture.detectChanges();
+      for (const type of ['male', 'female'] as const) {
+        fixture.componentRef.setInput('type', type);
+        fixture.detectChanges();
 
-      const hair = (
-        fixture.nativeElement as HTMLElement
-      ).querySelector<HTMLImageElement>('.avatar-layer-hair');
-
-      expect(hair?.getAttribute('src')).toBe(expectedSrc);
-      expect(hair?.getAttribute('width')).toBe('512');
-      expect(hair?.getAttribute('height')).toBe('512');
+        const hair = (fixture.nativeElement as HTMLElement)
+          .querySelector<HTMLImageElement>('.avatar-layer-hair');
+        expect(hair?.getAttribute('src')).toBe(
+          AVATAR_SETS[type].hair[hairVariant].imageUrl,
+        );
+      }
     }
-
   });
 
-  it('keeps aspect-preserving hair layouts for every status', () => {
-    const kinds = [
-      null,
-      'win-streak-3',
-      'win-streak-5',
-      'win-streak-10',
-    ] as const;
+  it('restores the selected type’s base hair after a winstreak ends', () => {
+    fixture.componentRef.setInput('type', 'female');
+    fixture.componentRef.setInput('badges', [
+      badge('win-streak-5', 'Winstreak: 5'),
+    ]);
+    fixture.detectChanges();
 
-    for (const kind of kinds) {
-      fixture.componentRef.setInput(
-        'badges',
-        kind ? [badge(kind, kind)] : [],
-      );
-      fixture.detectChanges();
+    const hair = (fixture.nativeElement as HTMLElement)
+      .querySelector<HTMLImageElement>('.avatar-layer-hair');
+    expect(hair?.getAttribute('src')).toBe(
+      AVATAR_SETS.female.hair['winstreak-5'].imageUrl,
+    );
 
-      const hair = (
-        fixture.nativeElement as HTMLElement
-      ).querySelector<HTMLImageElement>('.avatar-layer-hair');
+    fixture.componentRef.setInput('badges', []);
+    fixture.detectChanges();
+    expect(hair?.getAttribute('src')).toBe(AVATAR_SETS.female.hair.base.imageUrl);
 
-      const expectedLayouts = {
-        base: {
-          scale: '0.74',
-          offsetX: '-0.5%',
-          offsetY: '-28%',
-        },
-        'win-streak-3': {
-          scale: '0.92',
-          offsetX: '-1.5%',
-          offsetY: '-30%',
-        },
-        'win-streak-5': {
-          scale: '0.98',
-          offsetX: '-1.5%',
-          offsetY: '-34%',
-        },
-        'win-streak-10': {
-          scale: '1.02',
-          offsetX: '-1.5%',
-          offsetY: '-30%',
-        },
-      } as const;
-      const expected = expectedLayouts[kind ?? 'base'];
-      expect({
-        scaleX: hair?.style.getPropertyValue('--avatar-layer-scale-x'),
-        scaleY: hair?.style.getPropertyValue('--avatar-layer-scale-y'),
-        offsetX: hair?.style.getPropertyValue('--avatar-layer-offset-x'),
-        offsetY: hair?.style.getPropertyValue('--avatar-layer-offset-y'),
-      }).toEqual({
-        scaleX: expected.scale,
-        scaleY: expected.scale,
-        offsetX: expected.offsetX,
-        offsetY: expected.offsetY,
-      });
-    }
+    fixture.componentRef.setInput('type', 'male');
+    fixture.detectChanges();
+    expect(hair?.getAttribute('src')).toBe(AVATAR_SETS.male.hair.base.imageUrl);
+  });
+
+  it('lets manual parts override status and restores status when cleared', () => {
+    fixture.componentRef.setInput('medal', 'gold');
+    fixture.componentRef.setInput('badges', [
+      badge('monthly-champion', 'Bomboclat'),
+      badge('win-streak-5', 'Winstreak: 5'),
+    ]);
+    fixture.detectChanges();
+
+    const avatar = fixture.nativeElement as HTMLElement;
+    const sources = () => [
+      ...avatar.querySelectorAll<HTMLImageElement>('.avatar-layer'),
+    ].map((image) => image.getAttribute('src'));
+    const automaticSources = sources();
+
+    fixture.componentRef.setInput('composition', {
+      head: { type: 'female', variant: 'silver' },
+      face: { type: 'male', variant: 'base' },
+      hair: { type: 'female', variant: 'base' },
+    } satisfies AvatarComposition);
+    fixture.detectChanges();
+
+    expect(sources()).toEqual([
+      AVATAR_SETS.female.head.silver.imageUrl,
+      AVATAR_SETS.male.face.base.imageUrl,
+      AVATAR_SETS.female.hair.base.imageUrl,
+    ]);
+    expect(avatar.classList.contains('avatar-medal-silver')).toBe(true);
+    expect(avatar.classList.contains('avatar-medal-gold')).toBe(false);
+
+    fixture.componentRef.setInput('composition', null);
+    fixture.detectChanges();
+
+    expect(sources()).toEqual(automaticSources);
+    expect(avatar.classList.contains('avatar-medal-gold')).toBe(true);
+    expect(avatar.classList.contains('avatar-medal-silver')).toBe(false);
   });
 
   it('changes the face for the monthly last-place status', () => {
@@ -214,17 +222,17 @@ describe('PlayerAvatar', () => {
       avatar.querySelector<HTMLImageElement>('.avatar-layer-head')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.head.bronze);
+    ).toBe(AVATAR_SETS.male.head.bronze.imageUrl);
     expect(
       avatar.querySelector<HTMLImageElement>('.avatar-layer-face')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.face.scemo);
+    ).toBe(AVATAR_SETS.male.face.scemo.imageUrl);
     expect(
       avatar.querySelector<HTMLImageElement>('.avatar-layer-hair')?.getAttribute(
         'src',
       ),
-    ).toBe(AVATAR_ASSETS.hair.base);
+    ).toBe(AVATAR_SETS.male.hair.base.imageUrl);
   });
 });
 
@@ -238,8 +246,6 @@ function badge(
     label,
     description,
     elo: null,
-    imageUrl: `/avatars/${
-      kind.startsWith('monthly-') ? 'face' : 'hair'
-    }/${kind}.webp`,
+    imageUrl: BADGE_ARTWORK[kind],
   };
 }

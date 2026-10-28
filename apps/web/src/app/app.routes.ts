@@ -63,5 +63,13 @@ export const appRoutes: Route[] = [
     loadComponent: () =>
       import('./features/auth/login-page').then((module) => module.LoginPage),
   },
+  {
+    path: 'avatar-lab',
+    title: 'Avatar Lab · Coppa Telenia',
+    loadComponent: () =>
+      import('./features/avatar-lab/avatar-lab-page').then(
+        (module) => module.AvatarLabPage,
+      ),
+  },
   { path: '**', redirectTo: '' },
 ];

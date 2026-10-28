@@ -20,6 +20,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
+            [type]="player.type"
             [medal]="store.globalMedalFor(player.id)"
             [badges]="store.badgesFor(player.id)"
           />
@@ -85,6 +86,7 @@
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
+            [type]="player.type"
             [medal]="store.globalMedalFor(player.id)"
             [badges]="store.badgesFor(player.id)"
           />
@@ -230,6 +232,7 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
+          [type]="player.type"
           [medal]="store.globalMedalFor(player.id)"
           [badges]="store.badgesFor(player.id)"
         />

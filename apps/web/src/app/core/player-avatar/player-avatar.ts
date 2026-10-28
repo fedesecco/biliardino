@@ -1,86 +1,31 @@
 import { Component, computed, input } from '@angular/core';
-import type { PlayerAvatarMedal } from '../models';
+import type { AvatarType, PlayerAvatarMedal } from '../models';
 import type { Badge } from '../monthly-badges/monthly-badges';
-import { AVATAR_ARTWORK_SIZE, AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
-import { GLOBAL_MEDAL_ARTWORK } from '../recognitions/recognitions';
+import {
+  AVATAR_ARTWORK_SIZE,
+  AVATAR_SETS,
+  type AvatarComposition,
+  type AvatarVariants,
+} from '../avatar-assets/avatar-assets';
+import { GLOBAL_MEDAL_DETAILS } from '../recognitions/recognitions';
 
 export type PlayerAvatarSize = 'small' | 'medium' | 'large' | 'hero';
 
-type AvatarLayer = 'head' | 'face' | 'hair';
+type AvatarLayer = keyof AvatarVariants;
 
-interface AvatarLayerLayout {
-  scaleX: number;
-  scaleY: number;
-  offsetX: string;
-  offsetY: string;
-}
-
-const MONTHLY_FACE_ASSETS: Partial<Record<Badge['kind'], string>> = {
-  'monthly-champion': AVATAR_ASSETS.face.bomboclat,
-  'monthly-last': AVATAR_ASSETS.face.scemo,
-};
-
-const WIN_STREAK_HAIR_ASSETS: Partial<Record<Badge['kind'], string>> = {
-  'win-streak-3': AVATAR_ASSETS.hair['winstreak-3'],
-  'win-streak-5': AVATAR_ASSETS.hair['winstreak-5'],
-  'win-streak-10': AVATAR_ASSETS.hair['winstreak-10'],
-};
-
-const BASE_HEAD_LAYER_LAYOUT: AvatarLayerLayout = {
-  scaleX: 1,
-  scaleY: 1,
-  offsetX: '0%',
-  offsetY: '0%',
-};
-
-const BASE_FACE_LAYER_LAYOUT: AvatarLayerLayout = {
-  scaleX: 0.86,
-  scaleY: 0.86,
-  offsetX: '0%',
-  offsetY: '-6.6%',
-};
-
-const FACE_LAYER_LAYOUTS: Partial<
-  Record<Badge['kind'], AvatarLayerLayout>
+const MONTHLY_FACE_PARTS: Partial<
+  Record<Badge['kind'], AvatarVariants['face']>
 > = {
-  'monthly-champion': {
-    ...BASE_FACE_LAYER_LAYOUT,
-    offsetY: '-2.7%',
-  },
-  'monthly-last': {
-    ...BASE_FACE_LAYER_LAYOUT,
-    offsetY: '-2.7%',
-  },
+  'monthly-champion': 'bomboclat',
+  'monthly-last': 'scemo',
 };
 
-const BASE_HAIR_LAYER_LAYOUT: AvatarLayerLayout = {
-  scaleX: 0.74,
-  scaleY: 0.74,
-  offsetX: '-0.5%',
-  offsetY: '-28%',
-};
-
-const WIN_STREAK_HAIR_LAYER_LAYOUTS: Partial<
-  Record<Badge['kind'], AvatarLayerLayout>
+const WIN_STREAK_HAIR_PARTS: Partial<
+  Record<Badge['kind'], AvatarVariants['hair']>
 > = {
-  'win-streak-3': {
-    scaleX: 0.92,
-    scaleY: 0.92,
-    offsetX: '-1.5%',
-    offsetY: '-30%',
-  },
-  'win-streak-5': {
-    scaleX: 0.98,
-    scaleY: 0.98,
-    offsetX: '-1.5%',
-    offsetY: '-34%',
-  },
-  'win-streak-10': {
-    scaleX: 1.02,
-    scaleY: 1.02,
-    offsetX: '-1.5%',
-    offsetY: '-30%',
-  },
+  'win-streak-3': 'winstreak-3',
+  'win-streak-5': 'winstreak-5',
+  'win-streak-10': 'winstreak-10',
 };
 
 const MEDAL_BORDER_COLORS: Record<PlayerAvatarMedal, string> = {
@@ -119,9 +64,9 @@ const MEDAL_BORDER_COLORS: Record<PlayerAvatarMedal, string> = {
   styleUrl: './player-avatar.scss',
   host: {
     '[class]': 'size()',
-    '[class.avatar-medal-gold]': 'medal() === "gold"',
-    '[class.avatar-medal-silver]': 'medal() === "silver"',
-    '[class.avatar-medal-bronze]': 'medal() === "bronze"',
+    '[class.avatar-medal-gold]': 'headPart().variant === "gold"',
+    '[class.avatar-medal-silver]': 'headPart().variant === "silver"',
+    '[class.avatar-medal-bronze]': 'headPart().variant === "bronze"',
     '[style.background-color]': 'color()',
     '[style.border-color]': 'medalBorderColor()',
   },
@@ -129,11 +74,18 @@ const MEDAL_BORDER_COLORS: Record<PlayerAvatarMedal, string> = {
 export class PlayerAvatar {
   readonly name = input.required<string>();
   readonly color = input.required<string>();
+  readonly type = input<AvatarType>('male');
   readonly size = input<PlayerAvatarSize>('medium');
   readonly medal = input<PlayerAvatarMedal | null>(null);
   readonly badges = input<Badge[]>([]);
-
+  readonly composition = input<AvatarComposition | null>(null);
   protected readonly avatarArtworkSize = AVATAR_ARTWORK_SIZE;
+  protected readonly headPart = computed<AvatarComposition['head']>(
+    () => this.composition()?.head ?? {
+      type: this.type(),
+      variant: this.medal() ?? 'base',
+    },
+  );
   protected readonly monthlyBadge = computed(
     () =>
       this.badges().find(
@@ -142,46 +94,54 @@ export class PlayerAvatar {
   );
   protected readonly streakBadge = computed(
     () =>
-      this.badges().find(({ kind }) => Boolean(WIN_STREAK_HAIR_ASSETS[kind])) ??
+      this.badges().find(({ kind }) => Boolean(WIN_STREAK_HAIR_PARTS[kind])) ??
       null,
   );
   protected readonly avatarLayers = computed(() => {
-    const medal = this.medal();
+    const avatarSet = AVATAR_SETS[this.type()];
+    const composition = this.composition();
+    const headPart = this.headPart();
     const monthlyBadge = this.monthlyBadge();
     const streakBadge = this.streakBadge();
+    const head = AVATAR_SETS[headPart.type].head[headPart.variant];
+    const face = composition
+      ? AVATAR_SETS[composition.face.type].face[composition.face.variant]
+      : avatarSet.face[
+          monthlyBadge ? MONTHLY_FACE_PARTS[monthlyBadge.kind] ?? 'base' : 'base'
+        ];
+    const hair = composition
+      ? AVATAR_SETS[composition.hair.type].hair[composition.hair.variant]
+      : avatarSet.hair[
+          streakBadge ? WIN_STREAK_HAIR_PARTS[streakBadge.kind] ?? 'base' : 'base'
+        ];
 
     return [
       {
         kind: 'head' as const satisfies AvatarLayer,
-        imageUrl: medal ? AVATAR_ASSETS.head[medal] : AVATAR_ASSETS.head.base,
-        layout: BASE_HEAD_LAYER_LAYOUT,
+        imageUrl: head.imageUrl,
+        layout: head.layout,
       },
       {
         kind: 'face' as const satisfies AvatarLayer,
-        imageUrl: monthlyBadge
-          ? MONTHLY_FACE_ASSETS[monthlyBadge.kind] ?? AVATAR_ASSETS.face.base
-          : AVATAR_ASSETS.face.base,
-        layout: monthlyBadge
-          ? FACE_LAYER_LAYOUTS[monthlyBadge.kind] ?? BASE_FACE_LAYER_LAYOUT
-          : BASE_FACE_LAYER_LAYOUT,
+        imageUrl: face.imageUrl,
+        layout: face.layout,
       },
       {
         kind: 'hair' as const satisfies AvatarLayer,
-        imageUrl: streakBadge
-          ? WIN_STREAK_HAIR_ASSETS[streakBadge.kind] ?? AVATAR_ASSETS.hair.base
-          : AVATAR_ASSETS.hair.base,
-        layout: streakBadge
-          ? WIN_STREAK_HAIR_LAYER_LAYOUTS[streakBadge.kind] ?? BASE_HAIR_LAYER_LAYOUT
-          : BASE_HAIR_LAYER_LAYOUT,
+        imageUrl: hair.imageUrl,
+        layout: hair.layout,
       },
     ];
   });
   protected readonly avatarLabel = computed(() => {
+    if (this.composition()) {
+      return `Avatar di ${this.name()}`;
+    }
     const medal = this.medal();
     const monthlyBadge = this.monthlyBadge();
     const streakBadge = this.streakBadge();
     const details = [
-      medal ? GLOBAL_MEDAL_ARTWORK[medal].label : null,
+      medal ? GLOBAL_MEDAL_DETAILS[medal].label : null,
       monthlyBadge?.label ?? null,
       streakBadge?.description ?? streakBadge?.label ?? null,
     ].filter((detail): detail is string => Boolean(detail));
@@ -191,7 +151,7 @@ export class PlayerAvatar {
       : `Avatar di ${this.name()}`;
   });
   protected readonly medalBorderColor = computed(() => {
-    const medal = this.medal();
-    return medal ? MEDAL_BORDER_COLORS[medal] : null;
+    const head = this.headPart().variant;
+    return head === 'base' ? null : MEDAL_BORDER_COLORS[head];
   });
 }

@@ -51,6 +51,30 @@ describe('PlayersPage', () => {
     );
   });
 
+  it('offers a male/female avatar type toggle', () => {
+    const fixture = TestBed.createComponent(PlayersPage);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('.add-button') as HTMLButtonElement).click();
+    fixture.detectChanges();
+
+    const options = fixture.nativeElement.querySelectorAll(
+      '.type-choice',
+    ) as NodeListOf<HTMLLabelElement>;
+    const femaleOption = fixture.nativeElement.querySelectorAll(
+      'input[formControlName="type"]',
+    )[1] as HTMLInputElement;
+
+    expect(options).toHaveLength(2);
+    expect([...options].map((option) => option.textContent?.trim())).toEqual([
+      'Maschio',
+      'Femmina',
+    ]);
+    femaleOption.click();
+    fixture.detectChanges();
+
+    expect(femaleOption.checked).toBe(true);
+  });
+
   it('links each player card to its detail page', () => {
     const fixture = TestBed.createComponent(PlayersPage);
     fixture.detectChanges();
@@ -68,6 +92,7 @@ function player(id: string, name: string, avatarColor: string): Player {
     id,
     name,
     avatar_color: avatarColor,
+    type: 'male',
     current_elo: 1000,
     current_win_streak: 0,
     active: true,

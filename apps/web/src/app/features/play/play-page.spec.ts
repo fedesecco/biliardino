@@ -2,6 +2,7 @@ import { computed, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
 import type {
   Player,
   SelectionMode,
@@ -78,7 +79,7 @@ describe('PlayPage', () => {
               label: 'Winstreak: 5',
               description: '5 vittorie consecutive',
               elo: null,
-              imageUrl: '/avatars/hair/winstreak-5.webp',
+              imageUrl: AVATAR_SETS.male.hair['winstreak-5'].imageUrl,
             },
           ]
         : [],
@@ -223,6 +224,7 @@ function player(id: string, name: string, currentElo: number): Player {
     id,
     name,
     avatar_color: '#123456',
+    type: 'male',
     current_elo: currentElo,
     current_win_streak: 0,
     active: true,

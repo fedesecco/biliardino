@@ -1,5 +1,6 @@
 export type TeamColor = 'red' | 'blue';
 export type PlayerAvatarMedal = 'gold' | 'silver' | 'bronze';
+export type AvatarType = 'male' | 'female';
 export type SelectionMode = 'off' | 'any' | TeamColor;
 export type TeamPickingMode = 'random' | 'elo-balanced';
 
@@ -7,6 +8,7 @@ export interface Player {
   id: string;
   name: string;
   avatar_color: string;
+  type: AvatarType;
   current_elo: number;
   current_win_streak: number;
   active: boolean;
@@ -25,7 +27,7 @@ export interface MatchParticipant {
   team: TeamColor;
   elo_before: number;
   elo_delta: number;
-  player: Pick<Player, 'id' | 'name' | 'avatar_color'>;
+  player: Pick<Player, 'id' | 'name' | 'avatar_color' | 'type'>;
 }
 
 export interface MatchRecord {
@@ -44,6 +46,7 @@ export interface PlayerStatistic {
   id: string;
   name: string;
   avatar_color: string;
+  type: AvatarType;
   current_elo: number;
   current_win_streak: number;
   games: number;

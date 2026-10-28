@@ -1,0 +1,101 @@
+<section class="avatar-lab" aria-labelledby="avatar-lab-title">
+  <header class="page-heading">
+    <h1 id="avatar-lab-title">Avatar Lab</h1>
+    <p>Combina base, occhi e capelli. Le prove non modificano i giocatori.</p>
+  </header>
+
+  <div class="composer">
+    <div class="avatar-preview" aria-label="Anteprima avatar">
+      <app-player-avatar
+        name="prova"
+        color="#ffffff"
+        size="hero"
+        [composition]="composition()"
+      />
+    </div>
+
+    <div class="avatar-controls">
+      @for (control of controls; track control.layer) {
+      @let selected = selectedOption(control);
+      @let isOpen = openLayer() === control.layer;
+      <div
+        class="field avatar-dropdown"
+        [class.is-open]="isOpen"
+        [class.opens-above]="isOpen && openAbove()"
+        [attr.data-avatar-dropdown]="control.layer"
+      >
+        <label
+          [id]="'avatar-' + control.layer + '-label'"
+          [for]="'avatar-' + control.layer + '-trigger'"
+        >{{ control.label }}</label>
+        <button
+          #trigger
+          type="button"
+          class="avatar-select-trigger"
+          role="combobox"
+          aria-haspopup="listbox"
+          aria-autocomplete="none"
+          [id]="'avatar-' + control.layer + '-trigger'"
+          [attr.aria-labelledby]="'avatar-' + control.layer + '-label avatar-' + control.layer + '-value'"
+          [attr.aria-expanded]="isOpen"
+          [attr.aria-controls]="'avatar-' + control.layer + '-listbox'"
+          [attr.aria-activedescendant]="isOpen ? 'avatar-' + control.layer + '-option-' + activeIndex() : null"
+          (click)="toggle(control)"
+          (keydown)="onKeydown($event, control, trigger)"
+          (blur)="close(control)"
+        >
+          <span class="option-thumbnail" aria-hidden="true">
+            <img
+              [src]="selected.artwork.imageUrl"
+              alt=""
+              width="48"
+              height="48"
+            />
+          </span>
+          <span class="option-label" [id]="'avatar-' + control.layer + '-value'">
+            {{ selected.label }}
+          </span>
+          <span class="select-chevron" aria-hidden="true">⌄</span>
+        </button>
+
+        <div
+          class="avatar-options"
+          role="listbox"
+          [id]="'avatar-' + control.layer + '-listbox'"
+          [attr.aria-labelledby]="'avatar-' + control.layer + '-label'"
+          [style.--dropdown-space]="dropdownSpace() + 'px'"
+          [hidden]="!isOpen"
+        >
+          @for (option of control.options; track option.id; let index = $index) {
+          <button
+            type="button"
+            tabindex="-1"
+            class="avatar-option"
+            role="option"
+            [id]="'avatar-' + control.layer + '-option-' + index"
+            [attr.aria-selected]="option.id === selected.id"
+            [class.is-active]="index === activeIndex()"
+            [class.is-selected]="option.id === selected.id"
+            (pointerdown)="$event.preventDefault()"
+            (click)="choose(control, index, trigger)"
+          >
+            <span class="option-thumbnail" aria-hidden="true">
+              <img
+                [src]="option.artwork.imageUrl"
+                alt=""
+                width="48"
+                height="48"
+              />
+            </span>
+            <span class="option-label">{{ option.label }}</span>
+            @if (option.id === selected.id) {
+            <span class="selection-mark" aria-hidden="true">✓</span>
+            }
+          </button>
+          }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</section>

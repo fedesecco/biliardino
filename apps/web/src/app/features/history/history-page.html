@@ -126,6 +126,7 @@
               <app-player-avatar
                 [name]="participant.player.name"
                 [color]="participant.player.avatar_color"
+                [type]="participant.player.type"
                 [medal]="store.globalMedalFor(participant.player_id)"
                 [badges]="store.badgesFor(participant.player_id)"
                 size="small"
@@ -167,6 +168,7 @@
               <app-player-avatar
                 [name]="participant.player.name"
                 [color]="participant.player.avatar_color"
+                [type]="participant.player.type"
                 [medal]="store.globalMedalFor(participant.player_id)"
                 [badges]="store.badgesFor(participant.player_id)"
                 size="small"

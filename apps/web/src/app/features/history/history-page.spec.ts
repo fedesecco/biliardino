@@ -3,7 +3,7 @@ import localeIt from '@angular/common/locales/it';
 import { signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
-import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
 import { AppStore } from '../../core/app-store.service';
 import type { MatchRecord } from '../../core/models';
 import { SupabaseService } from '../../core/supabase.service';
@@ -92,7 +92,7 @@ describe('HistoryPage', () => {
         label: 'Winstreak: 5',
         description: '5 vittorie consecutive',
         elo: null,
-        imageUrl: '/avatars/hair/winstreak-5.webp',
+        imageUrl: AVATAR_SETS.male.hair['winstreak-5'].imageUrl,
       },
     ]);
     const fixture = TestBed.createComponent(HistoryPage);
@@ -110,7 +110,7 @@ describe('HistoryPage', () => {
       redPlayerLink
         .querySelector<HTMLImageElement>('.avatar-layer-hair')
         ?.getAttribute('src'),
-    ).toBe(AVATAR_ASSETS.hair['winstreak-5']);
+    ).toBe(AVATAR_SETS.male.hair['winstreak-5'].imageUrl);
 
     fixture.destroy();
   });
@@ -160,6 +160,7 @@ function matchCreatedMinutesAgo(id: string, minutes: number): MatchRecord {
           id: 'red-player',
           name: 'Mario Rossi',
           avatar_color: '#a8e6cf',
+          type: 'male',
         },
       },
       {
@@ -171,6 +172,7 @@ function matchCreatedMinutesAgo(id: string, minutes: number): MatchRecord {
           id: 'blue-player',
           name: 'Luigi Bianchi',
           avatar_color: '#bde0fe',
+          type: 'male',
         },
       },
     ],

@@ -49,11 +49,11 @@ describe('AnalyticsPage', () => {
     expect(element.textContent).not.toContain('Vittorie per colore');
   });
 
-  it('renders the registered hero artwork for October 2026', () => {
+  it('renders the registered hero artwork for November 2026', () => {
     monthlyRankingsSignal.set(
       monthlyRankings.map((standing) => ({
         ...standing,
-        month_start: '2026-10-01',
+        month_start: '2026-11-01',
       })),
     );
     const fixture = TestBed.createComponent(AnalyticsPage);
@@ -61,19 +61,19 @@ describe('AnalyticsPage', () => {
     const element = fixture.nativeElement as HTMLElement;
 
     expect(element.querySelector('#monthly-award-title')?.textContent?.trim()).toBe(
-      'Premio esclusivo Ottobre 2026',
+      'Premio esclusivo Novembre 2026',
     );
     expect(
       element
         .querySelector<HTMLImageElement>('app-trophy-artwork.hero img')
         ?.getAttribute('src'),
-    ).toBe('/trophies/2026-10-1024.webp');
+    ).toBe('/trophies/2026-11-1024.webp');
   });
   it('shows a pending message when the current month has no prize artwork', () => {
     monthlyRankingsSignal.set(
       monthlyRankings.map((standing) => ({
         ...standing,
-        month_start: '2026-11-01',
+        month_start: '2026-12-01',
       })),
     );
     const fixture = TestBed.createComponent(AnalyticsPage);
@@ -87,7 +87,7 @@ describe('AnalyticsPage', () => {
       element
         .querySelector('.fallback-trophy')
         ?.getAttribute('aria-label'),
-    ).toBe('Nessun premio disponibile per novembre 2026');
+    ).toBe('Nessun premio disponibile per dicembre 2026');
   });
 
   it('opens the monthly award ranking', () => {
@@ -145,6 +145,7 @@ function statistic(
     id,
     name,
     avatar_color: avatarColor,
+    type: 'male',
     current_elo: currentElo,
     current_win_streak: 0,
     games: 2,

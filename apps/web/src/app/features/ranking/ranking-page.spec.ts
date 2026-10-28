@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
 import type { PlayerStatistic } from '../../core/models';
 import { RankingPage } from './ranking-page';
 
@@ -10,6 +10,7 @@ const statistic: PlayerStatistic = {
   id: 'leader-id',
   name: 'Mario Rossi',
   avatar_color: '#a8e6cf',
+  type: 'male',
   current_elo: 1120,
   current_win_streak: 0,
   games: 12,
@@ -98,12 +99,12 @@ describe('RankingPage', () => {
       rows[0]
         .querySelector<HTMLImageElement>('.avatar-layer-head')
         ?.getAttribute('src'),
-    ).toBe(AVATAR_ASSETS.head.gold);
+    ).toBe(AVATAR_SETS.male.head.gold.imageUrl);
     expect(
       rows[2]
         .querySelector<HTMLImageElement>('.avatar-layer-head')
         ?.getAttribute('src'),
-    ).toBe(AVATAR_ASSETS.head.silver);
+    ).toBe(AVATAR_SETS.male.head.silver.imageUrl);
     expect(
       rows[0].querySelector('.player-name strong')?.classList,
     ).toContain('medal-name-gold');

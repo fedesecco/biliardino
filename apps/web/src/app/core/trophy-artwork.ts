@@ -22,6 +22,10 @@ const TROPHY_IMAGE_BY_MONTH: Record<string, TrophyImages> = {
     thumbnail: '/trophies/2026-10-256.webp',
     hero: '/trophies/2026-10-1024.webp',
   },
+  '2026-11-01': {
+    thumbnail: '/trophies/2026-11-256.webp',
+    hero: '/trophies/2026-11-1024.webp',
+  },
 };
 export function hasExclusiveTrophyArtwork(monthStart: string): boolean {
   return Boolean(TROPHY_IMAGE_BY_MONTH[monthStart]);

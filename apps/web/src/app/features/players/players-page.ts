@@ -2,7 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import type { Player } from '../../core/models';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
+import type { AvatarType, Player } from '../../core/models';
 import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 
 @Component({
@@ -40,6 +41,10 @@ export class PlayersPage {
     '#f6d6ad',
     '#b8e0d2',
   ] as const;
+
+  protected readonly avatarTypes = Object.entries(AVATAR_SETS).map(
+    ([value, avatarSet]) => ({ value, label: avatarSet.label }),
+  );
   protected readonly playerForm = this.formBuilder.nonNullable.group({
     name: [
       '',
@@ -49,6 +54,7 @@ export class PlayersPage {
       '#a8e6cf',
       [Validators.required, Validators.pattern(/^#[0-9a-fA-F]{6}$/)],
     ],
+    type: ['male' as AvatarType, Validators.required],
     active: true,
   });
 
@@ -62,6 +68,7 @@ export class PlayersPage {
     this.playerForm.reset({
       name: '',
       avatarColor,
+      type: 'male',
       active: true,
     });
   }
@@ -73,6 +80,7 @@ export class PlayersPage {
     this.playerForm.setValue({
       name: player.name,
       avatarColor: player.avatar_color,
+      type: player.type,
       active: player.active,
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -121,10 +129,11 @@ export class PlayersPage {
         await this.store.updatePlayer(editingId, {
           name: value.name,
           avatar_color: value.avatarColor,
+          type: value.type,
           active: value.active,
         });
       } else {
-        await this.store.createPlayer(value.name, value.avatarColor);
+        await this.store.createPlayer(value.name, value.avatarColor, value.type);
       }
       this.formVisible.set(false);
     } catch (error: unknown) {

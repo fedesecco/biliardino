@@ -57,6 +57,21 @@
         }
       </div>
 
+      <fieldset class="type-field">
+        <legend>Tipo avatar</legend>
+        <div class="type-toggle">
+          @for (avatarType of avatarTypes; track avatarType.value) {
+          <label class="type-choice">
+            <input
+              type="radio"
+              formControlName="type"
+              [value]="avatarType.value"
+            />
+            <span>{{ avatarType.label }}</span>
+          </label>
+          }
+        </div>
+      </fieldset>
       <fieldset class="color-field">
         <legend>Colore card</legend>
         <div class="color-list">
@@ -106,6 +121,7 @@
         <app-player-avatar
           [name]="player.name"
           [color]="player.avatar_color"
+          [type]="player.type"
           [medal]="store.globalMedalFor(player.id)"
           [badges]="store.badgesFor(player.id)"
           size="large"

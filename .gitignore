@@ -60,3 +60,6 @@ __screenshots__/
 .env
 .env.local
 apps/web/public/env.js
+
+# Raw resources
+raw/

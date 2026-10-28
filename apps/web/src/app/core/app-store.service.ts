@@ -11,6 +11,7 @@ import type {
   MonthlyChampion,
   MonthlyEloRanking,
   PickedPlayer,
+  AvatarType,
   Player,
   PlayerRivalry,
   PlayerStatistic,
@@ -122,6 +123,7 @@ export class AppStore {
   readonly badges = computed(() => {
     const badges = calculateMonthlyBadgesFromStandings(
       this.monthlyRankings(),
+      this.statistics(),
     );
 
     for (const [playerId, streakBadges] of calculateWinStreakBadges(
@@ -329,11 +331,16 @@ export class AppStore {
     await this.refreshMatchData();
   }
 
-  async createPlayer(name: string, avatarColor: string): Promise<void> {
+  async createPlayer(
+    name: string,
+    avatarColor: string,
+    type: AvatarType,
+  ): Promise<void> {
     this.assertCompanyUser();
     const { error } = await this.supabase.client.from('players').insert({
       name: name.trim(),
       avatar_color: avatarColor,
+      type,
     });
 
     if (error) {
@@ -346,7 +353,7 @@ export class AppStore {
 
   async updatePlayer(
     playerId: string,
-    changes: Pick<Player, 'name' | 'avatar_color' | 'active'>,
+    changes: Pick<Player, 'name' | 'avatar_color' | 'type' | 'active'>,
   ): Promise<void> {
     this.assertCompanyUser();
     const { error } = await this.supabase.client
@@ -354,6 +361,7 @@ export class AppStore {
       .update({
         name: changes.name.trim(),
         avatar_color: changes.avatar_color,
+        type: changes.type,
         active: changes.active,
         updated_at: new Date().toISOString(),
       })
@@ -388,6 +396,7 @@ export class AppStore {
       .map((statistic) => ({
         playerId: statistic.id,
         playerName: statistic.name,
+        avatarType: statistic.type,
         currentWinStreak: statistic.current_win_streak,
         badges: [...this.badgesFor(statistic.id)],
         globalMedal: this.globalMedalFor(statistic.id),
@@ -437,6 +446,7 @@ export class AppStore {
             ] ??
             row.avatar_color ??
             '#a8e6cf',
+          type: row.type ?? 'male',
           current_elo: Number(row.current_elo ?? 1000),
           current_win_streak: Number(row.current_win_streak ?? 0),
           games: Number(row.games ?? 0),
@@ -446,7 +456,7 @@ export class AppStore {
           goals_against: Number(row.goals_against ?? 0),
           goal_diff: Number(row.goal_diff ?? 0),
           win_rate: Number(row.win_rate ?? 0),
-        })),
+        }))
     );
   }
 
@@ -646,6 +656,7 @@ export class AppStore {
           id: player.id,
           name: player.name,
           avatar_color: player.avatar_color,
+          type: player.type,
         },
       };
       const current = participantsByMatch.get(participant.match_id) ?? [];

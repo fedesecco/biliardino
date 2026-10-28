@@ -1,32 +1,28 @@
 import type { Badge, BadgeKind } from '../monthly-badges/monthly-badges';
-import type { PlayerAvatarMedal } from '../models';
-import { AVATAR_ASSETS } from '../avatar-assets/avatar-assets';
+import type { AvatarType, PlayerAvatarMedal } from '../models';
+import { AVATAR_SETS } from '../avatar-assets/avatar-assets';
 
-export interface GlobalMedalArtwork {
-  imageUrl: string;
+export interface GlobalMedalDetails {
   label: string;
   alt: string;
   description: string;
 }
 
-export const GLOBAL_MEDAL_ARTWORK: Record<
+export const GLOBAL_MEDAL_DETAILS: Record<
   PlayerAvatarMedal,
-  GlobalMedalArtwork
+  GlobalMedalDetails
 > = {
   gold: {
-    imageUrl: AVATAR_ASSETS.head.gold,
     label: 'Oro in classifica',
     alt: 'Medaglia di classifica oro per il primo posto nella classifica globale',
     description: 'Medaglia di classifica: primo posto globale',
   },
   silver: {
-    imageUrl: AVATAR_ASSETS.head.silver,
     label: 'Argento in classifica',
     alt: 'Medaglia di classifica argento per il secondo posto nella classifica globale',
     description: 'Medaglia di classifica: secondo posto globale',
   },
   bronze: {
-    imageUrl: AVATAR_ASSETS.head.bronze,
     label: 'Bronzo in classifica',
     alt: 'Medaglia di classifica bronzo per il terzo posto nella classifica globale',
     description: 'Medaglia di classifica: terzo posto globale',
@@ -65,6 +61,7 @@ export function recognitionDialogTitle(
 export interface RecognitionSnapshot {
   playerId: string;
   playerName: string;
+  avatarType: AvatarType;
   currentWinStreak: number;
   badges: Badge[];
   globalMedal: PlayerAvatarMedal | null;
@@ -115,14 +112,14 @@ export function findNewRecognitions(
       current.globalMedal &&
       medalRank(current.globalMedal) > medalRank(previous?.globalMedal ?? null)
     ) {
-      const medal = GLOBAL_MEDAL_ARTWORK[current.globalMedal];
+      const medal = GLOBAL_MEDAL_DETAILS[current.globalMedal];
       recognitions.push({
         playerId: current.playerId,
         playerName: current.playerName,
         kind: 'global-medal',
         label: medal.label,
         description: medal.description,
-        imageUrl: medal.imageUrl,
+        imageUrl: AVATAR_SETS[current.avatarType].head[current.globalMedal].imageUrl,
       });
     }
 

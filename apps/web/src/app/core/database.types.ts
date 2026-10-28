@@ -217,6 +217,7 @@ export type Database = {
           current_win_streak: number;
           id: string;
           name: string;
+          type: Database['public']['Enums']['avatar_type'];
           updated_at: string;
         };
         Insert: {
@@ -227,6 +228,7 @@ export type Database = {
           current_win_streak?: number;
           id?: string;
           name: string;
+          type?: Database['public']['Enums']['avatar_type'];
           updated_at?: string;
         };
         Update: {
@@ -234,9 +236,10 @@ export type Database = {
           avatar_color?: string;
           created_at?: string;
           current_elo?: number;
-          id?: string;
           current_win_streak?: number;
+          id?: string;
           name?: string;
+          type?: Database['public']['Enums']['avatar_type'];
           updated_at?: string;
         };
         Relationships: [];
@@ -410,6 +413,7 @@ export type Database = {
           id: string | null;
           losses: number | null;
           name: string | null;
+          type: Database['public']['Enums']['avatar_type'] | null;
           win_rate: number | null;
           wins: number | null;
         };
@@ -452,6 +456,7 @@ export type Database = {
       };
     };
     Enums: {
+      avatar_type: 'male' | 'female';
       team_color: 'red' | 'blue';
     };
     CompositeTypes: {
@@ -580,6 +585,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      avatar_type: ['male', 'female'],
       team_color: ['red', 'blue'],
     },
   },

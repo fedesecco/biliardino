@@ -10,7 +10,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import type { ParamMap } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
-import { AVATAR_ASSETS } from '../../core/avatar-assets/avatar-assets';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
 import type {
   MatchRecord,
   MonthlyChampion,
@@ -25,6 +25,7 @@ const player: PlayerStatistic = {
   id: 'player-one',
   name: 'Mario Rossi',
   avatar_color: '#a8e6cf',
+  type: 'male',
   current_elo: 1120,
   current_win_streak: 5,
   games: 12,
@@ -56,6 +57,12 @@ const octoberTrophy: MonthlyChampion = {
   awarded_at: '2026-11-01T03:05:00.000Z',
 };
 
+const novemberTrophy: MonthlyChampion = {
+  ...octoberTrophy,
+  month_start: '2026-11-01',
+  awarded_at: '2026-12-01T03:05:00.000Z',
+};
+
 const exclusiveTrophy: MonthlyChampion = {
   month_start: '2026-08-01',
   player_id: player.id,
@@ -82,6 +89,7 @@ const recentMatch: MatchRecord = {
         id: player.id,
         name: player.name,
         avatar_color: player.avatar_color,
+        type: player.type,
       },
     },
     {
@@ -93,6 +101,7 @@ const recentMatch: MatchRecord = {
         id: 'player-two',
         name: 'Luigi Bianchi',
         avatar_color: '#3279f6',
+        type: 'male',
       },
     },
   ],
@@ -122,14 +131,14 @@ const profileBadges = [
     kind: 'monthly-champion' as const,
     label: 'Bomboclat',
     elo: 24,
-    imageUrl: '/avatars/face/bomboclat.webp',
+    imageUrl: AVATAR_SETS.male.face.bomboclat.imageUrl,
   },
   {
     kind: 'win-streak-5' as const,
     label: 'Winstreak: 5',
     description: '5 vittorie consecutive',
     elo: null,
-    imageUrl: '/avatars/hair/winstreak-5.webp',
+    imageUrl: AVATAR_SETS.male.hair['winstreak-5'].imageUrl,
   },
 ];
 const badgesFor = vi.fn().mockReturnValue(profileBadges);
@@ -159,7 +168,12 @@ describe('PlayerDetailPage', () => {
           useValue: {
             loading: signal(false),
             statistics: signal([player, secondPlayer]),
-            monthlyChampions: signal([octoberTrophy, exclusiveTrophy, trophy]),
+            monthlyChampions: signal([
+              novemberTrophy,
+              octoberTrophy,
+              exclusiveTrophy,
+              trophy,
+            ]),
             badgesFor,
             globalMedalFor,
             loadPlayerRecentMatches,
@@ -189,6 +203,7 @@ describe('PlayerDetailPage', () => {
       ...element.querySelectorAll<HTMLButtonElement>('.trophy-grid button'),
     ].map((button) => button.getAttribute('aria-label'));
     expect(awardLabels).toEqual([
+      'Apri Premio esclusivo Novembre 2026',
       'Apri Premio esclusivo Ottobre 2026',
       'Apri Premio esclusivo Agosto 2026',
       'Apri Miglior giocatore di luglio 2026',
@@ -198,6 +213,7 @@ describe('PlayerDetailPage', () => {
         (image) => image.getAttribute('src'),
       ),
     ).toEqual([
+      '/trophies/2026-11-256.webp',
       '/trophies/2026-10-256.webp',
       '/trophies/2026-08-256.webp',
     ]);
@@ -208,7 +224,18 @@ describe('PlayerDetailPage', () => {
     ).toBe('/trophies/legacy-paper-256.webp');
   });
 
-  it('shows current status through the composed avatar and its distinctive parts', () => {
+  it.each(['male', 'female'] as const)('shows %s status through the composed avatar and its distinctive parts', (type) => {
+    TestBed.inject(AppStore).statistics.set([{ ...player, type }, secondPlayer]);
+    badgesFor.mockReturnValue([
+      {
+        ...profileBadges[0],
+        imageUrl: AVATAR_SETS[type].face.bomboclat.imageUrl,
+      },
+      {
+        ...profileBadges[1],
+        imageUrl: AVATAR_SETS[type].hair['winstreak-5'].imageUrl,
+      },
+    ]);
     const fixture = TestBed.createComponent(PlayerDetailPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
@@ -219,18 +246,18 @@ describe('PlayerDetailPage', () => {
         (image) => image.getAttribute('src'),
       ),
     ).toEqual([
-      AVATAR_ASSETS.head.gold,
-      AVATAR_ASSETS.face.bomboclat,
-      AVATAR_ASSETS.hair['winstreak-5'],
+      AVATAR_SETS[type].head.gold.imageUrl,
+      AVATAR_SETS[type].face.bomboclat.imageUrl,
+      AVATAR_SETS[type].hair['winstreak-5'].imageUrl,
     ]);
     expect(
       [...element.querySelectorAll<HTMLImageElement>('.avatar-part img')].map(
         (image) => image.getAttribute('src'),
       ),
     ).toEqual([
-      AVATAR_ASSETS.head.gold,
-      '/avatars/face/bomboclat.webp',
-      '/avatars/hair/winstreak-5.webp',
+      AVATAR_SETS[type].head.gold.imageUrl,
+      AVATAR_SETS[type].face.bomboclat.imageUrl,
+      AVATAR_SETS[type].hair['winstreak-5'].imageUrl,
     ]);
     expect(
       [...element.querySelectorAll<HTMLElement>('.avatar-part strong')].map(

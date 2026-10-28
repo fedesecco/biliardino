@@ -11,6 +11,7 @@ import {
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
+import { AVATAR_SETS } from '../../core/avatar-assets/avatar-assets';
 import type {
   MatchParticipant,
   MatchRecord,
@@ -19,7 +20,7 @@ import type {
   TeamColor,
 } from '../../core/models';
 import type { Badge } from '../../core/monthly-badges/monthly-badges';
-import { GLOBAL_MEDAL_ARTWORK } from '../../core/recognitions/recognitions';
+import { GLOBAL_MEDAL_DETAILS } from '../../core/recognitions/recognitions';
 import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
 import { italianMonthLabel } from '../../core/rome-calendar/rome-calendar';
 import { TrophyArtwork } from '../../core/trophy-artwork';
@@ -66,16 +67,16 @@ export class PlayerDetailPage {
   );
 
   protected readonly avatarParts = computed<ProfileAvatarPart[]>(() => {
+    const statistic = this.statistic();
     const medal = this.store.globalMedalFor(this.playerId());
-    const medalArtwork = medal ? GLOBAL_MEDAL_ARTWORK[medal] : null;
 
     return [
-      ...(medalArtwork
+      ...(medal && statistic
         ? [
             {
-              imageUrl: medalArtwork.imageUrl,
-              label: medalArtwork.label,
-              description: medalArtwork.description,
+              imageUrl: AVATAR_SETS[statistic.type].head[medal].imageUrl,
+              label: GLOBAL_MEDAL_DETAILS[medal].label,
+              description: GLOBAL_MEDAL_DETAILS[medal].description,
             },
           ]
         : []),
