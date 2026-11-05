@@ -9,6 +9,7 @@ import {
   hasExclusiveTrophyArtwork,
   TrophyArtwork,
 } from '../../core/trophy-artwork';
+import { RankingPage } from '../ranking/ranking-page';
 
 interface AwardStanding {
   elo: number;
@@ -23,7 +24,7 @@ function capitalize(value: string): string {
 
 @Component({
   selector: 'app-analytics-page',
-  imports: [DecimalPipe, PlayerAvatar, RouterLink, TrophyArtwork],
+  imports: [DecimalPipe, PlayerAvatar, RankingPage, RouterLink, TrophyArtwork],
   templateUrl: './analytics-page.html',
   styleUrl: './analytics-page.scss',
 })
@@ -32,6 +33,7 @@ export class AnalyticsPage {
   protected readonly globalLeaders = computed(() =>
     this.store.statistics().slice(0, 3),
   );
+  protected readonly globalRankingOpen = signal(false);
   protected readonly monthlyRankingOpen = signal(false);
   protected readonly monthStart = computed(
     () =>
@@ -55,12 +57,8 @@ export class AnalyticsPage {
       .sort((first, second) => first.rank - second.rank);
   });
   protected readonly monthlyLeaders = computed(() =>
-    this.monthlyStandings().filter((standing) => standing.rank === 1),
+    this.monthlyStandings().slice(0, 3),
   );
-
-  protected toggleMonthlyRanking(): void {
-    this.monthlyRankingOpen.update((open) => !open);
-  }
 
   private toAwardStanding(
     standing: MonthlyEloRanking,

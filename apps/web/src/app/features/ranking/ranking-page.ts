@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import { PlayerAvatar } from '../../core/player-avatar/player-avatar';
@@ -21,10 +21,12 @@ interface RankingRow {
 @Component({
   selector: 'app-ranking-page',
   imports: [DecimalPipe, PlayerAvatar, RouterLink],
+  host: { '[class.embedded]': 'embedded()' },
   templateUrl: './ranking-page.html',
   styleUrl: './ranking-page.scss',
 })
 export class RankingPage {
+  readonly embedded = input(false);
   protected readonly store = inject(AppStore);
   protected readonly rankingRows = computed<RankingRow[]>(() => {
     let rank = 0;

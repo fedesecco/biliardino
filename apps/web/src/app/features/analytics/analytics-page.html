@@ -9,28 +9,32 @@
   <div class="surface loading-block" aria-label="Caricamento classifiche"></div>
   } @else {
   <div class="awards-grid">
-    <a
-      class="global-card surface"
-      routerLink="/classifiche/globale"
+    <section
+      class="award-card global-card surface"
       aria-labelledby="global-ranking-title"
     >
-      <div class="award-copy global-card-copy">
-        <span>Classifica ELO</span>
+      <button
+        type="button"
+        class="award-trigger"
+        (click)="globalRankingOpen.set(!globalRankingOpen())"
+        [attr.aria-expanded]="globalRankingOpen()"
+        aria-controls="global-ranking"
+        aria-labelledby="global-ranking-title"
+      >
+      <div class="award-copy">
         <h2 id="global-ranking-title">Classifica globale</h2>
-        <p>La graduatoria completa di tutti i giocatori.</p>
-        <strong class="open-ranking">Apri la classifica globale</strong>
       </div>
+      @if (!globalRankingOpen()) {
       <div
-        class="global-preview"
+        class="ranking-preview"
         aria-label="Anteprima della classifica globale"
       >
-        <span class="global-preview-heading">Primi tre giocatori</span>
         @if (globalLeaders().length === 0) {
         <p class="empty-ranking">La classifica comparirà dopo la prima partita.</p>
         } @else {
         @for (player of globalLeaders(); track player.id; let position = $index) {
-        <div class="global-preview-row">
-          <span class="global-preview-rank">{{ position + 1 }}</span>
+        <div class="ranking-preview-row">
+          <span class="ranking-preview-rank">{{ position + 1 }}</span>
           <app-player-avatar
             [name]="player.name"
             [color]="player.avatar_color"
@@ -50,7 +54,21 @@
         }
         }
       </div>
-    </a>
+      }
+      </button>
+      <div
+        class="ranking-collapse"
+        [class.open]="globalRankingOpen()"
+        [attr.aria-hidden]="!globalRankingOpen()"
+        [inert]="!globalRankingOpen()"
+      >
+        <div class="ranking-collapse-inner">
+          <div id="global-ranking" class="award-ranking" role="region" aria-labelledby="global-ranking-title">
+            <app-ranking-page [embedded]="true" />
+          </div>
+        </div>
+      </div>
+    </section>
     <section
       class="award-card monthly-award surface"
       aria-labelledby="monthly-award-title"
@@ -58,12 +76,12 @@
       <button
         type="button"
         class="award-trigger"
-        (click)="toggleMonthlyRanking()"
+        (click)="monthlyRankingOpen.set(!monthlyRankingOpen())"
         [attr.aria-expanded]="monthlyRankingOpen()"
         aria-controls="monthly-ranking"
+        aria-labelledby="monthly-award-title"
       >
         <div class="award-copy">
-          <span>Classifica mensile</span>
           @if (hasMonthlyArtwork()) {
           <h2 id="monthly-award-title">
             Premio esclusivo {{ monthLabel() }}
@@ -73,46 +91,46 @@
             Non c'è ancora un premio per questo mese
           </h2>
           }
-          @if (monthlyLeaders().length === 0) {
-          <p>Nessuna partita giocata questo mese.</p>
-          } @else {
-          <div class="award-leaders">
+        </div>
+        <app-trophy-artwork [monthStart]="monthStart()" size="hero" />
+          @if (!monthlyRankingOpen()) {
+          <div class="ranking-preview" aria-label="Anteprima della classifica mensile">
+            @if (monthlyLeaders().length === 0) {
+            <p class="empty-ranking">Nessuna partita giocata questo mese.</p>
+            } @else {
             @for (leader of monthlyLeaders(); track leader.playerId) {
-            <app-player-avatar
-              [name]="leader.player.name"
-              [color]="leader.player.avatar_color"
-              [type]="leader.player.type"
-              [medal]="store.globalMedalFor(leader.playerId)"
-              [badges]="store.badgesFor(leader.playerId)"
-            />
-            <span>
-              <small>In testa</small>
+            <div class="ranking-preview-row">
+              <span class="ranking-preview-rank">{{ leader.rank }}</span>
+              <app-player-avatar
+                [name]="leader.player.name"
+                [color]="leader.player.avatar_color"
+                [type]="leader.player.type"
+                [medal]="store.globalMedalFor(leader.playerId)"
+                [badges]="store.badgesFor(leader.playerId)"
+                size="small"
+              />
               <strong
                 [class.medal-name-gold]="store.globalMedalFor(leader.playerId) === 'gold'"
                 [class.medal-name-silver]="store.globalMedalFor(leader.playerId) === 'silver'"
                 [class.medal-name-bronze]="store.globalMedalFor(leader.playerId) === 'bronze'"
                 >{{ leader.player.name }}</strong
               >
-            </span>
-            <b
-              >{{ leader.elo > 0 ? '+' : '' }}{{ leader.elo | number: '1.0-2' }}
-              ELO</b
-            >
+              <b>{{ leader.elo > 0 ? '+' : '' }}{{ leader.elo | number: '1.0-0' }}</b>
+            </div>
+            }
             }
           </div>
           }
-          <p>A fine mese, resterà per sempre nella bacheca del vincitore.</p>
-          <strong class="open-ranking">
-            {{ monthlyRankingOpen() ? 'Nascondi classifica' : 'Vedi classifica
-            del mese' }}
-          </strong>
-        </div>
-        <app-trophy-artwork [monthStart]="monthStart()" size="hero" />
       </button>
 
-      @if (monthlyRankingOpen()) {
-      <div id="monthly-ranking" class="award-ranking">
-        <h3>Classifica di {{ monthLabel() }}</h3>
+      <div
+        class="ranking-collapse"
+        [class.open]="monthlyRankingOpen()"
+        [attr.aria-hidden]="!monthlyRankingOpen()"
+        [inert]="!monthlyRankingOpen()"
+      >
+      <div class="ranking-collapse-inner">
+      <div id="monthly-ranking" class="award-ranking" role="region" aria-labelledby="monthly-award-title">
         @if (monthlyStandings().length === 0) {
         <p class="empty-ranking">Nessun punteggio mensile disponibile.</p>
         } @else { @for (standing of monthlyStandings(); track standing.playerId)
@@ -143,7 +161,8 @@
         </a>
         } }
       </div>
-      }
+      </div>
+      </div>
     </section>
   </div>
 

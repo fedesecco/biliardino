@@ -17,14 +17,6 @@ export const appRoutes: Route[] = [
       ),
   },
   {
-    path: 'classifiche/globale',
-    title: 'Classifica globale · Coppa Telenia',
-    loadComponent: () =>
-      import('./features/ranking/ranking-page').then(
-        (module) => module.RankingPage,
-      ),
-  },
-  {
     path: 'classifiche',
     title: 'Classifiche · Coppa Telenia',
     loadComponent: () =>

@@ -8,6 +8,25 @@
   animation: page-in 360ms ease-out;
 }
 
+.sync-banner {
+  padding: 0.8rem 1rem;
+  margin: 0 0 1rem;
+  color: var(--ink);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  background: rgb(255 240 207 / 90%);
+  border: 1px solid var(--amber);
+  border-radius: 0.85rem;
+}
+
+.sync-retry {
+  margin-bottom: 1rem;
+
+  .error-banner {
+    margin-bottom: 0.5rem;
+  }
+}
+
 .lock-banner {
   display: flex;
   flex-wrap: wrap;
@@ -208,39 +227,18 @@
 }
 
 .selection-action {
-  position: fixed;
-  z-index: 25;
-  right: 0.5rem;
-  bottom: 5rem;
-  left: 0.5rem;
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  justify-content: space-between;
+  width: 100%;
+  min-width: 0;
+  min-height: 4rem;
   max-width: 44rem;
   padding: 0.5rem;
-  margin: auto;
   color: white;
   background: rgb(32 35 47 / 96%);
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 0.9rem;
   box-shadow: var(--shadow-lg);
   backdrop-filter: blur(1rem);
-
-  > .selection-summary {
-    display: none;
-  }
-
-  strong,
-  span {
-    display: block;
-  }
-
-  span {
-    margin-top: 0.15rem;
-    color: #abb0bf;
-    font-size: 0.65rem;
-  }
+  pointer-events: auto;
 
   .team-create-actions {
     display: grid;
@@ -573,14 +571,6 @@
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 
-  .selection-action > .selection-summary {
-    display: block;
-  }
-
-  .selection-action .team-create-actions {
-    width: auto;
-  }
-
   .selection-action .primary-button {
     min-width: 8.5rem;
     width: auto;
@@ -606,7 +596,7 @@
   }
 
   .selection-action {
-    bottom: 1.5rem;
+    width: max-content;
   }
 
   .scoreboard {

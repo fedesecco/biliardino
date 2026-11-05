@@ -1,9 +1,14 @@
+import { NgTemplateOutlet } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
+  signal,
+  type Signal,
+  type TemplateRef,
   untracked,
   viewChild,
 } from '@angular/core';
@@ -14,7 +19,7 @@ import { recognitionDialogTitle } from './core/recognitions/recognitions';
 import { SupabaseService } from './core/supabase.service';
 
 @Component({
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [NgTemplateOutlet, RouterLink, RouterLinkActive, RouterOutlet],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',
@@ -25,6 +30,11 @@ export class App {
   protected readonly store = inject(AppStore);
   protected readonly appVersion = APP_VERSION;
   protected readonly recognitionDialogTitle = recognitionDialogTitle;
+  protected readonly pageActions =
+    signal<Signal<TemplateRef<unknown> | undefined> | null>(null);
+  protected readonly bottomActions = computed(
+    () => this.pageActions()?.() ?? null,
+  );
   private readonly recognitionDialog =
     viewChild<ElementRef<HTMLDialogElement>>('recognitionDialog');
   constructor() {

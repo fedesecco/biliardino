@@ -1,15 +1,38 @@
-@if (draft(); as teams) {
+@if (!confirming()) {
+@if (auth.companyUser() && store.playSyncError(); as error) {
+<div class="sync-retry">
+  <p class="error-banner" role="alert">{{ error }}</p>
+  <button
+    class="secondary-button"
+    type="button"
+    (click)="retryPlaySync()"
+    [disabled]="busy()"
+  >
+    Riprova sincronizzazione
+  </button>
+</div>
+} @if (store.error(); as error) {
+<p class="error-banner" role="alert">{{ error }}</p>
+} @if (localError(); as error) {
+<p class="error-banner" role="alert">{{ error }}</p>
+}
+} @if (auth.companyUser() && store.playReady() && !store.playConnected()) {
+<p class="sync-banner" role="status">
+  Connessione interrotta. Riconnessione in corso… Le modifiche sono disabilitate.
+</p>
+} @if (auth.companyUser() && draft(); as teams) {
 <section class="match-view" aria-labelledby="match-title">
   <div class="match-toolbar">
     <h1 id="match-title">Partita</h1>
-    <button class="secondary-button" type="button" (click)="changePlayers()">
+    <button
+      class="secondary-button"
+      type="button"
+      (click)="changePlayers()"
+      [disabled]="!canMutate()"
+    >
       Cambia
     </button>
   </div>
-
-  @if (localError(); as error) {
-  <p class="error-banner" role="alert">{{ error }}</p>
-  }
 
   <div class="scoreboard">
     <article class="team-panel red-team">
@@ -38,16 +61,16 @@
         <span>
           <small>Se vince</small>
           <strong class="positive"
-            >+{{ elo.red.win.min | number: '1.0-2' }}/{{
-              elo.red.win.max | number: '1.0-2'
+            >+{{ elo.red.win.min | number: '1.0-0' }}/{{
+              elo.red.win.max | number: '1.0-0'
             }}</strong
           >
         </span>
         <span>
           <small>Se perde</small>
           <strong class="negative"
-            >-{{ elo.red.loss.min | number: '1.0-2' }}/{{
-              elo.red.loss.max | number: '1.0-2'
+            >-{{ elo.red.loss.min | number: '1.0-0' }}/{{
+              elo.red.loss.max | number: '1.0-0'
             }}</strong
           >
         </span>
@@ -57,17 +80,17 @@
         class="score-tap"
         type="button"
         (click)="addGoal('red')"
-        [disabled]="confirming() || busy()"
+        [disabled]="!canMutate() || confirming() || score().red >= 6"
         aria-label="Aggiungi goal alla squadra rossa"
       >
         <span>{{ score().red }}</span>
-        <small>Tocca per segnare</small>
+        <small>{{ canMutate() ? 'Tocca per segnare' : 'Punteggio condiviso' }}</small>
       </button>
       <button
         class="minus-button"
         type="button"
         (click)="removeGoal('red')"
-        [disabled]="score().red === 0 || busy()"
+        [disabled]="!canMutate() || score().red === 0"
         aria-label="Rimuovi un goal alla squadra rossa"
       >
         − annulla
@@ -104,16 +127,16 @@
         <span>
           <small>Se vince</small>
           <strong class="positive"
-            >+{{ elo.blue.win.min | number: '1.0-2' }}/{{
-              elo.blue.win.max | number: '1.0-2'
+            >+{{ elo.blue.win.min | number: '1.0-0' }}/{{
+              elo.blue.win.max | number: '1.0-0'
             }}</strong
           >
         </span>
         <span>
           <small>Se perde</small>
           <strong class="negative"
-            >-{{ elo.blue.loss.min | number: '1.0-2' }}/{{
-              elo.blue.loss.max | number: '1.0-2'
+            >-{{ elo.blue.loss.min | number: '1.0-0' }}/{{
+              elo.blue.loss.max | number: '1.0-0'
             }}</strong
           >
         </span>
@@ -123,17 +146,17 @@
         class="score-tap"
         type="button"
         (click)="addGoal('blue')"
-        [disabled]="confirming() || busy()"
+        [disabled]="!canMutate() || confirming() || score().blue >= 6"
         aria-label="Aggiungi goal alla squadra blu"
       >
         <span>{{ score().blue }}</span>
-        <small>Tocca per segnare</small>
+        <small>{{ canMutate() ? 'Tocca per segnare' : 'Punteggio condiviso' }}</small>
       </button>
       <button
         class="minus-button"
         type="button"
         (click)="removeGoal('blue')"
-        [disabled]="score().blue === 0 || busy()"
+        [disabled]="!canMutate() || score().blue === 0"
         aria-label="Rimuovi un goal alla squadra blu"
       >
         − annulla
@@ -160,11 +183,30 @@
       <h2 id="confirm-title">
         {{ score().red }} <span>—</span> {{ score().blue }}
       </h2>
+      @if (!store.playConnected()) {
+      <p class="sync-banner" role="status">
+        Riconnessione in corso… Le modifiche sono disabilitate.
+      </p>
+      } @if (store.playSyncError(); as error) {
+      <div class="sync-retry">
+        <p class="error-banner" role="alert">{{ error }}</p>
+        <button
+          class="secondary-button"
+          type="button"
+          (click)="retryPlaySync()"
+          [disabled]="busy()"
+        >
+          Riprova sincronizzazione
+        </button>
+      </div>
+      } @if (localError(); as error) {
+      <p class="error-banner" role="alert">{{ error }}</p>
+      }
       <button
         class="primary-button"
         type="button"
         (click)="confirmMatch()"
-        [disabled]="busy()"
+        [disabled]="!canMutate()"
       >
         {{ busy() ? 'Salvataggio…' : 'Conferma partita' }}
       </button>
@@ -172,9 +214,17 @@
         class="secondary-button"
         type="button"
         (click)="correctScore()"
-        [disabled]="busy()"
+        [disabled]="!canMutate()"
       >
         Correggi punteggio
+      </button>
+      <button
+        class="secondary-button"
+        type="button"
+        (click)="changePlayers()"
+        [disabled]="!canMutate()"
+      >
+        Cambia
       </button>
     </div>
   </div>
@@ -192,17 +242,7 @@
     </div>
   </header>
 
-  @if (!auth.companyUser()) {
-  <div class="lock-banner">
-    <strong>Modalità sola lettura.</strong>
-    <span> Accedi con l'account condiviso per creare una partita.</span>
-    <a routerLink="/accedi">Accedi</a>
-  </div>
-  } @if (store.error(); as error) {
-  <p class="error-banner" role="alert">{{ error }}</p>
-  } @if (localError(); as error) {
-  <p class="error-banner" role="alert">{{ error }}</p>
-  } @if (store.loading()) {
+  @if (store.loading()) {
   <div class="players-grid" aria-label="Caricamento giocatori">
     @for (item of [1, 2, 3, 4, 5, 6]; track item) {
     <div class="player-card skeleton"></div>
@@ -225,7 +265,7 @@
         class="card-select"
         type="button"
         (click)="toggleAny(player.id)"
-        [disabled]="!auth.companyUser()"
+        [disabled]="!canSelect()"
         [attr.aria-pressed]="selection().has(player.id)"
         [attr.aria-label]="'Seleziona ' + player.name"
       >
@@ -252,7 +292,7 @@
           class="team-dot red"
           [class.active]="selection().get(player.id) === 'red'"
           (click)="chooseMode($event, player.id, 'red')"
-          [disabled]="!auth.companyUser()"
+          [disabled]="!canSelect()"
           [attr.aria-label]="'Assegna ' + player.name + ' ai rossi'"
         ></button>
         <button
@@ -260,7 +300,7 @@
           class="team-dot any"
           [class.active]="selection().get(player.id) === 'any'"
           (click)="chooseMode($event, player.id, 'any')"
-          [disabled]="!auth.companyUser()"
+          [disabled]="!canSelect()"
           [attr.aria-label]="'Lascia scegliere la squadra di ' + player.name"
         >
           ?
@@ -270,7 +310,7 @@
           class="team-dot blue"
           [class.active]="selection().get(player.id) === 'blue'"
           (click)="chooseMode($event, player.id, 'blue')"
-          [disabled]="!auth.companyUser()"
+          [disabled]="!canSelect()"
           [attr.aria-label]="'Assegna ' + player.name + ' ai blu'"
         ></button>
       </div>
@@ -279,14 +319,8 @@
   </div>
   }
 
+  <ng-template #bottomActions>
   <div class="selection-action">
-    <div class="selection-summary">
-      <strong>
-        @if (selectedCount() < 4) { Ancora {{ 4 - selectedCount() }} } @else {
-        Squadre pronte }
-      </strong>
-      <span>Priorità a chi è stato escluso più volte</span>
-    </div>
     <div class="team-create-actions">
       <button
         class="primary-button"
@@ -308,5 +342,6 @@
       </button>
     </div>
   </div>
+  </ng-template>
 </section>
 }

@@ -5,7 +5,11 @@
 
 .app-shell {
   min-height: 100dvh;
-  padding: 0 0.75rem 5.5rem;
+  padding: 0 0.75rem calc(5.5rem + env(safe-area-inset-bottom));
+}
+
+.app-shell.has-bottom-actions {
+  padding-bottom: calc(10.5rem + env(safe-area-inset-bottom));
 }
 
 .topbar {
@@ -115,19 +119,30 @@ main {
 }
 
 
-.bottom-nav {
+.bottom-dock {
   position: fixed;
   z-index: 30;
-  right: 0.75rem;
+  right: max(0.75rem, env(safe-area-inset-right));
   bottom: max(0.75rem, env(safe-area-inset-bottom));
-  left: 0.75rem;
+  left: max(0.75rem, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: center;
+  max-width: 72rem;
+  margin-inline: auto;
+  pointer-events: none;
+}
+
+.bottom-nav {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
+  width: 100%;
   max-width: 30rem;
   min-height: 4rem;
   padding: 0.35rem;
-  margin: auto;
+  pointer-events: auto;
   background: rgb(30 34 46 / 94%);
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: 1.1rem;
@@ -299,10 +314,25 @@ main {
     min-height: 6rem;
   }
 
+}
+
+@media (min-width: 62rem) {
+  .app-shell,
+  .app-shell.has-bottom-actions {
+    padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+  }
+
+  .bottom-dock {
+    right: max(2rem, env(safe-area-inset-right));
+    bottom: max(1.5rem, env(safe-area-inset-bottom));
+    left: max(2rem, env(safe-area-inset-left));
+    flex-direction: row;
+    gap: 1rem;
+    justify-content: center;
+  }
+
   .bottom-nav {
-    right: 2rem;
-    bottom: 1.5rem;
-    left: auto;
+    flex-shrink: 0;
     width: 26rem;
   }
 }

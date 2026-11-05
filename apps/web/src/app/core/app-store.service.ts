@@ -1,5 +1,8 @@
+import { DOCUMENT } from '@angular/common';
 import {
   computed,
+  DestroyRef,
+  effect,
   inject,
   Injectable,
   signal,
@@ -10,7 +13,7 @@ import type {
   MatchRecord,
   MonthlyChampion,
   MonthlyEloRanking,
-  PickedPlayer,
+  TeamColor,
   AvatarType,
   Player,
   PlayerRivalry,
@@ -36,6 +39,7 @@ import { romeMonthKey } from './rome-calendar/rome-calendar';
 
 type MatchRow = Database['public']['Tables']['matches']['Row'];
 type MatchParticipantRow = Database['public']['Tables']['match_players']['Row'];
+type ActivePlayRow = Database['public']['Tables']['active_play']['Row'];
 
 type FilteredMatchRow = MatchRow & {
   match_players: Array<Pick<MatchParticipantRow, 'player_id'>>;
@@ -59,12 +63,19 @@ const GLOBAL_MEDAL_BY_POSITION: Record<
 @Injectable({ providedIn: 'root' })
 export class AppStore {
   private readonly supabase = inject(SupabaseService);
+  private readonly document = inject(DOCUMENT);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly activePlay = signal<ActivePlayRow | null>(null);
+  private playConnectionEpoch = 0;
+  private reconnectingPlay = false;
+  private playDatabaseSubscribed = false;
   private readonly playerColorReplacements: Record<string, string> = {
     '#e84a5f': '#fbc4ab',
     '#3279f6': '#bde0fe',
   };
   private historyLoadPromise: Promise<void> | null = null;
   private realtimeChannel: RealtimeChannel | null = null;
+  private playChannel: RealtimeChannel | null = null;
   private readonly historyPageSize = 25;
   private historyCursor: MatchHistoryCursor | null = null;
   private historyPlayerId: string | null = null;
@@ -139,9 +150,34 @@ export class AppStore {
   });
   readonly playSelection = signal(new Map<string, SelectionMode>());
   readonly teamPickingMode = signal<TeamPickingMode>('elo-balanced');
-  readonly playDraft = signal<TeamDraft | null>(null);
-  readonly playScore = signal({ red: 0, blue: 0 });
-  readonly playConfirming = signal(false);
+  readonly playReady = signal(false);
+  readonly playConnected = signal(false);
+  readonly playSyncError = signal<string | null>(null);
+  readonly playDraft = computed<TeamDraft | null>(() => {
+    const state = this.activePlay();
+    if (!this.supabase.companyUser() || !state || state.phase === 'selection') {
+      return null;
+    }
+    const playersById = new Map(this.players().map((player) => [player.id, player]));
+    const resolve = (ids: string[]) =>
+      ids.flatMap((id) => {
+        const player = playersById.get(id);
+        return player ? [player] : [];
+      });
+    const playing = new Set([...state.red_players, ...state.blue_players]);
+    return {
+      red: resolve(state.red_players),
+      blue: resolve(state.blue_players),
+      benched: resolve(state.candidates.filter((id) => !playing.has(id))),
+    };
+  });
+  readonly playScore = computed(() => ({
+    red: this.activePlay()?.red_score ?? 0,
+    blue: this.activePlay()?.blue_score ?? 0,
+  }));
+  readonly playConfirming = computed(
+    () => this.supabase.companyUser() && this.activePlay()?.phase === 'confirming',
+  );
 
   constructor() {
     if (!this.supabase.configured()) {
@@ -151,6 +187,53 @@ export class AppStore {
 
     void this.refresh();
     this.subscribeToChanges();
+    effect((onCleanup) => {
+      if (!this.supabase.companyUser()) {
+        return;
+      }
+      this.subscribeToPlayChanges();
+      onCleanup(() => {
+        this.playConnectionEpoch++;
+        this.playDatabaseSubscribed = false;
+        const channel = this.playChannel;
+        this.playChannel = null;
+        this.activePlay.set(null);
+        this.playReady.set(false);
+        this.playConnected.set(false);
+        this.playSyncError.set(null);
+        if (channel) {
+          void this.supabase.client.removeChannel(channel);
+        }
+      });
+    });
+    const window = this.document.defaultView;
+    const onVisibility = () => {
+      if (this.document.visibilityState === 'visible') {
+        void this.synchronizePlay();
+      }
+    };
+    const onOffline = () => {
+      if (!this.supabase.companyUser()) {
+        return;
+      }
+      this.playDatabaseSubscribed = false;
+      this.playConnectionEpoch++;
+      this.playConnected.set(false);
+      this.playSyncError.set('Connessione assente. Il punteggio non può essere modificato.');
+    };
+    const onOnline = () => void this.retryPlaySync();
+    this.document.addEventListener('visibilitychange', onVisibility);
+    window?.addEventListener('offline', onOffline);
+    window?.addEventListener('online', onOnline);
+    this.destroyRef.onDestroy(() => {
+      this.playConnectionEpoch++;
+      this.document.removeEventListener('visibilitychange', onVisibility);
+      window?.removeEventListener('offline', onOffline);
+      window?.removeEventListener('online', onOnline);
+      if (this.realtimeChannel) {
+        void this.supabase.client.removeChannel(this.realtimeChannel);
+      }
+    });
   }
 
   globalMedalFor(playerId: string): PlayerAvatarMedal | null {
@@ -265,56 +348,83 @@ export class AppStore {
     await this.loadHistoryPageTracked();
   }
 
-  async pickTeams(
+  async retryPlaySync(): Promise<void> {
+    if (!this.supabase.companyUser() || this.reconnectingPlay) {
+      return;
+    }
+    this.reconnectingPlay = true;
+    this.playDatabaseSubscribed = false;
+    const epoch = ++this.playConnectionEpoch;
+    this.playConnected.set(false);
+    const channel = this.playChannel;
+    this.playChannel = null;
+    try {
+      if (channel) {
+        await this.supabase.client.removeChannel(channel);
+      }
+      // Rejoin even if the socket stayed open but database registration failed.
+      if (!this.destroyRef.destroyed && this.supabase.companyUser() &&
+          epoch === this.playConnectionEpoch) {
+        this.subscribeToPlayChanges();
+      }
+    } catch (error: unknown) {
+      if (epoch === this.playConnectionEpoch && this.supabase.companyUser()) {
+        this.playSyncError.set(this.errorMessage(error));
+      }
+    } finally {
+      this.reconnectingPlay = false;
+    }
+  }
+
+  async startPlay(
     candidates: string[],
     redPreferences: string[],
     bluePreferences: string[],
     mode: TeamPickingMode,
-  ): Promise<PickedPlayer[]> {
-    this.assertCompanyUser();
-    const { data, error } = await this.supabase.client.rpc('pick_teams', {
+  ): Promise<void> {
+    const state = this.assertPlayWritable();
+    const { data, error } = await this.supabase.client.rpc('start_play', {
       p_candidates: candidates,
       p_red_preferences: redPreferences,
       p_blue_preferences: bluePreferences,
       p_balance_by_elo: mode === 'elo-balanced',
+      p_expected_revision: state.revision,
     });
-
     if (error) {
+      await this.synchronizePlay();
       throw error;
     }
-
-    return data;
+    this.applyActivePlay(data);
   }
 
-  async recordMatch(
-    candidates: string[],
-    redPlayers: string[],
-    bluePlayers: string[],
-    redScore: number,
-    blueScore: number,
+  async changePlay(
+    action: 'goal' | 'undo' | 'correct' | 'cancel' | 'finish',
+    team?: TeamColor,
   ): Promise<void> {
-    this.assertCompanyUser();
-    const participantIds = [
-      ...new Set([...redPlayers, ...bluePlayers]),
-    ];
-    const before = this.recognitionSnapshots(participantIds);
-    const { error } = await this.supabase.client.rpc('record_match', {
-      p_candidates: candidates,
-      p_red_players: redPlayers,
-      p_blue_players: bluePlayers,
-      p_red_score: redScore,
-      p_blue_score: blueScore,
+    const state = this.assertPlayWritable();
+    if (!state.round_id) {
+      throw new Error('Non c’è una partita in corso.');
+    }
+    const participantIds = [...state.red_players, ...state.blue_players];
+    const before = action === 'finish' ? this.recognitionSnapshots(participantIds) : [];
+    const { data, error } = await this.supabase.client.rpc('mutate_play', {
+      p_round_id: state.round_id,
+      p_expected_revision: state.revision,
+      p_action: action,
+      ...(team ? { p_team: team } : {}),
     });
-
     if (error) {
+      await this.synchronizePlay();
       throw error;
     }
-
-    this.notice.set('Partita registrata. Classifica aggiornata.');
-    await this.refreshMatchData();
-    this.newRecognitions.set(
-      findNewRecognitions(before, this.recognitionSnapshots(participantIds)),
-    );
+    this.applyActivePlay(data);
+    if (action === 'finish') {
+      this.notice.set('Partita registrata. Classifica aggiornata.');
+      await this.refreshMatchData();
+      this.newRecognitions.set(
+        findNewRecognitions(before, this.recognitionSnapshots(participantIds)),
+      );
+    }
   }
 
   async deleteMatch(matchId: string): Promise<void> {
@@ -677,6 +787,67 @@ export class AppStore {
     }
   }
 
+  private assertPlayWritable(): ActivePlayRow {
+    this.assertCompanyUser();
+    const state = this.activePlay();
+    if (!state || !this.playReady() || !this.playConnected()) {
+      throw new Error('Attendi la sincronizzazione della partita prima di modificarla.');
+    }
+    return state;
+  }
+
+  private applyActivePlay(state: ActivePlayRow): void {
+    if (!this.supabase.companyUser()) {
+      return;
+    }
+    const previous = this.activePlay();
+    if (previous && state.revision <= previous.revision) {
+      return;
+    }
+    this.activePlay.set(state);
+    this.playReady.set(true);
+    // Restore the shared roster when joining or leaving a round, not on every goal.
+    if (state.phase !== 'selection' || (previous && previous.phase !== 'selection')) {
+      if (!previous || previous.round_id !== state.round_id) {
+        this.teamPickingMode.set(state.balance_by_elo ? 'elo-balanced' : 'random');
+        this.playSelection.set(new Map(state.candidates.map((id) => [
+          id,
+          state.red_preferences.includes(id) ? 'red' :
+            state.blue_preferences.includes(id) ? 'blue' : 'any',
+        ])));
+      }
+    }
+  }
+
+  private async synchronizePlay(): Promise<void> {
+    if (!this.supabase.companyUser() || !this.playDatabaseSubscribed ||
+        this.playChannel?.state !== 'joined') {
+      return;
+    }
+    const epoch = ++this.playConnectionEpoch;
+    this.playConnected.set(false);
+    try {
+      const { data, error } = await this.supabase.client
+        .from('active_play')
+        .select('*')
+        .eq('id', true)
+        .single();
+      if (epoch !== this.playConnectionEpoch || !this.supabase.companyUser()) {
+        return;
+      }
+      if (error) {
+        throw error;
+      }
+      this.applyActivePlay(data);
+      this.playConnected.set(true);
+      this.playSyncError.set(null);
+    } catch (error: unknown) {
+      if (epoch === this.playConnectionEpoch && this.supabase.companyUser()) {
+        this.playSyncError.set(this.errorMessage(error));
+      }
+    }
+  }
+
   private subscribeToChanges(): void {
     this.realtimeChannel = this.supabase.client
       .channel('scoreboard-live')
@@ -698,6 +869,45 @@ export class AppStore {
       .subscribe();
   }
 
+  private subscribeToPlayChanges(): void {
+    const channel = this.supabase.client.channel('active-play-live');
+    this.playChannel = channel;
+    channel.on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'active_play' },
+        (payload) => {
+          if (this.playChannel === channel) {
+            this.applyActivePlay(payload.new as ActivePlayRow);
+          }
+        },
+      )
+      .on('system', {}, (payload) => {
+        if (this.playChannel !== channel || !this.supabase.companyUser() ||
+            payload.extension !== 'postgres_changes') {
+          return;
+        }
+        this.playDatabaseSubscribed = payload.status === 'ok';
+        if (this.playDatabaseSubscribed) {
+          void this.synchronizePlay();
+        } else {
+          this.playConnectionEpoch++;
+          this.playConnected.set(false);
+          this.playSyncError.set('Impossibile attivare la sincronizzazione della partita. Riprova.');
+        }
+      })
+      .subscribe((status) => {
+        if (this.playChannel !== channel || !this.supabase.companyUser()) {
+          return;
+        }
+        if (status !== 'SUBSCRIBED') {
+          this.playDatabaseSubscribed = false;
+          this.playConnectionEpoch++;
+          this.playConnected.set(false);
+          this.playSyncError.set('Sincronizzazione interrotta. Riconnessione in corso…');
+        }
+      });
+  }
+
   private assertCompanyUser(): void {
     if (!this.supabase.companyUser()) {
       throw new Error('Questa azione richiede l’account condiviso.');
@@ -705,7 +915,8 @@ export class AppStore {
   }
 
   private errorMessage(error: unknown): string {
-    return error instanceof Error
+    return error && typeof error === 'object' &&
+      'message' in error && typeof error.message === 'string'
       ? error.message
       : 'Impossibile sincronizzare i dati.';
   }

@@ -1,6 +1,6 @@
 <a class="skip-link" href="#main-content">Vai al contenuto</a>
 
-<div class="app-shell">
+<div class="app-shell" [class.has-bottom-actions]="bottomActions() !== null">
   <header class="topbar">
     <div class="brand">
       <a class="brand-home" routerLink="/" aria-label="Coppa Telenia, nuova partita">
@@ -39,10 +39,15 @@
   }
 
   <main id="main-content">
-    <router-outlet></router-outlet>
+    <router-outlet
+      (activate)="pageActions.set($event.bottomActions ?? null)"
+      (deactivate)="pageActions.set(null)"
+    ></router-outlet>
   </main>
 
 
+  <div class="bottom-dock">
+    <ng-container [ngTemplateOutlet]="bottomActions()"></ng-container>
   <nav class="bottom-nav" aria-label="Navigazione principale">
     <a
       routerLink="/"
@@ -79,6 +84,7 @@
     </a>
     }
   </nav>
+  </div>
 
   @if (store.notice(); as notice) {
   <button

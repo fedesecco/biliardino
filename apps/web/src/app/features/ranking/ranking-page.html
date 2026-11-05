@@ -1,7 +1,9 @@
-<section class="ranking-page" aria-labelledby="ranking-title">
+<section class="ranking-page" [attr.aria-labelledby]="embedded() ? 'global-ranking-title' : 'ranking-title'">
+  @if (!embedded()) {
   <div class="page-heading">
     <h1 id="ranking-title">Classifica globale</h1>
   </div>
+  }
 
   @if (store.error(); as error) {
   <p class="error-banner" role="alert">{{ error }}</p>

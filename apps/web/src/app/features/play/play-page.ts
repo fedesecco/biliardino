@@ -1,9 +1,7 @@
 import { DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, inject, signal, type TemplateRef, viewChild } from '@angular/core';
 import { AppStore } from '../../core/app-store.service';
 import type {
-  Player,
   SelectionMode,
   TeamColor,
   TeamPickingMode,
@@ -29,11 +27,12 @@ const MAXIMUM_MARGIN_MULTIPLIER = Math.min(
 
 @Component({
   selector: 'app-play-page',
-  imports: [DecimalPipe, PlayerAvatar, RouterLink],
+  imports: [DecimalPipe, PlayerAvatar],
   templateUrl: './play-page.html',
   styleUrl: './play-page.scss',
 })
 export class PlayPage {
+  readonly bottomActions = viewChild<TemplateRef<unknown>>('bottomActions');
   protected readonly store = inject(AppStore);
   protected readonly auth = inject(SupabaseService);
   protected readonly selection = this.store.playSelection;
@@ -43,16 +42,22 @@ export class PlayPage {
   protected readonly confirming = this.store.playConfirming;
   protected readonly busy = signal(false);
   protected readonly localError = signal<string | null>(null);
+  protected readonly canSelect = computed(
+    () => this.auth.companyUser() && !this.busy(),
+  );
+  protected readonly canMutate = computed(
+    () =>
+      this.canSelect() &&
+      this.store.playReady() &&
+      this.store.playConnected(),
+  );
 
   protected readonly selectedCount = computed(
     () =>
       [...this.selection().values()].filter((mode) => mode !== 'off').length,
   );
   protected readonly canCreateTeams = computed(
-    () =>
-      this.auth.companyUser() &&
-      this.selectedCount() >= 4 &&
-      !this.busy(),
+    () => this.canMutate() && this.selectedCount() >= 4,
   );
   protected readonly eloPreview = computed(() => {
     const teams = this.draft();
@@ -83,7 +88,7 @@ export class PlayPage {
   });
 
   protected toggleAny(playerId: string): void {
-    if (!this.auth.companyUser()) {
+    if (!this.canSelect()) {
       return;
     }
 
@@ -97,7 +102,7 @@ export class PlayPage {
     mode: Exclude<SelectionMode, 'off'>,
   ): void {
     event.stopPropagation();
-    if (!this.auth.companyUser()) {
+    if (!this.canSelect()) {
       return;
     }
 
@@ -120,7 +125,7 @@ export class PlayPage {
         ([, mode]) => mode !== 'off',
       );
       const candidates = selectedEntries.map(([playerId]) => playerId);
-      const picked = await this.store.pickTeams(
+      await this.store.startPlay(
         candidates,
         selectedEntries
           .filter(([, mode]) => mode === 'red')
@@ -130,31 +135,6 @@ export class PlayPage {
           .map(([playerId]) => playerId),
         this.teamPickingMode(),
       );
-      const playersById = new Map(
-        this.store
-          .activePlayers()
-          .map((player) => [player.id, player] as const),
-      );
-      const pickedIds = new Set(picked.map((entry) => entry.player_id));
-      const redPlayers = picked
-        .filter((entry) => entry.team === 'red')
-        .map((entry) => playersById.get(entry.player_id))
-        .filter((player): player is Player => player !== undefined);
-      const bluePlayers = picked
-        .filter((entry) => entry.team === 'blue')
-        .map((entry) => playersById.get(entry.player_id))
-        .filter((player): player is Player => player !== undefined);
-
-      this.draft.set({
-        red: redPlayers,
-        blue: bluePlayers,
-        benched: candidates
-          .filter((playerId) => !pickedIds.has(playerId))
-          .map((playerId) => playersById.get(playerId))
-          .filter((player): player is Player => player !== undefined),
-      });
-      this.score.set({ red: 0, blue: 0 });
-      this.confirming.set(false);
     } catch (error: unknown) {
       this.localError.set(this.errorMessage(error));
     } finally {
@@ -162,53 +142,48 @@ export class PlayPage {
     }
   }
 
-  protected addGoal(team: TeamColor): void {
-    if (this.confirming() || this.busy()) {
+  protected async addGoal(team: TeamColor): Promise<void> {
+    if (this.confirming() || this.score()[team] >= 6) {
       return;
     }
+    await this.changePlay('goal', team);
+  }
 
-    const current = this.score();
-    const nextValue = Math.min(6, current[team] + 1);
-    this.score.set({ ...current, [team]: nextValue });
-    if (nextValue === 6) {
-      this.confirming.set(true);
+  protected async removeGoal(team: TeamColor): Promise<void> {
+    if (this.score()[team] === 0) {
+      return;
     }
+    await this.changePlay('undo', team);
   }
 
-  protected removeGoal(team: TeamColor): void {
-    const current = this.score();
-    this.score.set({ ...current, [team]: Math.max(0, current[team] - 1) });
-  }
-
-  protected correctScore(): void {
-    this.confirming.set(false);
+  protected async correctScore(): Promise<void> {
+    if (!this.confirming()) {
+      return;
+    }
+    await this.changePlay('correct');
   }
 
   protected async confirmMatch(): Promise<void> {
-    const draft = this.draft();
     const score = this.score();
-    if (!draft || !this.confirming() || (score.red !== 6 && score.blue !== 6)) {
+    if (!this.confirming() || (score.red !== 6 && score.blue !== 6)) {
+      return;
+    }
+    await this.changePlay('finish');
+  }
+
+  protected async changePlayers(): Promise<void> {
+    await this.changePlay('cancel');
+  }
+
+  protected async retryPlaySync(): Promise<void> {
+    if (!this.auth.companyUser() || this.busy()) {
       return;
     }
 
     this.busy.set(true);
     this.localError.set(null);
     try {
-      const candidateIds = [
-        ...draft.red,
-        ...draft.blue,
-        ...draft.benched,
-      ].map((player) => player.id);
-      await this.store.recordMatch(
-        candidateIds,
-        draft.red.map((player) => player.id),
-        draft.blue.map((player) => player.id),
-        score.red,
-        score.blue,
-      );
-      this.draft.set(null);
-      this.busy.set(false);
-      await this.createTeams();
+      await this.store.retryPlaySync();
     } catch (error: unknown) {
       this.localError.set(this.errorMessage(error));
     } finally {
@@ -216,10 +191,23 @@ export class PlayPage {
     }
   }
 
-  protected changePlayers(): void {
-    this.draft.set(null);
-    this.score.set({ red: 0, blue: 0 });
-    this.confirming.set(false);
+  private async changePlay(
+    action: 'goal' | 'undo' | 'correct' | 'cancel' | 'finish',
+    team?: TeamColor,
+  ): Promise<void> {
+    if (!this.canMutate() || !this.draft()) {
+      return;
+    }
+
+    this.busy.set(true);
+    this.localError.set(null);
+    try {
+      await this.store.changePlay(action, team);
+    } catch (error: unknown) {
+      this.localError.set(this.errorMessage(error));
+    } finally {
+      this.busy.set(false);
+    }
   }
 
   private updateSelection(playerId: string, mode: SelectionMode): void {
@@ -236,7 +224,12 @@ export class PlayPage {
   }
 
   private errorMessage(error: unknown): string {
-    return error instanceof Error ? error.message : 'Operazione non riuscita.';
+    return error !== null &&
+      typeof error === 'object' &&
+      'message' in error &&
+      typeof error.message === 'string'
+      ? error.message
+      : 'Operazione non riuscita.';
   }
 }
 

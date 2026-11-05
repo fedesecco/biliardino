@@ -2,7 +2,7 @@ import { registerLocaleData } from '@angular/common';
 import localeIt from '@angular/common/locales/it';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { AppStore } from '../../core/app-store.service';
 import type { MonthlyEloRanking, PlayerStatistic } from '../../core/models';
 import { AnalyticsPage } from './analytics-page';
@@ -33,20 +33,15 @@ describe('AnalyticsPage', () => {
     }).compileComponents();
   });
 
-  it('shows the classifications landing page with the monthly ranking card', () => {
+  it('shows both ranking cards collapsed initially', () => {
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    const globalCard = element.querySelector<HTMLAnchorElement>('.global-card');
-
-    expect(element.querySelector('#classifications-title')?.textContent).toBe(
-      'Classifiche',
-    );
     expect(element.querySelectorAll('.awards-grid > *')).toHaveLength(2);
-    expect(globalCard?.textContent).toContain('Classifica globale');
-    expect(globalCard?.getAttribute('href')).toBe('/classifiche/globale');
-    expect(element.querySelector('.monthly-badge-rules')).toBeNull();
-    expect(element.textContent).not.toContain('Vittorie per colore');
+    expect(element.querySelector('.global-card .award-trigger')?.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector('.monthly-award .award-trigger')?.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector('#global-ranking')?.closest('.ranking-collapse')?.getAttribute('aria-hidden')).toBe('true');
+    expect(element.querySelector('#monthly-ranking')?.closest('.ranking-collapse')?.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('renders the registered hero artwork for November 2026', () => {
@@ -90,11 +85,63 @@ describe('AnalyticsPage', () => {
     ).toBe('Nessun premio disponibile per dicembre 2026');
   });
 
-  it('opens the monthly award ranking', () => {
+  it('previews the first three monthly standings rather than the global ELO order', () => {
+    TestBed.inject(AppStore).statistics.set([
+      statistic('player-four', 'Paolo Neri', '#7b61ff', 1800),
+      statistic('player-three', 'Anna Verdi', '#d98d1d', 1500),
+      ...statistics,
+    ]);
+    monthlyRankingsSignal.set([
+      { month_start: '2026-08-01', player_id: 'player-two', elo_gained: -24, rank: 3 },
+      { month_start: '2026-08-01', player_id: 'player-four', elo_gained: -30, rank: 4 },
+      { month_start: '2026-08-01', player_id: 'player-one', elo_gained: 24, rank: 1 },
+      { month_start: '2026-08-01', player_id: 'player-three', elo_gained: 12.4, rank: 2 },
+      { month_start: '2026-07-01', player_id: 'player-one', elo_gained: 99, rank: 1 },
+    ]);
     const fixture = TestBed.createComponent(AnalyticsPage);
     fixture.detectChanges();
     const element = fixture.nativeElement as HTMLElement;
-    const trigger = element.querySelector<HTMLButtonElement>('.award-trigger');
+    const rows = [...element.querySelectorAll('.monthly-award .ranking-preview-row')];
+    expect(rows.map((row) => [
+      row.querySelector('.ranking-preview-rank')?.textContent?.trim(),
+      row.querySelector('strong')?.textContent?.trim(),
+      row.querySelector('b')?.textContent?.trim(),
+    ])).toEqual([
+      ['1', 'Mario Rossi', '+24'],
+      ['2', 'Anna Verdi', '+12'],
+      ['3', 'Luigi Bianchi', '-24'],
+    ]);
+  });
+
+  it('opens and closes the complete global ranking without navigating', () => {
+    const fixture = TestBed.createComponent(AnalyticsPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const trigger = element.querySelector<HTMLButtonElement>('.global-card .award-trigger');
+    const initialUrl = TestBed.inject(Router).url;
+    expect(element.querySelector('.global-card .ranking-preview')).not.toBeNull();
+    trigger?.click();
+    fixture.detectChanges();
+    expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+    expect(element.querySelector('#global-ranking')?.closest('.ranking-collapse')?.getAttribute('aria-hidden')).toBe('false');
+    expect(element.querySelector('#global-ranking .ranking-row')?.getAttribute('href')).toBe('/giocatore/player-one');
+    expect(TestBed.inject(Router).url).toBe(initialUrl);
+    expect(element.querySelector('.global-card .ranking-preview')).toBeNull();
+    expect(element.querySelector('.monthly-award .ranking-preview')).not.toBeNull();
+    trigger?.click();
+    fixture.detectChanges();
+    expect(trigger?.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector('#global-ranking')?.closest('.ranking-collapse')?.getAttribute('aria-hidden')).toBe('true');
+    expect(element.querySelector('.global-card .ranking-preview')).not.toBeNull();
+  });
+
+  it('opens and closes the monthly ranking without navigating', () => {
+    const fixture = TestBed.createComponent(AnalyticsPage);
+    fixture.detectChanges();
+    const element = fixture.nativeElement as HTMLElement;
+    const trigger = element.querySelector<HTMLButtonElement>('.monthly-award .award-trigger');
+    const initialUrl = TestBed.inject(Router).url;
+    expect(element.querySelector('.monthly-award .ranking-preview')).not.toBeNull();
 
     trigger?.click();
     fixture.detectChanges();
@@ -106,6 +153,14 @@ describe('AnalyticsPage', () => {
         ?.getAttribute('href'),
     ).toBe('/giocatore/player-one');
     expect(trigger?.getAttribute('aria-expanded')).toBe('true');
+    expect(TestBed.inject(Router).url).toBe(initialUrl);
+    expect(element.querySelector('.monthly-award .ranking-preview')).toBeNull();
+    expect(element.querySelector('.global-card .ranking-preview')).not.toBeNull();
+    trigger?.click();
+    fixture.detectChanges();
+    expect(trigger?.getAttribute('aria-expanded')).toBe('false');
+    expect(element.querySelector('#monthly-ranking')?.closest('.ranking-collapse')?.getAttribute('aria-hidden')).toBe('true');
+    expect(element.querySelector('.monthly-award .ranking-preview')).not.toBeNull();
   });
 });
 

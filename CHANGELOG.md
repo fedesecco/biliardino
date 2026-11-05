@@ -1,5 +1,29 @@
 # Changelog
 
+## [1.8.0]
+
+### Features
+
+- **Partita in corso:** squadre, panchina, punteggio, correzioni e conferma sono sincronizzati fra i dispositivi. Aprendo la pagina o ricaricandola si recupera la partita in corso. Solo su account loggati.
+
+### Changes
+
+- **Partita:** ELO vinto/perso viene mostrato arrotondato all'intero più vicino, senza modificare i calcoli o i punti assegnati.
+- **Selezione giocatori:** chi non ha ancora giocato una partita nella giornata riceve un bonus temporaneo di +1 alla priorità di estrazione.
+- **Selezione giocatori:** alla conferma della partita, la priorità di chi gioca diminuisce di 1 (minimo 0), anzichè passare a 0 (minimo 0).
+- **Navigazione:** menu sempre fissato in basso; su desktop il menu e i comandi di selezione sono affiancati e centrati come unico gruppo, mentre su mobile i comandi sono centrati sopra il menu.
+- **Classifiche:** card globale e mensile uniformate nello stile, con altezza determinata dal contenuto. Entrambe si espandono nella pagina, senza aprire una nuova sezione. Premio mensile ora compare sopra l'antepirma di classifica.
+- **Varie:** rimossi vari testi superflui nella selezione giocatori e nelle classifiche:
+  - Card «Modalità sola lettura» con l'invito ad accedere.
+  - Riepiloghi «Ancora N» / «Squadre pronte» e frase «Priorità a chi è stato escluso più volte».
+  - Schermata dedicata «Caricamento della partita in corso…».
+  - Sottotitoli «Classifica ELO» e «Classifica mensile».
+  - Intestazioni delle anteprime «Primi tre giocatori».
+  - Titolo mensile duplicato «Classifica di [mese e anno]».
+  - Descrizione «La graduatoria completa di tutti i giocatori».
+  - Frase «A fine mese, resterà per sempre nella bacheca del vincitore».
+  - Diciture «Vedi classifica globale», «Vedi classifica del mese» e «Nascondi classifica»; le card restano cliccabili per aprirle e chiuderle.
+
 ## [1.7.0]
 
 ### Features

@@ -16,12 +16,6 @@ export interface Player {
   updated_at: string;
 }
 
-export interface PickedPlayer {
-  player_id: string;
-  team: TeamColor;
-  excluded_count: number;
-}
-
 export interface MatchParticipant {
   player_id: string;
   team: TeamColor;
