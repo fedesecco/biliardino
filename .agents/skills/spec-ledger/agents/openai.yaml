@@ -1,0 +1,3 @@
+interface:
+  display_name: "SpecLedger"
+  short_description: "Specification-first development with stable IDs"

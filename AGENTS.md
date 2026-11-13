@@ -35,6 +35,16 @@
 - Database history is append-only under `supabase/migrations`; never rewrite an applied migration.
 - The user-facing changelog is `CHANGELOG.md` and is rendered by the application.
 
+## SpecLedger
+
+- This repository follows SpecLedger. Read `docs/README.md` for canonical specifications, prefix ownership, adoption scope, and evidence limits.
+- The retrospective baseline covers all existing application domains and history. Accepted specifications govern intended behavior; source, migrations, and tests are evidence, not automatic approval.
+- Read the relevant feature requirements, `docs/general.md`, and `docs/architecture.md` before meaningful behavior changes. Use the `$spec-ledger` skill available in the working context.
+- Resolve conflicts and update agreed specifications before implementation; then add/update necessary tests and verify through Nx. For a bug already fully specified, cite the violated ID without inventing a documentation change.
+- Trace shared-rule consumers, preserve stable IDs, and reference requirement IDs in tests or metadata when substantively changing those tests. Existing documentation-to-test links provide initial traceability; do not rewrite the suite just to add IDs.
+- `docs/open-questions.md` records owner decisions and known implementation gaps. `Accepted` does not mean `Verified`; several clarified requirements are explicitly only partially implemented.
+- Preserve all existing database, security, Nx, changelog, and versioning instructions below. Documentation adoption is not permission to apply migrations, alter production data, or silently fix unrelated application behavior.
+
 ## Database workflow
 
 - For database incidents, inspect both Supabase API and PostgreSQL logs before editing.
