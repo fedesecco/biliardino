@@ -10,6 +10,8 @@ La repository adotta **SpecLedger (Specification Ledger Development)** dal 2026-
 4. [Decisioni e scostamenti](open-questions.md) e [verifiche](verification.md) prima di dichiarare conformità.
 5. [Fonti ed evoluzione](sources-and-history.md) per ricostruire il passato senza ripristinare regole sostituite.
 
+Evoluzione multi-gruppo: [roadmap dettagliata](roadmap.md) con attività spuntabili, dipendenze, matrice dei ruoli e decisioni residue; [dizionario di prodotto](glossary.md) per i termini. La roadmap registra la direzione concordata, non funzionalità implementate, e non sostituisce la baseline corrente.
+
 ## Mappa canonica e proprietà dei prefissi
 
 Ogni prefisso ha un solo ambito proprietario nell'intera repository. I collegamenti portano al documento contenente le definizioni `## PREFIX-NNN — Titolo`; cercare l'ID in quel documento per trovarlo senza dipendere dagli anchor del renderer.
@@ -51,10 +53,12 @@ Restano fuori dall'evidenza raccolta: configurazione/schema e log live Supabase,
 
 ## Lavoro futuro
 
+Per la nuova evoluzione seguire la [roadmap](roadmap.md). All'avvio di ciascun incremento, promuovere il relativo comportamento nel documento canonico di dominio con ID stabili e sostituire in roadmap il testo promosso con collegamenti e avanzamento. Non mantenere due specifiche concorrenti e non spuntare come implementata una voce solo documentata.
+
 Usare la skill `$spec-ledger` installata nel contesto di lavoro. Sequenza: comprendere → chiarire → analizzare coerenza e impatti → documentare l'intento concordato → validare gli accordi → implementare → scrivere/aggiornare i test necessari → verificare → audit.
 
 Prima di una modifica condivisa cercare l'ID e i suoi dipendenti in specifiche, codice e test, includendo consumatori privi di annotazioni. Leggere le asserzioni, non soltanto i nomi. Una richiesta che contraddice un requisito accettato non è approvazione implicita: risolvere il conflitto o approvare un'eccezione circoscritta.
 
 Per un bug già completamente descritto da un requisito accettato basta citarlo: non cambiare la specifica per giustificare il codice. Le nuove aspettative dei test derivano dalla specifica dopo l'implementazione, non da uno snapshot dell'errore. Non annotare ogni riga né riscrivere tutti i test per il solo inserimento degli ID: i collegamenti esistenti sono tracciabilità iniziale e gli ID si aggiungono quando i test vengono modificati sostanzialmente.
 
-I comandi, le coperture e l'ordine del lavoro residuo sono in [verification.md](verification.md). La prossima attività implementativa deve affrontare un ambito concordato dei requisiti parziali, non assumere che la sola presenza di questi documenti abbia corretto l'applicazione.
+I comandi, le coperture e l'ordine del lavoro residuo della baseline sono in [verification.md](verification.md). Le nuove funzionalità seguono la roadmap e il gate di specifica del relativo incremento; gli scostamenti esistenti restano espliciti e si affrontano nell'ambito concordato, senza assumere che la documentazione abbia già corretto l'applicazione.
