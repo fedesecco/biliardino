@@ -2,7 +2,7 @@
 
 ## Come leggere l'evidenza
 
-La baseline è stata ricostruita sul sorgente della release 1.8.0, revisione `5ca8fa4`, e sulle decisioni del proprietario del 2026-11-13. La versione pendente 1.8.1 aggiunge documentazione e integrazione delle istruzioni, non fix applicativi. Il sorgente dei test non è stato modificato.
+La baseline è stata ricostruita sul sorgente della release 1.8.0, revisione `5ca8fa4`, e sulle decisioni del proprietario del 2026-11-13. Durante l'adozione il sorgente dei test non è stato modificato.
 
 Tre domande restano separate: il requisito ha asserzioni pertinenti? Quelle asserzioni sono state eseguite? Corrispondono all'intento corrente? Un mock con valori già calcolati non verifica la formula SQL; un nome di test senza asserzioni pertinenti non stabilisce copertura. I documenti di feature specificano casi e lacune, questa pagina raccoglie una sola volta l'esecuzione.
 
@@ -44,6 +44,12 @@ Gli ID nei documenti collegano i casi già esistenti senza rinominarli soltanto 
 Il controllo documentale segue la checklist runtime-independent della skill: unicità delle definizioni, proprietà prefissi, riferimenti ID, collegamenti locali/anchor, stati e scostamenti, completezza dell'inventario migrazioni, coerenza versione/changelog e instradamento delle istruzioni. Un controllo sintattico non prova coerenza semantica, non-riuso in una storia inaccessibile o adeguatezza dei test: il confronto con l'intento è stato svolto tramite ispezione e questionari al proprietario.
 
 Non eseguiti: E2E browser, build/lint applicativi, integrazione SQL, accesso Supabase live, deploy, migrazioni, cron, ispezione visuale o validazione artwork. Non sono necessari per provare un cambiamento di UI che qui non è avvenuto; restano necessari per future dichiarazioni di conformità dei rispettivi comportamenti. Non è stata rieseguita alcuna migrazione per creare una baseline.
+
+## Verifica della correzione PLAY-005 — 2026-11-19
+
+- Migrazione `20261119185013_stop_stale_play_rpc_retries` applicata su Supabase. Una prova SQL con identità sintetica limitata alla sessione ha verificato che entrambe le RPC rifiutano un comando obsoleto con `PT409`, senza scrivere dati. Non è stata eseguita una richiesta HTTP autenticata: la conversione in `409` è il comportamento documentato di PostgREST.
+- Dopo la migrazione: nessun nuovo `40001` delle due RPC nella finestra osservata e nessuno dei due backend in loop ancora presente in `pg_stat_activity`. La metrica CPU non è stata misurata.
+- `npx nx test web --filter 'rejects a stale command and displays the authoritative score'`: un test passato; verifica il recupero client con Supabase simulato.
 
 ## Comandi esistenti e ambiente sicuro
 

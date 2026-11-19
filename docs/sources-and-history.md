@@ -73,6 +73,7 @@ I nomi sono identificatori dei file, **non attestazioni della data di applicazio
 | `202611050002_monthly_champions_realtime.sql` | Pubblicazione realtime dei premi; AWARD-003, RANK-005. |
 | `202611050003_daily_first_game_priority.sql` | Bonus temporaneo prima partita del giorno; PICK-002. |
 | `202611050004_decrement_played_priority.sql` | Partecipante −1 anziché reset; replay contatori e record_match corrente; PICK-005, ELO-001. |
+| `20261119185013_stop_stale_play_rpc_retries.sql` | Restituisce HTTP 409 senza retry automatici per i comandi obsoleti; PLAY-005. |
 
 ## Conservazione e limiti
 

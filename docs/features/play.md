@@ -42,9 +42,11 @@ Dopo successo lo store mostra la notifica, ricarica giocatori/statistiche/premi 
 
 ## PLAY-005 — Concorrenza e idempotenza circoscritta
 
-`start_play` e `mutate_play` bloccano lo stesso slot con `FOR UPDATE`. Ogni modifica accettata aumenta `revision`. Round o revisione obsoleti producono conflitto SQLSTATE `40001`; input/fase non validi `22023`; utente non autorizzato `42501`. Non esiste fusione automatica di due goal concorrenti: il comando obsoleto viene rifiutato e il client recupera lo stato server, senza applicazioni ottimistiche.
+`start_play` e `mutate_play` bloccano lo stesso slot con `FOR UPDATE`. Ogni modifica accettata aumenta `revision`. Round o revisione obsoleti restituiscono HTTP `409` (SQLSTATE `PT409`), senza retry automatico di PostgREST; input/fase non validi mantengono `22023`, utente non autorizzato `42501`. Non esiste fusione automatica di due goal concorrenti: il comando obsoleto viene rifiutato e il client recupera lo stato server, senza applicazioni ottimistiche. Il precedente SQLSTATE `40001` innescava retry indefiniti in PostgREST 14.
 
 Solo `finish` ha una deduplicazione esplicita: se esiste una partita con `source_round_id` richiesto, restituisce lo slot corrente prima del controllo round/revisione, anche se un altro giro è già iniziato. Il vincolo unico completa questa protezione. Non vale per goal, undo, cancel o start; cancellare la partita rimuove anche il riferimento usato per riconoscere un vecchio finish. Le autorizzazioni e la chiusura dei vecchi RPC diretti appartengono ad AUTH.
+
+Code: [migrazione dei conflitti sulle RPC](../../supabase/migrations/20261119185013_stop_stale_play_rpc_retries.sql). Evidenza del rilascio: [verifiche](../verification.md).
 
 Tests: `app-store-live.spec.ts`, «rejects a stale command and displays the authoritative score instead of optimistic data» verifica risincronizzazione con errore simulato; `play-page.spec.ts`, «does not change the score optimistically while a command is pending» verifica punti invariati e pulsanti disabilitati. Mancano test reali su due transazioni concorrenti, doppio finish, retry dopo nuovo giro/cancellazione e rollback completo.
 
